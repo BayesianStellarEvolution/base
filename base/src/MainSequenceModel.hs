@@ -1,8 +1,12 @@
 module MainSequenceModel where
 
+import Control.Monad (when)
 import Data.Char (isSpace)
-import Data.Text
+import Data.Text (Text)
 import Data.Attoparsec.Text
+
+data MSModel = MSModel { filters :: [Text] }
+             deriving (Show, Eq)
 
 data MSModelFormat = Filters [Text]
                    | Comment Text
@@ -22,3 +26,15 @@ parseComment =
 parseHeader =
   let parser = many1 $ choice [parseComment, parseFilters]
   in parser <?> "MS Model header"
+
+parseModel = do
+  header <- parseHeader
+
+  let headerWithoutComments = filter isFilters header
+      records = length headerWithoutComments
+
+  when (records /= 1) $ fail $ "MS Model - malformed header: " ++ show records ++ " filter specifications"
+
+  let (Filters filters) = head headerWithoutComments
+
+  return $ MSModel filters
