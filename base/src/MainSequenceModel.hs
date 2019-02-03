@@ -50,9 +50,9 @@ parseSectionHeader =
 
   in parser <?> "MS Section header"
      where feh = taggedDouble "[Fe/H]=" <?> "FeH"
-           alphaFe = skipWhile isSpace *> "[alpha/Fe]=" *> double <?> "alphaFe"
-           lHp = skipWhile isSpace *> "l/Hp=" *> double <?> "lHp"
-           y = skipWhile isSpace *> "Y=" *> double <?> "Y"
+           alphaFe = taggedDouble "[alpha/Fe]="  <?> "alphaFe"
+           lHp = taggedDouble "l/Hp=" <?> "lHp"
+           y = taggedDouble "Y=" <?> "Y"
 
 
 parseAgeHeader =
