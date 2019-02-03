@@ -58,7 +58,7 @@ parseSectionHeader =
 parseAgeHeader =
   let parser = SectionHeader <$> ("%a" *> logAge)
   in parser <?> "MS Age header"
-     where logAge = skipWhile isSpace *> "logAge=" *> double <?> "logAge"
+     where logAge = taggedDouble "logAge=" <?> "logAge"
 
 
 parseModel = do
