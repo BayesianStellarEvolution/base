@@ -21,7 +21,7 @@ spec = parallel $ do
         doParse "%f U B V R I J H K\n" == (Right $ Filters ["U", "B", "V", "R", "I", "J", "H", "K"])
 
 
-    xdescribe "MS Model section header" $ do
+    describe "MS Model section header" $ do
       let doParse = parseOnly parseSectionHeader "%s [Fe/H]=-2.500000    [alpha/Fe]=0.000000    l/Hp=1.938000    Y=0.245100"
 
       it "parses a section header" $
