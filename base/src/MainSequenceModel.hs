@@ -1,6 +1,6 @@
 module MainSequenceModel where
 
-import Control.Monad (when)
+import Control.Monad (liftM2, when)
 import Data.Text (Text)
 import Data.Attoparsec.Text
 
@@ -14,10 +14,11 @@ data MSModelFormat = Filters [Text]
 isFilters (Filters _) = True
 isFilters _           = False
 
-isSpace = inClass " \t\n"
+isSpace = inClass " \t"
+isNewline = inClass "\n\r"
 
 parseFilters =
-  let parser = "%f" *> many1 (space *> takeWhile1 (not . isSpace)) <* endOfLine
+  let parser = "%f" *> many1 (satisfy isSpace *> takeWhile1 (not . liftM2 (||) isSpace isNewline)) <* endOfLine
   in Filters <$> parser <?> "MS Model filters"
 
 parseComment =

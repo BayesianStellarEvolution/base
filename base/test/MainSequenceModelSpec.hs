@@ -46,4 +46,4 @@ spec = parallel $ do
 
       it "concatenates multiple lines of filters" $
         let result = filters <$> parseOnly parseModel "%f U B V R I J H K\n%f u g r i z\n"
-        in result == Right ["U","B","V","R","I","J","H","K","%f","u","g","r","i","z"]
+        in result == Right ["U","B","V","R","I","J","H","K","u","g","r","i","z"]
