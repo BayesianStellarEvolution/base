@@ -20,6 +20,7 @@ spec = parallel $ do
       it "parses a list of filters" $
         doParse "%f U B V R I J H K\n" == (Right $ Filters ["U", "B", "V", "R", "I", "J", "H", "K"])
 
+
     describe "Comments" $ do
       let desired = Right $ Comment "any text here"
           doParse = parseOnly parseComment
@@ -36,6 +37,7 @@ spec = parallel $ do
       it "parses a file header" $
         let result = parseOnly parseHeader "# DSED models\n%f U B V R I J H K u g r i z\n"
         in result == Right [Comment "DSED models", Filters ["U", "B", "V", "R", "I", "J", "H", "K", "u", "g", "r", "i", "z"]]
+
 
     describe "Model" $ do
       it "parses filters out of the header" $
