@@ -14,7 +14,7 @@ data MSModelFormat = Filters [Text]
 isFilters (Filters _) = True
 isFilters _           = False
 
-isSpace = inClass " \t\n\r\v"
+isSpace = inClass " \t\n\r"
 
 parseFilters =
   let parser = "%f" *> many1 (space *> takeWhile1 (not . isSpace)) <* endOfLine
