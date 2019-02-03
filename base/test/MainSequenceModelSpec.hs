@@ -20,4 +20,4 @@ spec = parallel $ do
 
     describe "Comments" $ do
       it "captures a comment" $
-        parseOnly parseComment "# any text here\n" == (Right $ Comment " any text here")
+        parseOnly parseComment "# any text here\n" == (Right $ Comment "any text here")

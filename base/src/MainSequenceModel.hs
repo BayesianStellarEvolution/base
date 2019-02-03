@@ -13,5 +13,5 @@ parseFilters =
   in Filters <$> parser <?> "MS Model filters"
 
 parseComment =
-  let parser = "#" *> takeTill (inClass "\n\r") <* endOfLine
+  let parser = "#" *> skipWhile isSpace *> takeTill (inClass "\n\r") <* endOfLine
   in Comment <$> parser <?> "MS Model Comment"
