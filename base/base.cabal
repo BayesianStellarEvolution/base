@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 76f8d16c3c79a2c7db55c6cecce20d8c919eb8f34c6b8a4580ee95bd177075ff
+-- hash: 2493a9166759d02868a972bb11abbc6cc98ae99148588bbf9980013fbdaffb5f
 
 name:           base
 version:        0.0.0
@@ -25,4 +25,6 @@ library
       Paths_base
   hs-source-dirs:
       src
+  build-depends:
+      base >=4.12 && <5
   default-language: Haskell2010

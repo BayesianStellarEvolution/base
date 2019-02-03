@@ -8,3 +8,6 @@ github: BayesianStellarEvolution/base
 
 library:
   source-dirs: src
+  exposed-modules: []
+  dependencies:
+    - base >=4.12 && <5
