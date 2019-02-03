@@ -43,3 +43,7 @@ spec = parallel $ do
       it "parses filters out of the header" $
         let result = filters <$> parseOnly parseModel "# DSED models\n%f U B V R I J H K u g r i z\n"
         in result == Right ["U","B","V","R","I","J","H","K","u","g","r","i","z"]
+
+      it "concatenates multiple lines of filters" $
+        let result = filters <$> parseOnly parseModel "%f U B V R I J H K\n%f u g r i z\n"
+        in result == Right ["U","B","V","R","I","J","H","K","%f","u","g","r","i","z"]
