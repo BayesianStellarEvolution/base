@@ -8,6 +8,9 @@ data MSModelFormat = Filters [Text]
                    | Comment Text
                    deriving (Show, Eq)
 
+isFilters (Filters _) = True
+isFilters _           = False
+
 parseFilters =
   let parser = "%f" *> many1 (space *> takeWhile1 (not . isSpace)) <* endOfLine
   in Filters <$> parser <?> "MS Model filters"
