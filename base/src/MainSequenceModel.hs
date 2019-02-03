@@ -4,30 +4,38 @@ import Control.Monad (liftM2, when)
 import Data.Text (Text)
 import Data.Attoparsec.Text
 
+
 data MSModel = MSModel { filters :: [Text] }
              deriving (Show, Eq)
+
 
 data MSModelFormat = Filters [Text]
                    | Comment Text
                    deriving (Show, Eq)
 
+
 isFilters (Filters _) = True
 isFilters _           = False
 
+
 isSpace = inClass " \t"
 isNewline = inClass "\n\r"
+
 
 parseFilters =
   let parser = "%f" *> many1 (satisfy isSpace *> takeWhile1 (not . liftM2 (||) isSpace isNewline)) <* endOfLine
   in Filters <$> parser <?> "MS Model filters"
 
+
 parseComment =
   let parser = "#" *> skipWhile isSpace *> takeTill (inClass "\n\r") <* endOfLine
   in Comment <$> parser <?> "MS Model Comment"
 
+
 parseFileHeader =
   let parser = many1 $ choice [parseComment, parseFilters]
   in parser <?> "MS Model header"
+
 
 parseModel = do
   header <- parseFileHeader
