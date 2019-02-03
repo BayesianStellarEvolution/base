@@ -20,13 +20,14 @@ spec = parallel $ do
 
     describe "Comments" $ do
       let desired = Right $ Comment "any text here"
+          doParse = parseOnly parseComment
 
       it "captures a comment with no space after #" $
-        parseOnly parseComment "#any text here\n" == desired
+        doParse "#any text here\n" == desired
       it "skips tabs after #" $
-        parseOnly parseComment "# any text here\n" == desired
+        doParse "# any text here\n" == desired
       it "skips space after #" $
-        parseOnly parseComment "#\tany text here\n" == desired
+        doParse "#\tany text here\n" == desired
 
 
     describe "Header" $ do
