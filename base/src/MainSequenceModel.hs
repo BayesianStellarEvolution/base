@@ -10,6 +10,7 @@ data MSModel = MSModel { filters :: [Text] }
 
 
 data MSModelFormat = Filters [Text]
+                   | SectionHeader Double Double
                    | Comment Text
                    deriving (Show, Eq)
 
@@ -38,8 +39,12 @@ parseFileHeader =
 
 
 parseSectionHeader =
-  let parser = string "%s"
+  let parser = SectionHeader <$> ("%s" *> feh)
+                             <*> alphaFe
+
   in parser <?> "MS Section header"
+     where feh = "[Fe/H]=" *> double
+           alphaFe = "[alpha/Fe]=" *> double
 
 parseModel = do
   header <- parseFileHeader
