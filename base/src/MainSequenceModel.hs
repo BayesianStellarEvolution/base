@@ -38,6 +38,9 @@ parseFileHeader =
   in parser <?> "MS Model header"
 
 
+taggedDouble t = skipWhile isSpace *> string t *> double
+
+
 parseSectionHeader =
   let parser = SectionHeader <$> ("%s" *> feh)
                              <*> alphaFe
@@ -46,10 +49,16 @@ parseSectionHeader =
                              <*  endOfLine
 
   in parser <?> "MS Section header"
-     where feh = skipWhile isSpace *> "[Fe/H]=" *> double <?> "FeH"
+     where feh = taggedDouble "[Fe/H]=" <?> "FeH"
            alphaFe = skipWhile isSpace *> "[alpha/Fe]=" *> double <?> "alphaFe"
            lHp = skipWhile isSpace *> "l/Hp=" *> double <?> "lHp"
            y = skipWhile isSpace *> "Y=" *> double <?> "Y"
+
+
+parseAgeHeader =
+  let parser = SectionHeader <$> ("%a" *> logAge)
+  in parser <?> "MS Age header"
+     where logAge = skipWhile isSpace *> "logAge=" *> double <?> "logAge"
 
 
 parseModel = do
