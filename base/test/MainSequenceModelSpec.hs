@@ -14,3 +14,6 @@ spec = parallel $ do
     describe "Filters" $ do
       it "parses a single filter" $
         parseOnly parseFilters "%f U\n" == Right ["U"]
+
+      it "parses a list of filters" $
+        parseOnly parseFilters "%f U B V R I J H K\n" == Right ["U", "B", "V", "R", "I", "J", "H", "K"]

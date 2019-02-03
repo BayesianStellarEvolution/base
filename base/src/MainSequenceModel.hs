@@ -7,4 +7,4 @@ import Data.Attoparsec.Text
 data Model = Model { filters :: [Text] }
 
 
-parseFilters = string "%f " *> many1 (takeWhile1 (not . isSpace)) <* endOfLine
+parseFilters = string "%f" *> many1 (space *> takeWhile1 (not . isSpace)) <* endOfLine
