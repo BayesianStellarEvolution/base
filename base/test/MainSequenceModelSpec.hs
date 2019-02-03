@@ -12,4 +12,4 @@ spec = parallel $ do
   describe "MS Model file format" $ do
     describe "Filters" $ do
       it "parses a single filter" $
-        (parseFilters "U") == ["U"]
+        parseFilters "%f U" == ["U"]
