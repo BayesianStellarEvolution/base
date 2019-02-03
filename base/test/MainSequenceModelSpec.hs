@@ -24,7 +24,7 @@ spec = parallel $ do
     describe "MS Model section header" $ do
       let doParse = parseOnly parseSectionHeader "%s [Fe/H]=-2.500000    [alpha/Fe]=0.000000    l/Hp=1.938000    Y=0.245100\n"
 
-      xit "parses a section header" $
+      it "parses a section header" $
         let result = doParse
         in result == (Right $ SectionHeader (-2.5) 0.0 1.938 0.2451)
 
