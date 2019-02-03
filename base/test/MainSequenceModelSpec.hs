@@ -28,10 +28,6 @@ spec = parallel $ do
         let result = doParse "%s [Fe/H]=-2.500000    [alpha/Fe]=0.000000    l/Hp=1.938000    Y=0.245100\n"
         in result `shouldBe` (Right $ SectionHeader (-2.5) 0.0 1.938 0.2451)
 
-      it "works independent of spacing" $
-        let result = doParse "%s[Fe/H]=-2.500000\t[alpha/Fe]=0.000000l/Hp=1.938000Y=0.245100\n"
-        in result `shouldBe` (Right $ SectionHeader (-2.5) 0.0 1.938 0.2451)
-
 
     describe "Comments" $ do
       let desired = Right $ Comment "any text here"
@@ -39,10 +35,8 @@ spec = parallel $ do
 
       it "captures a comment with no space after #" $
         doParse "#any text here\n" `shouldBe` desired
-      it "skips tabs after #" $
-        doParse "# any text here\n" `shouldBe` desired
       it "skips space after #" $
-        doParse "#\tany text here\n" `shouldBe` desired
+        doParse "#\t any text here\n" `shouldBe` desired
 
 
     describe "Header" $ do
