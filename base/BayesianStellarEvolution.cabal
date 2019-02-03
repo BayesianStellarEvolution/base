@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 03275b4655670c8aa491dcb0eb21701163484eea915c5cc839a52756b51c8123
+-- hash: 82d2bc226a0eadc026efb3c82fe4d2b0e5ef18dac6c2a83866f5e1daab6d595a
 
 name:           BayesianStellarEvolution
 version:        0.0.0
@@ -61,6 +61,7 @@ test-suite library-tests
   build-depends:
       BayesianStellarEvolution
     , QuickCheck
+    , attoparsec
     , base
     , hspec
   default-language: Haskell2010

@@ -1,9 +1,10 @@
 module MainSequenceModel where
 
+import Data.Char (isSpace)
 import Data.Text
-import qualified Data.Attoparsec.Text as A
+import Data.Attoparsec.Text
 
 data Model = Model { filters :: [Text] }
 
-parseFilters :: Text -> [Text]
-parseFilters t = ["U"]
+
+parseFilters = string "%f " *> many1 (takeWhile1 (not . isSpace)) <* endOfLine

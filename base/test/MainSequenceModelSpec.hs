@@ -1,6 +1,7 @@
 module MainSequenceModelSpec (main, spec) where
 
 import Test.Hspec
+import Data.Attoparsec.Text (parseOnly)
 
 import MainSequenceModel
 
@@ -12,4 +13,4 @@ spec = parallel $ do
   describe "MS Model file format" $ do
     describe "Filters" $ do
       it "parses a single filter" $
-        parseFilters "%f U" == ["U"]
+        parseOnly parseFilters "%f U\n" == Right ["U"]
