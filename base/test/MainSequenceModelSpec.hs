@@ -35,8 +35,12 @@ spec = parallel $ do
 
     describe "Header" $ do
       it "parses a file header" $
-        let result = parseOnly parseHeader "# DSED models\n%f U B V R I J H K u g r i z\n"
-        in result == Right [Comment "DSED models", Filters ["U", "B", "V", "R", "I", "J", "H", "K", "u", "g", "r", "i", "z"]]
+        let result = parseOnly parseHeader "# DSED models\n%f U B V\n"
+        in result == Right [Comment "DSED models", Filters ["U", "B", "V"]]
+
+      it "reads multiple adjacent filter lines as separate lines" $
+        let result = parseOnly parseHeader "%f U B V\n%f R I J\n"
+        in result == Right [Filters ["U", "B", "V"], Filters ["R", "I", "J"]]
 
 
     describe "Model" $ do
