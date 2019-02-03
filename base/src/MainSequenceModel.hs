@@ -37,6 +37,10 @@ parseFileHeader =
   in parser <?> "MS Model header"
 
 
+parseSectionHeader =
+  let parser = string "%s"
+  in parser <?> "MS Section header"
+
 parseModel = do
   header <- parseFileHeader
 
