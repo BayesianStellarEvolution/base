@@ -1,5 +1,6 @@
 module MainSequenceModelSpec (main, spec) where
 
+import Data.Either (isLeft)
 import Test.Hspec
 import Data.Attoparsec.Text (parseOnly)
 
@@ -12,10 +13,13 @@ main = hspec spec
 spec = parallel $ do
   describe "MS Model file format" $ do
     describe "taggedDouble" $ do
-      let doParse = parseOnly . taggedDouble
+      let doParse = parseOnly $ taggedDouble "tag="
 
       it "pulls a double given a tag" $
-        doParse "tag=" " tag=1.00" `shouldBe` Right 1.00
+        doParse " tag=1.00" `shouldBe` Right 1.00
+
+      xit "requires at lease one space in the source string prior to the tag" $
+        doParse " tag=1.00" `shouldSatisfy` isLeft
 
     describe "Filters" $ do
       let doParse = parseOnly parseFilters
