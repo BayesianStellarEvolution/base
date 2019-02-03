@@ -1,7 +1,6 @@
 module MainSequenceModel where
 
 import Control.Monad (when)
-import Data.Char (isSpace)
 import Data.Text (Text)
 import Data.Attoparsec.Text
 
@@ -14,6 +13,8 @@ data MSModelFormat = Filters [Text]
 
 isFilters (Filters _) = True
 isFilters _           = False
+
+isSpace = inClass " \t\n\r\v"
 
 parseFilters =
   let parser = "%f" *> many1 (space *> takeWhile1 (not . isSpace)) <* endOfLine
