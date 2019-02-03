@@ -10,7 +10,7 @@ data MSModel = MSModel { filters :: [Text] }
 
 
 data MSModelFormat = Filters [Text]
-                   | SectionHeader Double Double
+                   | SectionHeader Double Double Double Double
                    | Comment Text
                    deriving (Show, Eq)
 
@@ -41,10 +41,16 @@ parseFileHeader =
 parseSectionHeader =
   let parser = SectionHeader <$> ("%s" *> feh)
                              <*> alphaFe
+               <*> lHp
+               <*> y
+               <* endOfLine
 
   in parser <?> "MS Section header"
      where feh = skipWhile isSpace *> "[Fe/H]=" *> double
            alphaFe = skipWhile isSpace *> "[alpha/Fe]=" *> double
+           lHp = skipWhile isSpace *> "Y=" *> double
+           y = skipWhile isSpace *> "l/Hp=" *> double
+
 
 parseModel = do
   header <- parseFileHeader
