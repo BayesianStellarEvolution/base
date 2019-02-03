@@ -11,8 +11,18 @@ library:
   exposed-modules: []
   dependencies:
     - base >=4.12 && <5
+    - attoparsec
+    - conduit
+    - conduit-extra
 
-
+executables:
+  makeIsochrone:
+    main: Main.hs
+    source-dirs: makeIsochrone
+    dependencies:
+      - base
+      - BayesianStellarEvolution
+    
 tests:
   library-tests:
     main: Spec.hs
