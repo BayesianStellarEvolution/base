@@ -6,6 +6,9 @@ copyright: '2019'
 # license:
 github: BayesianStellarEvolution/BayesianStellarEvolution
 
+default-extensions:
+  - OverloadedStrings
+
 library:
   source-dirs: src
   exposed-modules:
