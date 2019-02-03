@@ -33,8 +33,8 @@ parseModel = do
   let headerWithoutComments = filter isFilters header
       records = length headerWithoutComments
 
-  when (records /= 1) $ fail $ "MS Model - malformed header: " ++ show records ++ " filter specifications"
+  when (records == 0) $ fail $ "MS Model - malformed header: " ++ show records ++ " filter specifications"
 
-  let (Filters filters) = head headerWithoutComments
+  let filters = concatMap (\(Filters f) -> f) headerWithoutComments
 
   return $ MSModel filters
