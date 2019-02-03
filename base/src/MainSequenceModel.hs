@@ -11,6 +11,7 @@ data MSModel = MSModel { filters :: [Text] }
 
 data MSModelFormat = Filters [Text]
                    | SectionHeader Double Double Double Double
+                   | AgeHeader Double
                    | Comment Text
                    deriving (Show, Eq)
 
@@ -56,7 +57,7 @@ parseSectionHeader =
 
 
 parseAgeHeader =
-  let parser = SectionHeader <$> ("%a" *> logAge)
+  let parser = AgeHeader <$> ("%a" *> logAge)
   in parser <?> "MS Age header"
      where logAge = taggedDouble "logAge=" <?> "logAge"
 

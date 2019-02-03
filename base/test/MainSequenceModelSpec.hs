@@ -38,6 +38,13 @@ spec = parallel $ do
         let result = doParse "%s [Fe/H]=-2.500000    [alpha/Fe]=0.000000    l/Hp=1.938000    Y=0.245100\n"
         in result `shouldBe` (Right $ SectionHeader (-2.5) 0.0 1.938 0.2451)
 
+    describe "MS Model age header" $ do
+      let doParse = parseOnly parseAgeHeader
+
+      it "parses an age header" $
+        let result = doParse "%a logAge=8.397940"
+        in result `shouldBe` (Right $ AgeHeader 8.397940)
+
 
     describe "Comments" $ do
       let desired = Right $ Comment "any text here"
