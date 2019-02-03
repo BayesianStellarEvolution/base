@@ -19,9 +19,17 @@ spec = parallel $ do
         parseOnly parseFilters "%f U B V R I J H K\n" == (Right $ Filters ["U", "B", "V", "R", "I", "J", "H", "K"])
 
     describe "Comments" $ do
+      let desired = Right $ Comment "any text here"
+
       it "captures a comment with no space after #" $
-        parseOnly parseComment "#any text here\n" == (Right $ Comment "any text here")
+        parseOnly parseComment "#any text here\n" == desired
       it "skips tabs after #" $
-        parseOnly parseComment "# any text here\n" == (Right $ Comment "any text here")
+        parseOnly parseComment "# any text here\n" == desired
       it "skips space after #" $
-        parseOnly parseComment "#\tany text here\n" == (Right $ Comment "any text here")
+        parseOnly parseComment "#\tany text here\n" == desired
+
+
+    describe "Header" $ do
+      it "parses a file header" $
+        let result = parseOnly parseHeader "# DSED models\n%f U B V R I J H K u g r i z\n"
+        in result == Right [Comment "DSED models", Filters ["U", "B", "V", "R", "I", "J", "H", "K", "u", "g", "r", "i", "z"]]
