@@ -33,3 +33,7 @@ spec = parallel $ do
       it "parses a file header" $
         let result = parseOnly parseHeader "# DSED models\n%f U B V R I J H K u g r i z\n"
         in result == Right [Comment "DSED models", Filters ["U", "B", "V", "R", "I", "J", "H", "K", "u", "g", "r", "i", "z"]]
+
+    describe "Model" $ do
+      it "parses filters out of the header" $
+        parseOnly parseModel "# DSED models\n%f U B V R I J H K u g r i z\n" == (Right $ MSModel ["U","B","V","R","I","J","H","K","u","g","r","i","z"])
