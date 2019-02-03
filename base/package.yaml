@@ -5,3 +5,6 @@ maintainer: elliot.robinson@rgoptech.com
 copyright: '2019'
 # license:
 github: BayesianStellarEvolution/base
+
+library:
+  source-dirs: src
