@@ -19,6 +19,9 @@ data MSModelFormat = Filters [Text]
 isFilters (Filters _) = True
 isFilters _           = False
 
+isComment (Comment _) = True
+isComment _           = False
+
 
 isSpace = inClass " \t"
 isNewline = inClass "\n\r"
