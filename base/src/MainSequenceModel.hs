@@ -46,10 +46,10 @@ parseSectionHeader =
                              <*  endOfLine
 
   in parser <?> "MS Section header"
-     where feh = skipWhile isSpace *> "[Fe/H]=" *> double
-           alphaFe = skipWhile isSpace *> "[alpha/Fe]=" *> double
-           lHp = skipWhile isSpace *> "Y=" *> double
-           y = skipWhile isSpace *> "l/Hp=" *> double
+     where feh = skipWhile isSpace *> "[Fe/H]=" *> double <?> "FeH"
+           alphaFe = skipWhile isSpace *> "[alpha/Fe]=" *> double <?> "alphaFe"
+           lHp = skipWhile isSpace *> "l/Hp=" *> double <?> "lHp"
+           y = skipWhile isSpace *> "Y=" *> double <?> "Y"
 
 
 parseModel = do
