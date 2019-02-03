@@ -19,4 +19,6 @@ parseComment =
   let parser = "#" *> skipWhile isSpace *> takeTill (inClass "\n\r") <* endOfLine
   in Comment <$> parser <?> "MS Model Comment"
 
-parseHeader = many1 $ choice [parseComment, parseFilters]
+parseHeader =
+  let parser = many1 $ choice [parseComment, parseFilters]
+  in parser <?> "MS Model header"
