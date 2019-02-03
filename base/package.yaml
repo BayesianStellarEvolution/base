@@ -1,13 +1,28 @@
-name: base
+name: BayesianStellarEvolution
 category: application
 author: Elliot Robinson
 maintainer: elliot.robinson@rgoptech.com
 copyright: '2019'
 # license:
-github: BayesianStellarEvolution/base
+github: BayesianStellarEvolution/BayesianStellarEvolution
 
 library:
   source-dirs: src
   exposed-modules: []
   dependencies:
     - base >=4.12 && <5
+
+
+tests:
+  library-tests:
+    main: Spec.hs
+    source-dirs: test
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    dependencies:
+      - base
+      - BayesianStellarEvolution
+      - hspec
+      - QuickCheck

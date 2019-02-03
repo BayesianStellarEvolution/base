@@ -1,0 +1,45 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: b5a5e4e5ce06397ec3920f4da734cebc72d041f16f9cc7cabeb3f016fa165017
+
+name:           BayesianStellarEvolution
+version:        0.0.0
+category:       application
+homepage:       https://github.com/BayesianStellarEvolution/BayesianStellarEvolution#readme
+bug-reports:    https://github.com/BayesianStellarEvolution/BayesianStellarEvolution/issues
+author:         Elliot Robinson
+maintainer:     elliot.robinson@rgoptech.com
+copyright:      2019
+build-type:     Simple
+
+source-repository head
+  type: git
+  location: https://github.com/BayesianStellarEvolution/BayesianStellarEvolution
+
+library
+  other-modules:
+      Paths_BayesianStellarEvolution
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.12 && <5
+  default-language: Haskell2010
+
+test-suite library-tests
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_BayesianStellarEvolution
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      BayesianStellarEvolution
+    , QuickCheck
+    , base
+    , hspec
+  default-language: Haskell2010
