@@ -18,8 +18,8 @@ spec = parallel $ do
       it "pulls a double given a tag" $
         doParse " tag=1.00" `shouldBe` Right 1.00
 
-      xit "requires at lease one space in the source string prior to the tag" $
-        doParse " tag=1.00" `shouldSatisfy` isLeft
+      it "requires at lease one space in the source string prior to the tag" $
+        doParse "tag=1.00" `shouldSatisfy` isLeft
 
     describe "Filters" $ do
       let doParse = parseOnly parseFilters

@@ -38,7 +38,7 @@ parseFileHeader =
   in parser <?> "MS Model header"
 
 
-taggedDouble t = skipWhile isSpace *> string t *> double
+taggedDouble t = satisfy isSpace *> skipWhile isSpace *> string t *> double
 
 
 parseSectionHeader =
