@@ -11,6 +11,12 @@ main = hspec spec
 
 spec = parallel $ do
   describe "MS Model file format" $ do
+    describe "taggedDouble" $ do
+      let doParse = parseOnly . taggedDouble
+
+      it "pulls a double given a tag" $
+        doParse "tag=" " tag=1.00" `shouldBe` Right 1.00
+
     describe "Filters" $ do
       let doParse = parseOnly parseFilters
 
