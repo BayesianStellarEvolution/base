@@ -25,12 +25,12 @@ parseComment =
   let parser = "#" *> skipWhile isSpace *> takeTill (inClass "\n\r") <* endOfLine
   in Comment <$> parser <?> "MS Model Comment"
 
-parseHeader =
+parseFileHeader =
   let parser = many1 $ choice [parseComment, parseFilters]
   in parser <?> "MS Model header"
 
 parseModel = do
-  header <- parseHeader
+  header <- parseFileHeader
 
   let headerWithoutComments = filter isFilters header
       records = length headerWithoutComments
