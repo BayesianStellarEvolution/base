@@ -26,7 +26,7 @@ spec = parallel $ do
 
       it "parses a section header" $
         let result = doParse
-        in result == (Right $ SectionHeader (-2.5) 0.0 1.938 0.2451)
+        in result `shouldBe` (Right $ SectionHeader (-2.5) 0.0 1.938 0.2451)
 
 
     describe "Comments" $ do
