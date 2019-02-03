@@ -19,5 +19,9 @@ spec = parallel $ do
         parseOnly parseFilters "%f U B V R I J H K\n" == (Right $ Filters ["U", "B", "V", "R", "I", "J", "H", "K"])
 
     describe "Comments" $ do
-      it "captures a comment" $
+      it "captures a comment with no space after #" $
+        parseOnly parseComment "#any text here\n" == (Right $ Comment "any text here")
+      it "skips tabs after #" $
         parseOnly parseComment "# any text here\n" == (Right $ Comment "any text here")
+      it "skips space after #" $
+        parseOnly parseComment "#\tany text here\n" == (Right $ Comment "any text here")
