@@ -35,6 +35,7 @@ spec = parallel $ do
 
     describe "Header" $ do
       let doParse = parseOnly parseFileHeader
+
       it "parses a file header" $
         let result = doParse "# DSED models\n%f U B V\n"
         in result == Right [Comment "DSED models", Filters ["U", "B", "V"]]
@@ -45,10 +46,12 @@ spec = parallel $ do
 
 
     describe "Model" $ do
+      let doParse = fmap filters . parseOnly parseModel
+
       it "parses filters out of the header" $
-        let result = filters <$> parseOnly parseModel "# DSED models\n%f U B V R I J H K u g r i z\n"
+        let result = doParse "# DSED models\n%f U B V R I J H K u g r i z\n"
         in result == Right ["U","B","V","R","I","J","H","K","u","g","r","i","z"]
 
       it "concatenates multiple lines of filters" $
-        let result = filters <$> parseOnly parseModel "%f U B V R I J H K\n%f u g r i z\n"
+        let result = doParse "%f U B V R I J H K\n%f u g r i z\n"
         in result == Right ["U","B","V","R","I","J","H","K","u","g","r","i","z"]
