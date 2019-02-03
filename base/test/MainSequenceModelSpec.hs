@@ -15,10 +15,10 @@ spec = parallel $ do
       let doParse = parseOnly parseFilters
 
       it "parses a single filter" $
-        doParse "%f U\n" == (Right $ Filters ["U"])
+        doParse "%f U\n" `shouldBe` (Right $ Filters ["U"])
 
       it "parses a list of filters" $
-        doParse "%f U B V R I J H K\n" == (Right $ Filters ["U", "B", "V", "R", "I", "J", "H", "K"])
+        doParse "%f U B V R I J H K\n" `shouldBe` (Right $ Filters ["U", "B", "V", "R", "I", "J", "H", "K"])
 
 
     describe "MS Model section header" $ do
@@ -34,11 +34,11 @@ spec = parallel $ do
           doParse = parseOnly parseComment
 
       it "captures a comment with no space after #" $
-        doParse "#any text here\n" == desired
+        doParse "#any text here\n" `shouldBe` desired
       it "skips tabs after #" $
-        doParse "# any text here\n" == desired
+        doParse "# any text here\n" `shouldBe` desired
       it "skips space after #" $
-        doParse "#\tany text here\n" == desired
+        doParse "#\tany text here\n" `shouldBe` desired
 
 
     describe "Header" $ do
@@ -46,11 +46,11 @@ spec = parallel $ do
 
       it "parses a file header" $
         let result = doParse "# DSED models\n%f U B V\n"
-        in result == Right [Comment "DSED models", Filters ["U", "B", "V"]]
+        in result `shouldBe` Right [Comment "DSED models", Filters ["U", "B", "V"]]
 
       it "reads multiple adjacent filter lines as separate lines" $
         let result = doParse "%f U B V\n%f R I J\n"
-        in result == Right [Filters ["U", "B", "V"], Filters ["R", "I", "J"]]
+        in result `shouldBe` Right [Filters ["U", "B", "V"], Filters ["R", "I", "J"]]
 
 
     describe "Model" $ do
@@ -58,8 +58,8 @@ spec = parallel $ do
 
       it "parses filters out of the header" $
         let result = doParse "# DSED models\n%f U B V R I J H K u g r i z\n"
-        in result == Right ["U","B","V","R","I","J","H","K","u","g","r","i","z"]
+        in result `shouldBe` Right ["U","B","V","R","I","J","H","K","u","g","r","i","z"]
 
       it "concatenates multiple lines of filters" $
         let result = doParse "%f U B V R I J H K\n%f u g r i z\n"
-        in result == Right ["U","B","V","R","I","J","H","K","u","g","r","i","z"]
+        in result `shouldBe` Right ["U","B","V","R","I","J","H","K","u","g","r","i","z"]
