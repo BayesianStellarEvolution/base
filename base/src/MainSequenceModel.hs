@@ -43,8 +43,8 @@ parseSectionHeader =
                              <*> alphaFe
 
   in parser <?> "MS Section header"
-     where feh = "[Fe/H]=" *> double
-           alphaFe = "[alpha/Fe]=" *> double
+     where feh = skipWhile isSpace *> "[Fe/H]=" *> double
+           alphaFe = skipWhile isSpace *> "[alpha/Fe]=" *> double
 
 parseModel = do
   header <- parseFileHeader
