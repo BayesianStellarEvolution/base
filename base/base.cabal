@@ -1,0 +1,21 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 8f1e1b9a82f152ae3e08063b1dc82f33185acef5b7d6c897ba36df82e0a29627
+
+name:           base
+version:        0.0.0
+category:       application
+homepage:       https://github.com/BayesianStellarEvolution/base#readme
+bug-reports:    https://github.com/BayesianStellarEvolution/base/issues
+author:         Elliot Robinson
+maintainer:     elliot.robinson@rgoptech.com
+copyright:      2019
+build-type:     Simple
+
+source-repository head
+  type: git
+  location: https://github.com/BayesianStellarEvolution/base

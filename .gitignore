@@ -1,0 +1,43 @@
+# Object files
+*.o
+
+# Libraries
+*.lib
+*.a
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Temporary files
+\#*
+.\#*
+*~
+*_flymake.cpp
+
+# Merge conflicts
+*.orig
+
+# CMake build artifacts
+BUILD/*
+contrib/BUILD/*
+
+# Stack build artifacts
+.stack-work/
+*.cabal  # YOU MUST USE package.yaml FOR THIS TO WORK
+
+# Testing artifacts
+.hspec-failures
+
+# Utilities
+!.keep
+
+# Misc
+.dir-locals.el
