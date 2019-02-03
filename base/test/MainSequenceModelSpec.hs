@@ -12,11 +12,13 @@ main = hspec spec
 spec = parallel $ do
   describe "MS Model file format" $ do
     describe "Filters" $ do
+      let doParse = parseOnly parseFilters
+
       it "parses a single filter" $
-        parseOnly parseFilters "%f U\n" == (Right $ Filters ["U"])
+        doParse "%f U\n" == (Right $ Filters ["U"])
 
       it "parses a list of filters" $
-        parseOnly parseFilters "%f U B V R I J H K\n" == (Right $ Filters ["U", "B", "V", "R", "I", "J", "H", "K"])
+        doParse "%f U B V R I J H K\n" == (Right $ Filters ["U", "B", "V", "R", "I", "J", "H", "K"])
 
     describe "Comments" $ do
       let desired = Right $ Comment "any text here"
