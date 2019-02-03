@@ -41,9 +41,9 @@ parseFileHeader =
 parseSectionHeader =
   let parser = SectionHeader <$> ("%s" *> feh)
                              <*> alphaFe
-               <*> lHp
-               <*> y
-               <* endOfLine
+                             <*> lHp
+                             <*> y
+                             <*  endOfLine
 
   in parser <?> "MS Section header"
      where feh = skipWhile isSpace *> "[Fe/H]=" *> double
