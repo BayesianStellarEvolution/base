@@ -36,4 +36,5 @@ spec = parallel $ do
 
     describe "Model" $ do
       it "parses filters out of the header" $
-        parseOnly parseModel "# DSED models\n%f U B V R I J H K u g r i z\n" == (Right $ MSModel ["U","B","V","R","I","J","H","K","u","g","r","i","z"])
+        let result = filters <$> parseOnly parseModel "# DSED models\n%f U B V R I J H K u g r i z\n"
+        in result == (Right $ ["U","B","V","R","I","J","H","K","u","g","r","i","z"])
