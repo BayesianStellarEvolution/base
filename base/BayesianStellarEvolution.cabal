@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1d489dfd94974aeb54beddc6a03b38717c09382a5fad5e41a608688e42e3b2c2
+-- hash: b43e63834c7cd34c294186281a6e35b429be9a2cfd297372e52812f0d968ecf7
 
 name:           BayesianStellarEvolution
 version:        0.0.0
@@ -21,8 +21,9 @@ source-repository head
   location: https://github.com/BayesianStellarEvolution/BayesianStellarEvolution
 
 library
-  other-modules:
+  exposed-modules:
       MainSequenceModel
+  other-modules:
       Paths_BayesianStellarEvolution
   hs-source-dirs:
       src
