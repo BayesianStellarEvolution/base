@@ -99,14 +99,18 @@ spec = parallel $ do
         in result `shouldBe` Right ["U", "B", "V", "R"]
 
     describe "DSED" $ do
-      let doParse = parseOnly parseModel dsed
+      let doParse = parseOnly parseModel
 
       it "finds the filters" $
-        let result = filters <$> doParse
+        let result = filters <$> doParse dsed
         in result `shouldBe` Right ["U", "B", "V"]
 
+      it "fails if there's trash at the end" $
+        let result = doParse (dsed `T.append` "asdf")
+        in result `shouldSatisfy` isLeft
+
       it "parses the sections" $
-        let result = sections <$> doParse
+        let result = sections <$> doParse dsed
         in result `shouldBe` expected
             where expected =
                     Right [ SectionHeader (-2.5) 0 1.938 0.2451
@@ -131,6 +135,7 @@ spec = parallel $ do
                           , EEP 3 0.317207 [11.9778, 11.0959,  9.8205]
                           , EEP 4 0.335075 [11.8076, 10.9477,  9.6866]
                           , EEP 5 0.337718 [11.7862, 10.9296,  9.6705]]
+
 
 dsed :: Text
 dsed = T.pack $ [r|# (abbreviated) DSED models
