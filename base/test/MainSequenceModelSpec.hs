@@ -102,8 +102,13 @@ spec = parallel $ do
       let doParse = parseOnly parseModel dsed
 
       it "finds the filters" $
-        let result = fmap filters $ doParse
+        let result = filters <$> doParse
         in result `shouldBe` Right ["U", "B", "V"]
+
+      it "parses the sections" $
+        let result = sections <$> doParse
+        in result `shouldBe` expected
+            where expected = Right []
 
 dsed :: Text
 dsed = T.pack $ [r|# (abbreviated) DSED models

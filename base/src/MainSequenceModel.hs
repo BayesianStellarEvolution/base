@@ -5,7 +5,8 @@ import Data.Text (Text)
 import Data.Attoparsec.Text
 
 
-data MSModel = MSModel { filters :: [Text] }
+data MSModel = MSModel { filters :: [Text]
+                       , sections :: [MSModelFormat] }
              deriving (Show, Eq)
 
 
@@ -87,4 +88,4 @@ parseModel = do
 
   let filters = concatMap (\(Filters f) -> f) headerWithoutComments
 
-  return $ MSModel filters
+  return $ MSModel filters []
