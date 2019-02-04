@@ -87,7 +87,7 @@ spec = parallel $ do
         in result `shouldBe` Right [Filters ["U", "B", "V"], Filters ["R", "I", "J"]]
 
 
-    xdescribe "Model" $ do
+    describe "Model" $ do
       let doParse = fmap filters . parseOnly parseModel
 
       it "parses filters out of the header" $
