@@ -47,10 +47,10 @@ spec = parallel $ do
 
 
     xdescribe "MS Model EEP" $ do
-      let doParse = parseOnly parseEEP "    2 0.278163 11.747800 11.048400  9.849900"
+      let doParse = parseOnly (parseEEP 3) "    2 0.278163 11.747800 11.048400  9.849900"
 
       it "parses an EEP line" $
-        True `shouldBe` True
+        doParse `shouldBe` (Right $ EEP 2 0.278163 [11.7478, 11.0484, 9.8499])
 
     describe "Comments" $ do
       let desired = Right $ Comment "any text here"

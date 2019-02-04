@@ -66,7 +66,11 @@ parseAgeHeader =
      where logAge = taggedDouble "logAge=" <?> "logAge"
 
 
-parseEEP = decimal
+parseEEP c =
+  let parser = EEP <$> (skipWhile isSpace *> decimal)
+                   <*> (skipWhile isSpace *> double)
+                   <*> (count c (skipWhile isSpace *> double))
+  in parser <?> "MS EEP"
 
 
 parseModel = do
