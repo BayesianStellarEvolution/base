@@ -1,1 +1,1 @@
-stack test --fast --test-arguments="--fail-fast --failure-report=/dev/null"
+stack test --fast --test-arguments="--fail-fast --failure-report=/dev/null -fprogress"

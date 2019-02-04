@@ -58,6 +58,7 @@ spec = parallel $ do
       it "fails to parse with too few filters" $
         doParse 4 `shouldSatisfy` isLeft
 
+
     describe "Comments" $ do
       let desired = Right $ Comment "any text here"
           doParse = parseOnly parseComment
