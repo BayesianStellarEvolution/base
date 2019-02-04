@@ -10,8 +10,6 @@ import qualified Data.Text as T
 import Test.Hspec
 import Text.RawString.QQ
 
-import Debug.Trace
-
 import MainSequenceModel
 
 
@@ -108,8 +106,8 @@ spec = parallel $ do
         in result `shouldBe` Right ["U", "B", "V"]
 
       it "parses the sections" $
-        let result = traceShowId $ sections <$> doParse
-        in result `shouldSatisfy` isRight
+        let result = sections <$> doParse
+        in result `shouldBe` expected
             where expected =
                     Right [ SectionHeader (-2.5) 0 1.938 0.2451
                           , AgeHeader 8.39794
