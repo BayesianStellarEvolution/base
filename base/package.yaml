@@ -16,9 +16,9 @@ library:
   dependencies:
     - base >=4.12 && <5
     - attoparsec
+    - bytestring
     - conduit
     - conduit-extra
-    - text
 
 executables:
   makeIsochrone:
@@ -27,6 +27,8 @@ executables:
     dependencies:
       - base
       - BayesianStellarEvolution
+      - conduit
+      - conduit-extra
     
 tests:
   library-tests:
@@ -39,8 +41,8 @@ tests:
     dependencies:
       - base
       - attoparsec
+      - bytestring
       - BayesianStellarEvolution
       - hspec
       - QuickCheck
       - raw-strings-qq
-      - text

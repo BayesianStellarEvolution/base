@@ -1,20 +1,21 @@
 module MainSequenceModel where
 
 import Control.Monad (liftM2, when)
-import Data.Text (Text)
-import Data.Attoparsec.Text
+import Data.ByteString (ByteString)
+import Data.Attoparsec.ByteString
+import Data.Attoparsec.ByteString.Char8 (isHorizontalSpace, isEndOfLine, endOfLine, double, decimal)
 
 
-data MSModel = MSModel { filters :: [Text]
+data MSModel = MSModel { filters :: [ByteString]
                        , sections :: [MSModelFormat] }
              deriving (Show, Eq)
 
 
-data MSModelFormat = Filters [Text]
+data MSModelFormat = Filters [ByteString]
                    | SectionHeader Double Double Double Double
                    | AgeHeader Double
                    | EEP Int Double [Double]
-                   | Comment Text
+                   | Comment ByteString
                    deriving (Show, Eq)
 
 
@@ -25,21 +26,20 @@ isComment (Comment _) = True
 isComment _           = False
 
 
-isSpace = inClass " \t"
-isNewline = inClass "\n\r"
-
-
-separator = satisfy isSpace *> skipWhile isSpace
+separator = satisfy isHorizontalSpace *> skipWhile isHorizontalSpace
 
 
 parseFilters =
-  let parser = "%f" *> many1 (satisfy isSpace *> takeWhile1 (not . liftM2 (||) isSpace isNewline)) <* endOfLine
+  let parser = "%f" *> many1 (satisfy isHorizontalSpace *> takeWhile1 (not . liftM2 (||) isHorizontalSpace isEndOfLine)) <* endOfLine
   in Filters <$> parser <?> "MS Model filters"
 
 
 parseComment =
-  let parser = "#" *> skipWhile isSpace *> takeTill (inClass "\n\r") <* endOfLine
+  let parser = "#" *> skipWhile isHorizontalSpace *> takeTill isEndOfLine <* endOfLine
   in Comment <$> parser <?> "MS Model Comment"
+
+
+parseEmptyLine = endOfLine *> pure (Comment "")
 
 
 parseFileHeader =
@@ -89,8 +89,8 @@ parseModel = do
   let filters = concatMap (\(Filters f) -> f) headerWithoutComments
       nFilters = length filters
 
-  rest <- filter (not . isComment) <$> many' (choice [ parseSectionHeader, parseAgeHeader, parseEEP nFilters, parseComment ])
+  rest <- filter (not . isComment) <$> many' (choice [parseEEP nFilters, parseAgeHeader, parseSectionHeader, parseComment, parseEmptyLine ])
 
-  endOfInput
+  endOfInput <?> "MS Model end of file"
 
   return $ MSModel filters rest

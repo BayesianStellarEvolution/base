@@ -1,11 +1,12 @@
 {-# LANGUAGE QuasiQuotes #-}
 module MainSequenceModelSpec (main, spec) where
 
-import Data.Attoparsec.Text (parseOnly)
-import Data.Either (isLeft, isRight)
+import Data.Attoparsec.ByteString (parseOnly)
+import Data.Coerce (coerce)
+import Data.Either (isLeft)
 
-import           Data.Text (Text)
-import qualified Data.Text as T
+import           Data.ByteString (ByteString)
+import qualified Data.ByteString.Char8 as B
 
 import Test.Hspec
 import Text.RawString.QQ
@@ -106,7 +107,7 @@ spec = parallel $ do
         in result `shouldBe` Right ["U", "B", "V"]
 
       it "fails if there's trash at the end" $
-        let result = doParse (dsed `T.append` "asdf")
+        let result = doParse (dsed `B.append` "asdf")
         in result `shouldSatisfy` isLeft
 
       it "parses the sections" $
@@ -137,8 +138,8 @@ spec = parallel $ do
                           , EEP 5 0.337718 [11.7862, 10.9296,  9.6705]]
 
 
-dsed :: Text
-dsed = T.pack $ [r|# (abbreviated) DSED models
+dsed :: ByteString
+dsed = B.pack $ [r|# (abbreviated) DSED models
 %f U B V
 %s [Fe/H]=-2.500000    [alpha/Fe]=0.000000    l/Hp=1.938000    Y=0.245100
 %a logAge=8.397940
