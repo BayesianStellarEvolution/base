@@ -73,6 +73,7 @@ parseEEP c =
   let parser = EEP <$> (separator *> decimal)
                    <*> (separator *> double)
                    <*> (count c (separator *> double))
+                   <*  endOfLine
   in parser <?> "MS EEP"
 
 
