@@ -50,7 +50,7 @@ spec = parallel $ do
       let doParse = parseOnly parseAgeHeader
 
       it "parses an age header" $
-        let result = doParse "%a logAge=8.397940"
+        let result = doParse "%a logAge=8.397940\n"
         in result `shouldBe` (Right $ AgeHeader 8.397940)
 
 

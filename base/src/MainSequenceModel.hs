@@ -65,7 +65,7 @@ parseSectionHeader =
 
 
 parseAgeHeader =
-  let parser = AgeHeader <$> ("%a" *> logAge)
+  let parser = AgeHeader <$> ("%a" *> logAge) <* endOfLine
   in parser <?> "MS Age header"
      where logAge = taggedDouble "logAge=" <?> "logAge"
 
