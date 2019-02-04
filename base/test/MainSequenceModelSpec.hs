@@ -46,6 +46,12 @@ spec = parallel $ do
         in result `shouldBe` (Right $ AgeHeader 8.397940)
 
 
+    xdescribe "MS Model EEP" $ do
+      let doParse = parseOnly parseEEP "    2 0.278163 11.747800 11.048400  9.849900"
+
+      it "parses an EEP line" $
+        True `shouldBe` True
+
     describe "Comments" $ do
       let desired = Right $ Comment "any text here"
           doParse = parseOnly parseComment
