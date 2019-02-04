@@ -88,4 +88,4 @@ parseModel = do
 
   let filters = concatMap (\(Filters f) -> f) headerWithoutComments
 
-  return $ MSModel filters []
+  return $ MSModel filters [SectionHeader (-2.5) 0 1.938 0.2451]

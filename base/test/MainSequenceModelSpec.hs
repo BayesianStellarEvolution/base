@@ -108,7 +108,8 @@ spec = parallel $ do
       it "parses the sections" $
         let result = sections <$> doParse
         in result `shouldBe` expected
-            where expected = Right []
+            where expected =
+                    Right [SectionHeader (-2.5) 0 1.938 0.2451]
 
 dsed :: Text
 dsed = T.pack $ [r|# (abbreviated) DSED models
