@@ -90,4 +90,4 @@ parseModel = do
 
   s <- parseSectionHeader
 
-  return $ MSModel filters [SectionHeader (-2.5) 0 1.938 0.2451]
+  return $ MSModel filters [s]
