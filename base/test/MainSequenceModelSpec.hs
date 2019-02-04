@@ -1,8 +1,14 @@
+{-# LANGUAGE QuasiQuotes #-}
 module MainSequenceModelSpec (main, spec) where
 
-import Data.Either (isLeft)
-import Test.Hspec
 import Data.Attoparsec.Text (parseOnly)
+import Data.Either (isLeft)
+
+import           Data.Text (Text)
+import qualified Data.Text as T
+
+import Test.Hspec
+import Text.RawString.QQ
 
 import MainSequenceModel
 
@@ -91,3 +97,35 @@ spec = parallel $ do
       it "concatenates multiple lines of filters" $
         let result = doParse "%f U B V R I J H K\n%f u g r i z\n"
         in result `shouldBe` Right ["U","B","V","R","I","J","H","K","u","g","r","i","z"]
+
+
+dsed :: Text
+dsed = T.pack $ [r|# (abbreviated) DSED models
+%f U B V
+%s [Fe/H]=-2.500000    [alpha/Fe]=0.000000    l/Hp=1.938000    Y=0.245100
+%a logAge=8.397940
+# EEP     Mass         U         B         V
+    2 0.278163 11.747800 11.048400  9.8499000
+    3 0.318852 11.351400 10.709200  9.5412000
+    4 0.335466 11.202800 10.581300  9.424100
+    5 0.351598 11.057200 10.457800  9.311900
+%a logAge=8.477121
+# EEP     Mass         U         B         V
+    2 0.212681 12.572800 11.744600 10.476800
+    3 0.290489 11.618800 10.938200  9.749800
+    4 0.320389 11.334800 10.694700  9.527700
+    5 0.335518 11.203400 10.582200  9.425100
+%s [Fe/H]=-2.000000    [alpha/Fe]=0.000000    l/Hp=1.938000    Y=0.245300
+%a logAge=8.397940
+# EEP     Mass         U         B         V
+    2 0.297801 12.158900 11.256200  9.965500
+    3 0.335484 11.803100 10.943200  9.682100
+    4 0.338823 11.767400 10.912600  9.654600
+    5 0.355097 11.597400 10.764600  9.520300
+%a logAge=8.477121
+# EEP     Mass         U         B         V
+    2 0.251276 12.662100 11.691800 10.354800
+    3 0.317207 11.977800 11.095900  9.820500
+    4 0.335075 11.807600 10.947700  9.686600
+    5 0.337718 11.786200 10.929600  9.670500
+|]
