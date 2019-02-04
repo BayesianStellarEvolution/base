@@ -89,5 +89,6 @@ parseModel = do
   let filters = concatMap (\(Filters f) -> f) headerWithoutComments
 
   s <- parseSectionHeader
+  a <- parseAgeHeader
 
   return $ MSModel filters [s]
