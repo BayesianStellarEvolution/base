@@ -91,12 +91,12 @@ spec = parallel $ do
       let doParse = fmap filters . parseOnly parseModel
 
       it "parses filters out of the header" $
-        let result = doParse "# DSED models\n%f U B V R I J H K u g r i z\n"
-        in result `shouldBe` Right ["U","B","V","R","I","J","H","K","u","g","r","i","z"]
+        let result = doParse "# DSED models\n%f U B V R\n"
+        in result `shouldBe` Right ["U", "B", "V", "R"]
 
       it "concatenates multiple lines of filters" $
-        let result = doParse "%f U B V R I J H K\n%f u g r i z\n"
-        in result `shouldBe` Right ["U","B","V","R","I","J","H","K","u","g","r","i","z"]
+        let result = doParse "%f U B\n%f V R\n"
+        in result `shouldBe` Right ["U", "B", "V", "R"]
 
     describe "DSED" $ do
       let doParse = parseOnly parseModel dsed
