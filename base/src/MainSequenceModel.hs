@@ -87,7 +87,10 @@ parseModel = do
   when (records == 0) $ fail $ "MS Model - malformed header: " ++ show records ++ " filter specifications"
 
   let filters = concatMap (\(Filters f) -> f) headerWithoutComments
+      nFilters = length filters
 
-  rest <- many' $ choice [ parseSectionHeader, parseAgeHeader, parseEEP records, parseComment ]
+  rest <- filter (not . isComment) <$> many' (choice [ parseSectionHeader, parseAgeHeader, parseEEP nFilters, parseComment ])
+
+  endOfInput
 
   return $ MSModel filters rest
