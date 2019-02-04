@@ -112,7 +112,17 @@ spec = parallel $ do
         in result `shouldSatisfy` isRight
             where expected =
                     Right [ SectionHeader (-2.5) 0 1.938 0.2451
-                          , AgeHeader 8.39794 ]
+                          , AgeHeader 8.39794
+                          , EEP 2 0.278163 [11.7478, 11.0484, 9.8499]
+                          , EEP 3 0.318852 [11.3514, 10.7092, 9.5412]
+                          , EEP 4 0.335466 [11.2028, 10.5813, 9.4241]
+                          , EEP 5 0.351598 [11.0572, 10.4578, 9.3119]
+                          , AgeHeader 8.477121
+                          , EEP 2 0.212681 [12.5728, 11.7446, 10.4768]
+                          , EEP 3 0.290489 [11.6188, 10.9382,  9.7498]
+                          , EEP 4 0.320389 [11.3348, 10.6947,  9.5277]
+                          , EEP 5 0.335518 [11.2034, 10.5822,  9.4251]
+                          , SectionHeader (-2.0) 0.0 1.938 0.2453]
 
 dsed :: Text
 dsed = T.pack $ [r|# (abbreviated) DSED models
