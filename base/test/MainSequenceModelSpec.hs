@@ -87,7 +87,7 @@ spec = parallel $ do
         in result `shouldBe` Right [Filters ["U", "B", "V"], Filters ["R", "I", "J"]]
 
 
-    describe "Model" $ do
+    xdescribe "Model" $ do
       let doParse = fmap filters . parseOnly parseModel
 
       it "parses filters out of the header" $
@@ -97,7 +97,6 @@ spec = parallel $ do
       it "concatenates multiple lines of filters" $
         let result = doParse "%f U B\n%f V R\n"
         in result `shouldBe` Right ["U", "B", "V", "R"]
-
 
     describe "DSED" $ do
       let doParse = parseOnly parseModel dsed
