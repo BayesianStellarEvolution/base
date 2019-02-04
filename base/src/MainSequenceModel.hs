@@ -91,4 +91,4 @@ parseModel = do
   s <- parseSectionHeader
   a <- parseAgeHeader
 
-  return $ MSModel filters [s]
+  return $ MSModel filters [s, a]
