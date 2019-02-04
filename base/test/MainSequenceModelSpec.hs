@@ -47,10 +47,16 @@ spec = parallel $ do
 
 
     describe "MS Model EEP" $ do
-      let doParse = parseOnly (parseEEP 3) "    2 0.278163 11.747800 11.048400  9.849900\n"
+      let doParse c = parseOnly (parseEEP c) "    2 0.278163 11.747800 11.048400  9.849900\n"
 
       it "parses an EEP line" $
-        doParse `shouldBe` (Right $ EEP 2 0.278163 [11.7478, 11.0484, 9.8499])
+        doParse 3 `shouldBe` (Right $ EEP 2 0.278163 [11.7478, 11.0484, 9.8499])
+
+      it "fails to parse with too many filters" $
+        doParse 2 `shouldSatisfy` isLeft
+
+      it "fails to parse with too few filters" $
+        doParse 4 `shouldSatisfy` isLeft
 
     describe "Comments" $ do
       let desired = Right $ Comment "any text here"
