@@ -47,7 +47,7 @@ spec = parallel $ do
 
 
     describe "MS Model EEP" $ do
-      let doParse = parseOnly (parseEEP 3) "    2 0.278163 11.747800 11.048400  9.849900"
+      let doParse = parseOnly (parseEEP 3) "    2 0.278163 11.747800 11.048400  9.849900\n"
 
       it "parses an EEP line" $
         doParse `shouldBe` (Right $ EEP 2 0.278163 [11.7478, 11.0484, 9.8499])

@@ -28,6 +28,9 @@ isSpace = inClass " \t"
 isNewline = inClass "\n\r"
 
 
+separator = satisfy isSpace *> skipWhile isSpace
+
+
 parseFilters =
   let parser = "%f" *> many1 (satisfy isSpace *> takeWhile1 (not . liftM2 (||) isSpace isNewline)) <* endOfLine
   in Filters <$> parser <?> "MS Model filters"
@@ -43,7 +46,7 @@ parseFileHeader =
   in parser <?> "MS Model header"
 
 
-taggedDouble t = satisfy isSpace *> skipWhile isSpace *> string t *> double
+taggedDouble t = separator *> string t *> double
 
 
 parseSectionHeader =
@@ -67,9 +70,9 @@ parseAgeHeader =
 
 
 parseEEP c =
-  let parser = EEP <$> (skipWhile isSpace *> decimal)
-                   <*> (skipWhile isSpace *> double)
-                   <*> (count c (skipWhile isSpace *> double))
+  let parser = EEP <$> (separator *> decimal)
+                   <*> (separator *> double)
+                   <*> (count c (separator *> double))
   in parser <?> "MS EEP"
 
 
