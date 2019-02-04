@@ -98,6 +98,7 @@ spec = parallel $ do
         let result = doParse "%f U B\n%f V R\n"
         in result `shouldBe` Right ["U", "B", "V", "R"]
 
+
     describe "DSED" $ do
       let doParse = parseOnly parseModel dsed
 
