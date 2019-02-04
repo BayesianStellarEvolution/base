@@ -98,6 +98,12 @@ spec = parallel $ do
         let result = doParse "%f U B V R I J H K\n%f u g r i z\n"
         in result `shouldBe` Right ["U","B","V","R","I","J","H","K","u","g","r","i","z"]
 
+    describe "DSED" $ do
+      let doParse = parseOnly parseModel dsed
+
+      it "finds the filters" $
+        let result = fmap filters $ doParse
+        in result `shouldBe` Right ["U", "B", "V"]
 
 dsed :: Text
 dsed = T.pack $ [r|# (abbreviated) DSED models
