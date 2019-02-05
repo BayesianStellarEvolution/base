@@ -1,9 +1,13 @@
 module MainSequenceModel where
 
+import Conduit (MonadThrow, ConduitT)
+
 import Control.Monad (liftM2, when)
-import Data.ByteString (ByteString)
+
 import Data.Attoparsec.ByteString
 import Data.Attoparsec.ByteString.Char8 (isHorizontalSpace, isEndOfLine, endOfLine, double, decimal)
+import Data.ByteString (ByteString)
+import Data.Conduit.Attoparsec
 
 
 data MSModel = MSModel { filters :: [ByteString]
@@ -42,11 +46,6 @@ parseComment =
 parseEmptyLine = endOfLine *> pure (Comment "")
 
 
-parseFileHeader =
-  let parser = many1 $ choice [parseComment, parseFilters]
-  in parser <?> "MS Model header"
-
-
 taggedDouble t = separator *> string t *> double
 
 
@@ -70,7 +69,7 @@ parseAgeHeader =
      where logAge = taggedDouble "logAge=" <?> "logAge"
 
 
-parseEEPs =
+parseEEP =
   let parser = EEP <$> (separator *> decimal)
                    <*> (separator *> double)
                    <*> (many1 (separator *> double))
@@ -78,19 +77,10 @@ parseEEPs =
   in parser <?> "MS EEP"
 
 
-parseModel = do
-  header <- parseFileHeader
-
-  let headerWithoutComments = filter isFilters header
-      records = length headerWithoutComments
-
-  when (records == 0) $ fail $ "MS Model - malformed header: " ++ show records ++ " filter specifications"
-
-  let filters = concatMap (\(Filters f) -> f) headerWithoutComments
-      nFilters = length filters
-
-  rest <- filter (not . isComment) <$> many' (choice [parseEEPs, parseAgeHeader, parseSectionHeader, parseComment, parseEmptyLine ])
-
-  endOfInput <?> "MS Model end of file"
-
-  return rest
+lexModel ::
+  Monad m => ConduitT
+    ByteString
+    (Either ParseError (PositionRange, MSModelFormat))
+    m
+    ()
+lexModel = conduitParserEither (choice [parseEEP, parseAgeHeader, parseSectionHeader, parseComment, parseEmptyLine, parseFilters])

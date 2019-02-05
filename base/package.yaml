@@ -45,6 +45,7 @@ tests:
       - base
       - attoparsec
       - bytestring
+      - conduit
       - BayesianStellarEvolution
       - hspec
       - QuickCheck

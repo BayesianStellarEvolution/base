@@ -1,9 +1,11 @@
 {-# LANGUAGE QuasiQuotes #-}
 module MainSequenceModelSpec (main, spec) where
 
+import Conduit
+
 import Data.Attoparsec.ByteString (parseOnly)
 import Data.Coerce (coerce)
-import Data.Either (isLeft)
+import Data.Either (isLeft, isRight)
 
 import           Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as B
@@ -54,16 +56,10 @@ spec = parallel $ do
 
 
     describe "MS Model EEP" $ do
-      let doParse c = parseOnly (parseEEP c) "    2 0.278163 11.747800 11.048400  9.849900\n"
+      let doParse = parseOnly parseEEP "    2 0.278163 11.747800 11.048400  9.849900\n"
 
       it "parses an EEP line" $
-        doParse 3 `shouldBe` (Right $ EEP 2 0.278163 [11.7478, 11.0484, 9.8499])
-
-      it "fails to parse with too many filters" $
-        doParse 2 `shouldSatisfy` isLeft
-
-      it "fails to parse with too few filters" $
-        doParse 4 `shouldSatisfy` isLeft
+        doParse `shouldBe` (Right $ EEP 2 0.278163 [11.7478, 11.0484, 9.8499])
 
 
     describe "Comments" $ do
@@ -76,45 +72,15 @@ spec = parallel $ do
         doParse "#\t any text here\n" `shouldBe` desired
 
 
-    describe "Header" $ do
-      let doParse = parseOnly parseFileHeader
-
-      it "parses a file header" $
-        let result = doParse "# DSED models\n%f U B V\n"
-        in result `shouldBe` Right [Comment "DSED models", Filters ["U", "B", "V"]]
-
-      it "reads multiple adjacent filter lines as separate lines" $
-        let result = doParse "%f U B V\n%f R I J\n"
-        in result `shouldBe` Right [Filters ["U", "B", "V"], Filters ["R", "I", "J"]]
-
-
     describe "Model" $ do
-      let doParse = fmap filters . parseOnly parseModel
-
-      it "parses filters out of the header" $
-        let result = doParse "# DSED models\n%f U B V R\n"
-        in result `shouldBe` Right ["U", "B", "V", "R"]
-
-      it "concatenates multiple lines of filters" $
-        let result = doParse "%f U B\n%f V R\n"
-        in result `shouldBe` Right ["U", "B", "V", "R"]
-
-    describe "DSED" $ do
-      let doParse = parseOnly parseModel
-
-      it "finds the filters" $
-        let result = filters <$> doParse dsed
-        in result `shouldBe` Right ["U", "B", "V"]
-
-      it "fails if there's trash at the end" $
-        let result = doParse (dsed `B.append` "asdf")
-        in result `shouldSatisfy` isLeft
+      let doParse = runConduitPure $ yield dsed .| lexModel .| filterC (either (const True) (not . isComment . snd)) .| sinkList
 
       it "parses the sections" $
-        let result = sections <$> doParse dsed
-        in result `shouldBe` expected
+        let result = sequence $ map (fmap snd) doParse
+        in (result `shouldSatisfy` isRight) >> ((\(Right r) -> r) result `shouldBe` expected)
             where expected =
-                    Right [ SectionHeader (-2.5) 0 1.938 0.2451
+                          [ Filters ["U", "B", "V"]
+                          , SectionHeader (-2.5) 0 1.938 0.2451
                           , AgeHeader 8.39794
                           , EEP 2 0.278163 [11.7478, 11.0484, 9.8499]
                           , EEP 3 0.318852 [11.3514, 10.7092, 9.5412]
