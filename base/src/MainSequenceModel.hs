@@ -9,6 +9,8 @@ import Data.Attoparsec.ByteString.Char8 (isHorizontalSpace, isEndOfLine, endOfLi
 import Data.ByteString (ByteString)
 import Data.Conduit.Attoparsec
 
+import Text.Printf
+
 
 data MSModelFormat = Filters [ByteString]
                    | SectionHeader Double Double Double Double
@@ -93,7 +95,8 @@ parseModel =
           case next of
             Nothing -> return ()
             Just x  -> handleError x >> loop
-        handleError (Left x)  = return ()
+        handleError (Left e@(ParseError ctxt msg (Position line col _))) =
+          fail $ printf "Failed to parse MS model at line %d, column %d, %s" line col $ show e
         handleError (Right (_, x)) = unpack x
           where unpack (SectionHeader feh _ _ y) = yield feh
                 unpack _ = return ()
