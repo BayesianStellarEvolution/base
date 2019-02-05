@@ -108,7 +108,7 @@ spec = parallel $ do
         in (result `shouldSatisfy` isRight) >> ((\(Right r) -> r) result `shouldBe` expected)
 
       it "parses" $
-        let result = True -- runConduitPure $ yield dsed .| lexModel .| parseModel .| sinkList
+        let result = runConduitPure $ yield dsed .| lexModel .| parseModel .| sinkList
         in True `shouldBe` True
 
 
