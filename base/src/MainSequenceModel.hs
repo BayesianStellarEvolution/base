@@ -95,4 +95,5 @@ parseModel =
             Just x  -> handleError x >> loop
         handleError (Left x)  = return ()
         handleError (Right (_, x)) = unpack x
-          where unpack (Comment _) = yield 0.0
+          where unpack (SectionHeader feh _ _ y) = yield feh
+                unpack _ = return ()
