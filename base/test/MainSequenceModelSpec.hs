@@ -109,7 +109,7 @@ spec = parallel $ do
 
       it "parses" $
         let result = runConduitPure $ yield dsed .| lexModel .| parseModel .| sinkList
-        in True `shouldBe` True
+        in result `shouldBe` [-2.5, -2.0]
 
 
 dsed :: ByteString
