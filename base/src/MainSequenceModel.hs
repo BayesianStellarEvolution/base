@@ -10,11 +10,6 @@ import Data.ByteString (ByteString)
 import Data.Conduit.Attoparsec
 
 
-data MSModel = MSModel { filters :: [ByteString]
-                       , sections :: [MSModelFormat] }
-             deriving (Show, Eq)
-
-
 data MSModelFormat = Filters [ByteString]
                    | SectionHeader Double Double Double Double
                    | AgeHeader Double
