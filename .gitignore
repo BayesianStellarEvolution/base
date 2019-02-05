@@ -42,3 +42,6 @@ contrib/BUILD/*
 
 # Misc
 .dir-locals.el
+
+# Temp
+*.xz
