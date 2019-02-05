@@ -1,3 +1,4 @@
 resolver: lts-13.6
 packages:
   - base
+  - models

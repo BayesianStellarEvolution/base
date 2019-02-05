@@ -1,1 +1,1 @@
-stack test --fast --test-arguments="--fail-fast --failure-report=/dev/null -fprogress"
+echo "base tests:"; stack runghc --cwd base/test/ -- -XOverloadedStrings Spec.hs --fail-fast --failure-report=/dev/null -fprogress 2> /dev/null && ( echo -e "\nmodel tests:" ; stack runghc --cwd models/test/ -- -XOverloadedStrings Spec.hs --fail-fast --failure-report=/dev/null -fprogress 2>/dev/null )

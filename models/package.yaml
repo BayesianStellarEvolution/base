@@ -1,0 +1,27 @@
+name: BayesianStellarEvolution-Models
+category: application
+author: Elliot Robinson
+maintainer: elliot.robinson@rgoptech.com
+copyright: '2019'
+# license:
+github: BayesianStellarEvolution/BayesianStellarEvolution
+
+default-extensions:
+  - OverloadedStrings
+
+tests:
+  model-tests:
+    main: Spec.hs
+    source-dirs: test
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    dependencies:
+      - base
+      - attoparsec
+      - bytestring
+      - conduit
+      - BayesianStellarEvolution
+      - hspec
+      - QuickCheck
