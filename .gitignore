@@ -35,6 +35,7 @@ contrib/BUILD/*
 
 # Testing artifacts
 .hspec-failures
+*.hp
 
 # Utilities
 !.keep
