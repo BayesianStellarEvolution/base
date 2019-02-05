@@ -79,3 +79,12 @@ lexModel ::
     m
     ()
 lexModel = conduitParserEither (choice [parseEEP, parseAgeHeader, parseSectionHeader, parseComment, parseEmptyLine, parseFilters])
+
+parseModel ::
+  Monad m => ConduitT
+    (Either ParseError (PositionRange, MSModelFormat))
+    Double
+    m
+    ()
+parseModel =
+  undefined
