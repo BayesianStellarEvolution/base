@@ -1,6 +1,6 @@
 module MainSequenceModel where
 
-import Conduit (MonadThrow, ConduitT)
+import Conduit (MonadThrow, ConduitT, await, yield)
 
 import Control.Monad (liftM2, when)
 
@@ -87,4 +87,12 @@ parseModel ::
     m
     ()
 parseModel =
-  undefined
+  loop
+  where loop = do
+          next <- await
+          case next of
+            Nothing -> return ()
+            Just x  -> handleError x >> loop
+        handleError (Left x)  = return ()
+        handleError (Right (_, x)) = unpack x
+          where unpack (Comment _) = yield 0.0
