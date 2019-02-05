@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 826ffbc3d9536263540b4c4370f4510a58137067322d3a22dfe385a6f0a0d438
+-- hash: 27a2fa20295e688cbaa55e4249c4563318d5bfb4372c552132023cdeb59cc57b
 
 name:           BayesianStellarEvolution-Models
 version:        0.0.0
@@ -20,10 +20,19 @@ source-repository head
   type: git
   location: https://github.com/BayesianStellarEvolution/BayesianStellarEvolution
 
+library
+  other-modules:
+      Paths_BayesianStellarEvolution_Models
+  default-extensions: OverloadedStrings
+  build-depends:
+      base
+  default-language: Haskell2010
+
 test-suite model-tests
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      OldDsedSpec
       Paths_BayesianStellarEvolution_Models
   hs-source-dirs:
       test
@@ -36,5 +45,7 @@ test-suite model-tests
     , base
     , bytestring
     , conduit
+    , conduit-extra
     , hspec
+    , lzma-conduit
   default-language: Haskell2010

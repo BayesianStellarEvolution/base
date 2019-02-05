@@ -9,6 +9,10 @@ github: BayesianStellarEvolution/BayesianStellarEvolution
 default-extensions:
   - OverloadedStrings
 
+library:
+  dependencies:
+    - base
+  
 tests:
   model-tests:
     main: Spec.hs
@@ -19,9 +23,12 @@ tests:
       - -with-rtsopts=-N
     dependencies:
       - base
+      - BayesianStellarEvolution
+
       - attoparsec
       - bytestring
       - conduit
-      - BayesianStellarEvolution
+      - conduit-extra
       - hspec
+      - lzma-conduit
       - QuickCheck
