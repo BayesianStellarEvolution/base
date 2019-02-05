@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ea74c6ba00d4e1c123334e489edb0198f79747702d71e685a698e6137e512080
+-- hash: b06816ce428bcdbec4f7fc820bdb6d74e75ea2166b290b0dbe1e2b5f3462698f
 
 name:           BayesianStellarEvolution
 version:        0.0.0
@@ -45,9 +45,12 @@ executable makeIsochrone
   default-extensions: OverloadedStrings
   build-depends:
       BayesianStellarEvolution
+    , attoparsec
     , base
+    , bytestring
     , conduit
     , conduit-extra
+    , lzma-conduit
   default-language: Haskell2010
 
 test-suite library-tests

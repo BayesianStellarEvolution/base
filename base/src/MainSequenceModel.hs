@@ -70,10 +70,10 @@ parseAgeHeader =
      where logAge = taggedDouble "logAge=" <?> "logAge"
 
 
-parseEEP c =
+parseEEPs =
   let parser = EEP <$> (separator *> decimal)
                    <*> (separator *> double)
-                   <*> (count c (separator *> double))
+                   <*> (many1 (separator *> double))
                    <*  endOfLine
   in parser <?> "MS EEP"
 
@@ -89,8 +89,8 @@ parseModel = do
   let filters = concatMap (\(Filters f) -> f) headerWithoutComments
       nFilters = length filters
 
-  rest <- filter (not . isComment) <$> many' (choice [parseEEP nFilters, parseAgeHeader, parseSectionHeader, parseComment, parseEmptyLine ])
+  rest <- filter (not . isComment) <$> many' (choice [parseEEPs, parseAgeHeader, parseSectionHeader, parseComment, parseEmptyLine ])
 
   endOfInput <?> "MS Model end of file"
 
-  return $ MSModel filters rest
+  return rest

@@ -26,9 +26,12 @@ executables:
     source-dirs: makeIsochrone
     dependencies:
       - base
+      - attoparsec
       - BayesianStellarEvolution
+      - bytestring
       - conduit
       - conduit-extra
+      - lzma-conduit
     
 tests:
   library-tests:
