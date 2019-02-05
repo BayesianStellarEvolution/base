@@ -73,10 +73,8 @@ spec = parallel $ do
 
 
     describe "Model" $ do
-      let doParse = runConduitPure $ yield dsed .| lexModel .| sinkList
-
-      it "parses the sections" $
-        let result = sequence $ map (fmap snd) doParse
+      it "lexes the sections" $
+        let result = sequence $ map (fmap snd) $ runConduitPure $ yield dsed .| lexModel .| sinkList
         in (result `shouldSatisfy` isRight) >> ((\(Right r) -> r) result `shouldBe` expected)
             where expected = [ Comment "(abbreviated) DSED models"
                              , Filters ["U", "B", "V"]
