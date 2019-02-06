@@ -132,18 +132,20 @@ parseModel =
           next <- await
           case next of
             Nothing -> return ()
-            Just (SectionHeader feh _ _ _) -> section (feh, S.empty) >> unpack
+            Just (SectionHeader feh _ _ _) -> section feh >> unpack
             _ -> unpack
 
-        section s@(feh, ages) = do
-          next <- await
-          case next of
-            Nothing -> doYield
-            Just (AgeHeader a) -> do
-              na <- age a
-              section (feh, na `S.insert` ages)
-            Just l -> doYield >> leftover l
-            where doYield = yield (feh, ages)
+        section feh =
+          let go ages = do
+                next <- await
+                case next of
+                  Nothing -> doYield ages
+                  Just (AgeHeader a) -> do
+                    na <- age a
+                    go $ na `S.insert` ages
+                  Just l -> doYield ages >> leftover l
+          in go S.empty
+            where doYield ages = yield (feh, ages)
 
 
         age a =
