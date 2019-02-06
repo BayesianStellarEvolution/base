@@ -109,6 +109,7 @@ parseModel =
   mapC handleError .| filterC (not . isComment) .| unpack
   where handleError (Left (ParseError _ _ (Position line col _))) =
           throw $ TopLevelException line col
+        handleError (Left DivergentParser) = error "Divergent Parser"
         handleError (Right (_, x)) = x
 
         unpack = do
