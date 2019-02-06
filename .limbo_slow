@@ -1,0 +1,1 @@
+echo "base tests:"; stack runghc --cwd base/ -- --ghc-arg=-itest --ghc-arg=-isrc -XOverloadedStrings test/Spec.hs --fail-fast --failure-report=/dev/null -fprogress && ( echo "model tests:"; stack runghc --cwd models -- --ghc-arg=-itest --ghc-arg=-isrc -XOverloadedStrings test/Spec.hs --fail-fast --failure-report=/dev/null -fprogress )
