@@ -174,7 +174,7 @@ parseModel =
 
 
         age nFilters a =
-          let go eeps masses = do
+          let go eeps masses fs = do
                 next <- await
                 case next of
                   Just (pos, EEP eep mass filters)  -> do
@@ -182,11 +182,11 @@ parseModel =
 
                     when (eepFilters /= nFilters) $ throw $ FilterCountException pos nFilters eepFilters
 
-                    go (eeps `V.snoc` eep) (masses `V.snoc` mass)
+                    go (eeps `V.snoc` eep) (masses `V.snoc` mass) fs
 
-                  Just l@(_, AgeHeader _)           -> leftover l >> doReturn eeps masses
-                  Just l@(_, SectionHeader _ _ _ _) -> leftover l >> doReturn eeps masses
+                  Just l@(_, AgeHeader _)           -> leftover l >> doReturn eeps masses fs
+                  Just l@(_, SectionHeader _ _ _ _) -> leftover l >> doReturn eeps masses fs
                   Just (pos, _)                     -> throw $ ParseException pos
-                  Nothing                           -> doReturn eeps masses
-          in go V.empty V.empty
-            where doReturn eeps masses = return $ Age a eeps masses $ replicate nFilters (V.empty @Double)
+                  Nothing                           -> doReturn eeps masses fs
+          in go V.empty V.empty $ replicate nFilters (V.empty @Double)
+            where doReturn eeps masses fs = return $ Age a eeps masses fs
