@@ -101,9 +101,9 @@ parseModel =
           next <- await
           case next of
             Nothing -> return ()
-            Just x  -> handleError x >> loop
+            Just x  -> handleError x >>= unpack >> loop
         handleError (Left e@(ParseError ctxt msg (Position line col _))) =
           fail $ printf "Failed to parse MS model at line %d, column %d" line col
-        handleError (Right (_, x)) = unpack x
-          where unpack (SectionHeader feh _ _ y) = yield feh
-                unpack _ = return ()
+        handleError (Right (_, x)) = return x
+        unpack (SectionHeader feh _ _ y) = yield feh
+        unpack _ = return ()
