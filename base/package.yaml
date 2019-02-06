@@ -8,6 +8,7 @@ github: BayesianStellarEvolution/BayesianStellarEvolution
 
 default-extensions:
   - OverloadedStrings
+  - BangPatterns
 
 ghc-options:
   - -Wall

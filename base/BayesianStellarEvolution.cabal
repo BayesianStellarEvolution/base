@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d8dbafd70a68ed929264b076c5779879a7ab3bb1c6a22771b35092d2a40ae8d5
+-- hash: 7397cc55e33c3889218d4030d31ff560cb57a524bd4aaae3260c58dc548ba9f9
 
 name:           BayesianStellarEvolution
 version:        0.0.0
@@ -27,7 +27,7 @@ library
       Paths_BayesianStellarEvolution
   hs-source-dirs:
       src
-  default-extensions: OverloadedStrings
+  default-extensions: OverloadedStrings BangPatterns
   ghc-options: -Wall
   build-depends:
       attoparsec
@@ -45,7 +45,7 @@ executable makeIsochrone
       Paths_BayesianStellarEvolution
   hs-source-dirs:
       makeIsochrone
-  default-extensions: OverloadedStrings
+  default-extensions: OverloadedStrings BangPatterns
   ghc-options: -Wall
   build-depends:
       BayesianStellarEvolution
@@ -65,7 +65,7 @@ test-suite library-tests
       Paths_BayesianStellarEvolution
   hs-source-dirs:
       test
-  default-extensions: OverloadedStrings
+  default-extensions: OverloadedStrings BangPatterns
   ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       BayesianStellarEvolution
