@@ -112,13 +112,7 @@ lexModel' ::
     ()
 lexModel' = conduitParser (choice [parseEEP, parseAgeHeader, parseSectionHeader, parseComment, parseEmptyLine, parseFilters])
 
-data Age = Age !Double (Vector Int) (Vector Double) [Vector Double]
-
-instance Show Age where
-  showsPrec _ (Age a _ _ _) = shows a
-
-instance Eq Age where
-  (Age a1 _ _ _) == (Age a2 _ _ _) = a1 == a2
+data Age = Age !Double (Vector Int) (Vector Double) [Vector Double] deriving (Eq, Show)
 
 instance Ord Age where
   compare = comparing (\(Age a _ _ _) -> a)
@@ -182,7 +176,7 @@ parseModel =
 
                     when (eepFilters /= nFilters) $ throw $ FilterCountException pos nFilters eepFilters
 
-                    go (eeps `V.snoc` eep) (masses `V.snoc` mass) fs
+                    go (eeps `V.snoc` eep) (masses `V.snoc` mass) $ zipWith V.snoc fs filters
 
                   Just l@(_, AgeHeader _)           -> leftover l >> doReturn eeps masses fs
                   Just l@(_, SectionHeader _ _ _ _) -> leftover l >> doReturn eeps masses fs
