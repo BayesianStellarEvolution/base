@@ -1,6 +1,6 @@
 module MainSequenceModel where
 
-import Conduit (MonadThrow, ConduitT, await, yield)
+import Conduit
 
 import Control.Monad (liftM2, when)
 
@@ -96,14 +96,14 @@ parseModel ::
     m
     ()
 parseModel =
-  loop
-  where loop = do
+  mapC handleError .| unpack
+  where handleError (Left (ParseError _ _ (Position line col _))) =
+          error $ printf "Failed to parse MS model at line %d, column %d" line col
+        handleError (Right (_, x)) = x
+
+        unpack = do
           next <- await
           case next of
             Nothing -> return ()
-            Just x  -> handleError x >>= unpack >> loop
-        handleError (Left e@(ParseError ctxt msg (Position line col _))) =
-          fail $ printf "Failed to parse MS model at line %d, column %d" line col
-        handleError (Right (_, x)) = return x
-        unpack (SectionHeader feh _ _ y) = yield feh
-        unpack _ = return ()
+            Just (SectionHeader feh _ _ y) -> yield feh >> unpack
+            _ -> unpack
