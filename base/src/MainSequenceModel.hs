@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeApplications #-}
 module MainSequenceModel where
 
 import Conduit
@@ -188,4 +189,4 @@ parseModel =
                   Just (pos, _)                     -> throw $ ParseException pos
                   Nothing                           -> doReturn eeps masses
           in go V.empty V.empty
-            where doReturn eeps masses = return $ Age a eeps masses []
+            where doReturn eeps masses = return $ Age a eeps masses $ replicate nFilters (V.empty @Double)
