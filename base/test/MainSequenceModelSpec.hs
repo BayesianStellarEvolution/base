@@ -34,24 +34,24 @@ spec = parallel $ do
       let doParse = parseOnly parseFilters
 
       it "parses a single filter" $
-        doParse "%f U\n" `shouldBe` (Right $ Filters ["U"])
+        doParse " U\n" `shouldBe` (Right $ Filters ["U"])
 
       it "parses a list of filters" $
-        doParse "%f U B V R I J H K\n" `shouldBe` (Right $ Filters ["U", "B", "V", "R", "I", "J", "H", "K"])
+        doParse " U B V R I J H K\n" `shouldBe` (Right $ Filters ["U", "B", "V", "R", "I", "J", "H", "K"])
 
 
     describe "MS Model section header" $ do
       let doParse = parseOnly parseSectionHeader
 
       it "parses a section header" $
-        let result = doParse "%s [Fe/H]=-2.500000    [alpha/Fe]=0.000000    l/Hp=1.938000    Y=0.245100\n"
+        let result = doParse " [Fe/H]=-2.500000    [alpha/Fe]=0.000000    l/Hp=1.938000    Y=0.245100\n"
         in result `shouldBe` (Right $ SectionHeader (-2.5) 0.0 1.938 0.2451)
 
     describe "MS Model age header" $ do
       let doParse = parseOnly parseAgeHeader
 
       it "parses an age header" $
-        let result = doParse "%a logAge=8.397940\n"
+        let result = doParse " logAge=8.397940\n"
         in result `shouldBe` (Right $ AgeHeader 8.397940)
 
 
@@ -67,9 +67,9 @@ spec = parallel $ do
           doParse = parseOnly parseComment
 
       it "captures a comment with no space after #" $
-        doParse "#any text here\n" `shouldBe` desired
+        doParse "any text here\n" `shouldBe` desired
       it "skips space after #" $
-        doParse "#\t any text here\n" `shouldBe` desired
+        doParse "\t any text here\n" `shouldBe` desired
 
 
     describe "Model" $ do
@@ -101,6 +101,7 @@ spec = parallel $ do
                        , EEP 4 0.338823 [11.7674, 10.9126, 9.6546]
                        , EEP 5 0.355097 [11.5974, 10.7646, 9.5203]
                        , AgeHeader 8.477121
+                       , Comment ""
                        , Comment "EEP     Mass         U         B         V"
                        , EEP 2 0.251276 [12.6621, 11.6918, 10.3548]
                        , EEP 3 0.317207 [11.9778, 11.0959,  9.8205]
@@ -162,6 +163,7 @@ dsed = B.pack $ [r|# (abbreviated) DSED models
     4 0.338823 11.767400 10.912600  9.654600
     5 0.355097 11.597400 10.764600  9.520300
 %a logAge=8.477121
+
 # EEP     Mass         U         B         V
     2 0.251276 12.662100 11.691800 10.354800
     3 0.317207 11.977800 11.095900  9.820500

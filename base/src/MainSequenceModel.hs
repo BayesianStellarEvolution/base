@@ -7,30 +7,34 @@ import Control.Exception (Exception, throw)
 import Control.Monad (liftM2, when)
 
 import Data.Attoparsec.ByteString
-import Data.Attoparsec.ByteString.Char8 (isHorizontalSpace, isEndOfLine, endOfLine, double, decimal)
+import Data.Attoparsec.ByteString.Char8 (isHorizontalSpace, isEndOfLine, double, decimal, char, notChar)
 import Data.ByteString (ByteString)
 import Data.Conduit.Attoparsec
 import Data.Ord (comparing)
 import Data.Set (Set)
 import Data.Vector.Unboxed (Vector)
 
+import qualified Data.Attoparsec.ByteString.Char8 as AP
 import qualified Data.Set as S
 import qualified Data.Vector.Unboxed as V
 
 import Text.Printf
 
+import Data.List (intersperse)
 
-data MSModelException = LexException         Position
+
+data MSModelException = LexException         [String] Position
                       | ParseException       PositionRange
                       | FilterCountException PositionRange Int Int
 
 instance Exception MSModelException
 
 instance Show MSModelException where
-  showsPrec _ (LexException (Position line col _)) =
-    showString $ printf "Failed to lex MS model at line %d, column %d" line col
+  showsPrec _ (LexException context (Position line col _)) =
+    showString $ printf "Failed to lex main sequence model at line %d, column %d\nContext: %s"
+                     line col $ concat $ intersperse " > " context
   showsPrec _ (ParseException (PositionRange (Position line _ _) _)) =
-    showString $ printf "Illegal lexeme in MS model on line %d" line
+    showString $ printf "Illegal lexeme in main sequence model on line %d" line
   showsPrec _ (FilterCountException (PositionRange (Position line _ _) _) nFilters eepFilters) =
     showString $ printf "Incorrect number of filters on line %d. Expected %d, found %d." line nFilters eepFilters
 
@@ -50,33 +54,44 @@ isComment (Comment _) = True
 isComment _           = False
 
 
-separator = satisfy isHorizontalSpace *> skipWhile isHorizontalSpace
+separator = satisfy isHorizontalSpace *> skipWhile isHorizontalSpace <?> "required spacing"
+
+
+endOfLine = AP.endOfLine <?> "end of line"
 
 
 parseFilters =
-  let parser = "%f" *> many1 (satisfy isHorizontalSpace *> takeWhile1 (not . liftM2 (||) isHorizontalSpace isEndOfLine)) <* endOfLine
-  in Filters <$> parser <?> "MS Model filters"
+  let parser = many1 (satisfy isHorizontalSpace *> takeWhile1 (not . liftM2 (||) isHorizontalSpace isEndOfLine)) <* endOfLine
+  in Filters <$> parser <?> "Filters"
 
 
 parseComment =
-  let parser = "#" *> skipWhile isHorizontalSpace *> takeTill isEndOfLine <* endOfLine
-  in Comment <$> parser <?> "MS Model Comment"
+  let parser = skipWhile isHorizontalSpace *> takeTill isEndOfLine <* endOfLine
+  in Comment <$> parser <?> "Comment"
 
 
-parseEmptyLine = endOfLine *> pure (Comment "")
+parseEmptyLine :: Parser MSModelFormat
+parseEmptyLine = pure (Comment "")
 
 
 taggedDouble t = separator *> string t *> double
 
 
+parseHeader = do
+  a <- eitherP "a" (eitherP "s" "f")
+  case a of
+    Left _ -> parseAgeHeader
+    Right (Left _) -> parseSectionHeader
+    Right (Right _) -> parseFilters
+
 parseSectionHeader =
-  let parser = SectionHeader <$> ("%s" *> feh)
+  let parser = SectionHeader <$> feh
                              <*> alphaFe
                              <*> lHp
                              <*> y
                              <*  endOfLine
 
-  in parser <?> "MS Section header"
+  in parser <?> "Section header"
      where feh = taggedDouble "[Fe/H]=" <?> "FeH"
            alphaFe = taggedDouble "[alpha/Fe]="  <?> "alphaFe"
            lHp = taggedDouble "l/Hp=" <?> "lHp"
@@ -84,33 +99,38 @@ parseSectionHeader =
 
 
 parseAgeHeader =
-  let parser = AgeHeader <$> ("%a" *> logAge) <* endOfLine
-  in parser <?> "MS Age header"
+  let parser = AgeHeader <$> logAge <* endOfLine
+  in parser <?> "Age header"
      where logAge = taggedDouble "logAge=" <?> "logAge"
 
 
 parseEEP =
-  let parser = EEP <$> (skipWhile isHorizontalSpace *> decimal)
-                   <*> (separator *> double)
-                   <*> (many1 (separator *> double))
+  let parser = EEP <$> (skipWhile isHorizontalSpace *> decimal <?> "EEP")
+                   <*> (separator *> double <?> "Mass")
+                   <*> (many1 (separator *> double) <?> "Filters")
                    <*  endOfLine
-  in parser <?> "MS EEP"
+  in parser <?> "EEP"
 
 
+-- | Lex a Main Sequence model
+--
+-- Strange goings-on with eitherP here are to force the parser to make choices early
+-- This is strictly necessary to get useful error messages, and has a slight performance boost (over choose) as a bonus
 lexModel ::
   Monad m => ConduitT
     ByteString
     (Either ParseError (PositionRange, MSModelFormat))
     m
     ()
-lexModel = conduitParserEither (choice [parseEEP, parseAgeHeader, parseSectionHeader, parseComment, parseEmptyLine, parseFilters])
-lexModel' ::
-  MonadThrow m => ConduitT
-    ByteString
-    (PositionRange, MSModelFormat)
-    m
-    ()
-lexModel' = conduitParser (choice [parseEEP, parseAgeHeader, parseSectionHeader, parseComment, parseEmptyLine, parseFilters])
+lexModel = conduitParserEither $ do
+  c <- eitherP (char '%') (eitherP (eitherP (char '#') (char '\n')) (pure True))
+  case c of
+    Right (Right _) -> parseEEP
+    Left _ -> parseHeader
+    Right (Left (Left _)) -> parseComment
+    Right (Left (Right _)) -> parseEmptyLine
+
+
 
 data Age = Age !Double (Vector Int) (Vector Double) [Vector Double] deriving (Eq, Show)
 
@@ -131,8 +151,8 @@ parseModel ::
     ()
 parseModel =
   mapC handleError .| filterC (not . isComment . snd) .| unpack
-  where handleError (Left (ParseError _ _ pos)) =
-          throw $ LexException pos
+  where handleError (Left p@(ParseError context _ pos)) =
+          throw $ LexException context pos
         handleError (Left DivergentParser) = error "Divergent Parser"
         handleError (Right r) = r
 
