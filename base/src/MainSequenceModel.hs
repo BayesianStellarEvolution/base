@@ -19,8 +19,9 @@ import qualified Data.Vector.Unboxed as V
 import Text.Printf
 
 
-data MSModelException = LexException Position
-                      | ParseException PositionRange
+data MSModelException = LexException         Position
+                      | ParseException       PositionRange
+                      | FilterCountException PositionRange Int Int
 
 instance Exception MSModelException
 
@@ -29,6 +30,8 @@ instance Show MSModelException where
     showString $ printf "Failed to parse MS model at line %d, column %d" line col
   showsPrec _ (ParseException (PositionRange (Position line _ _) _)) =
     showString $ printf "Illegal lexeme in MS model on line %d" line
+  showsPrec _ (FilterCountException (PositionRange (Position line _ _) _) nFilters eepFilters) =
+    showString $ printf "Incorrect number of filters on line %d. Expected %d, found %d." line nFilters eepFilters
 
 
 data MSModelFormat = Filters [ByteString]
@@ -135,11 +138,12 @@ parseModel =
         unpack = do
           filters <- concat <$> (header .| sinkList)
 
-          let go = do
+          let nFilters = length filters
+              go = do
                 next <- await
                 case next of
                   Nothing -> return ()
-                  Just (_, SectionHeader feh _ _ _) -> section feh >> go
+                  Just (_, SectionHeader feh _ _ _) -> section nFilters feh >> go
                   _ -> go
 
           go
@@ -149,16 +153,16 @@ parseModel =
                 next <- await
                 case next of
                   Just (_, Filters fs) -> yield fs >> go
-                  Just l -> leftover l
-                  Nothing -> return ()
+                  Just l               -> leftover l
+                  Nothing              -> return ()
           in go
 
-        section feh =
+        section nFilters feh =
           let go ages = do
                 next <- await
                 case next of
                   Just (_, AgeHeader a) -> do
-                    na <- age a
+                    na <- age nFilters a
                     go $ na `S.insert` ages
 
                   Just l@(_, SectionHeader _ _ _ _) -> doYield ages >> leftover l
@@ -168,11 +172,17 @@ parseModel =
             where doYield ages = yield (feh, ages)
 
 
-        age a =
+        age nFilters a =
           let go eeps masses = do
                 next <- await
                 case next of
-                  Just (_, EEP eep mass filters)    -> go (eeps `V.snoc` eep) (masses `V.snoc` mass)
+                  Just (pos, EEP eep mass filters)  -> do
+                    let eepFilters = length filters
+
+                    when (eepFilters /= nFilters) $ throw $ FilterCountException pos nFilters eepFilters
+
+                    go (eeps `V.snoc` eep) (masses `V.snoc` mass)
+
                   Just l@(_, AgeHeader _)           -> leftover l >> doReturn eeps masses
                   Just l@(_, SectionHeader _ _ _ _) -> leftover l >> doReturn eeps masses
                   Just (pos, _)                     -> throw $ ParseException pos
