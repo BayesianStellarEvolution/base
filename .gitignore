@@ -21,6 +21,7 @@
 .\#*
 *~
 *_flymake.cpp
+*.swp
 
 # Merge conflicts
 *.orig
@@ -45,3 +46,4 @@ contrib/BUILD/*
 
 # Temp
 *.xz
+*.model

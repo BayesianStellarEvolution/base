@@ -28,7 +28,7 @@ instance Exception MSModelException
 
 instance Show MSModelException where
   showsPrec _ (LexException (Position line col _)) =
-    showString $ printf "Failed to parse MS model at line %d, column %d" line col
+    showString $ printf "Failed to lex MS model at line %d, column %d" line col
   showsPrec _ (ParseException (PositionRange (Position line _ _) _)) =
     showString $ printf "Illegal lexeme in MS model on line %d" line
   showsPrec _ (FilterCountException (PositionRange (Position line _ _) _) nFilters eepFilters) =
@@ -90,7 +90,7 @@ parseAgeHeader =
 
 
 parseEEP =
-  let parser = EEP <$> (separator *> decimal)
+  let parser = EEP <$> (skipWhile isHorizontalSpace *> decimal)
                    <*> (separator *> double)
                    <*> (many1 (separator *> double))
                    <*  endOfLine

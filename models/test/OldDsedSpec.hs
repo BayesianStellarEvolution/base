@@ -15,7 +15,7 @@ import MainSequenceModel
 loadAndLex :: String -> IO ()
 loadAndLex p =
   runConduitRes ( sourceFile p
-               .| decompress Nothing
+--               .| decompress Nothing
                .| lexModel
                .| parseModel
                .| sinkNull )
@@ -25,10 +25,18 @@ main :: IO ()
 main = hspec spec
 
 spec = parallel $ do
-  describe "Old DSED" $ do
+  xdescribe "Old DSED" $ do
     it "loads successfully" $
       loadAndLex "dsed_old.model.xz"
 
-  describe "New DSED" $ do
+  xdescribe "New DSED" $ do
     it "loads successfully" $
       loadAndLex "dsed_new.model.xz"
+
+  describe "Yale 2018" $ do
+    it "loads successfully" $
+      loadAndLex "yale_2018.model"
+
+  describe "PARSEC" $ do
+    it "loads successfully" $
+      loadAndLex "PARSEC.model"
