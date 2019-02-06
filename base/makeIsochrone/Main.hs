@@ -13,11 +13,10 @@ import MainSequenceModel
 
 main :: IO ()
 main = do
-  t <- runConduitRes ( sourceFile "/home/elliot/projects/base-models/dsed/dsed_new.model.xz"
-                    .| decompress Nothing
-                    .| lexModel
-                    .| parseModel
-                    .| lastC
-                     )
+  (Just t) <- runConduitRes ( sourceFile "/home/elliot/projects/base-models/dsed/dsed_new.model.xz"
+                           .| decompress Nothing
+                           .| lexModel
+                           .| parseModel
+                           .| lastC )
 
   print t
