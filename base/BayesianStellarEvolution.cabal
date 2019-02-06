@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 7397cc55e33c3889218d4030d31ff560cb57a524bd4aaae3260c58dc548ba9f9
+-- hash: 661dfd23199f41d4dc82045ee61cf7de7f5cafd4b00966a9dd41d13d3a54559e
 
 name:           BayesianStellarEvolution
 version:        0.0.0
@@ -54,6 +54,7 @@ executable makeIsochrone
     , bytestring
     , conduit
     , conduit-extra
+    , containers
     , lzma-conduit
   default-language: Haskell2010
 
