@@ -133,11 +133,25 @@ parseModel =
         handleError (Right r) = r
 
         unpack = do
-          next <- await
-          case next of
-            Nothing -> return ()
-            Just (_, SectionHeader feh _ _ _) -> section feh >> unpack
-            _ -> unpack
+          filters <- concat <$> (header .| sinkList)
+
+          let go = do
+                next <- await
+                case next of
+                  Nothing -> return ()
+                  Just (_, SectionHeader feh _ _ _) -> section feh >> go
+                  _ -> go
+
+          go
+
+        header =
+          let go = do
+                next <- await
+                case next of
+                  Just (_, Filters fs) -> yield fs >> go
+                  Just l -> leftover l
+                  Nothing -> return ()
+          in go
 
         section feh =
           let go ages = do
