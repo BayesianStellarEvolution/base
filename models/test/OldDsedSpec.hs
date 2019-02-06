@@ -17,6 +17,7 @@ loadAndLex p =
   runConduitRes ( sourceFile p
                .| decompress Nothing
                .| lexModel
+               .| parseModel
                .| sinkNull )
 
 
