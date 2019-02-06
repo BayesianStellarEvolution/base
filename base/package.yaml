@@ -9,6 +9,9 @@ github: BayesianStellarEvolution/BayesianStellarEvolution
 default-extensions:
   - OverloadedStrings
 
+ghc-options:
+  - -Wall
+  
 library:
   source-dirs: src
   exposed-modules:
@@ -19,6 +22,7 @@ library:
     - bytestring
     - conduit
     - conduit-extra
+    - vector
 
 executables:
   makeIsochrone:
@@ -32,7 +36,7 @@ executables:
       - conduit
       - conduit-extra
       - lzma-conduit
-    
+
 tests:
   library-tests:
     main: Spec.hs
@@ -50,3 +54,4 @@ tests:
       - hspec
       - QuickCheck
       - raw-strings-qq
+      - vector

@@ -11,6 +11,9 @@ import Data.Attoparsec.ByteString.Char8 (isHorizontalSpace, isEndOfLine, endOfLi
 import Data.ByteString (ByteString)
 import Data.Conduit.Attoparsec
 
+import Data.Vector.Unboxed (Vector)
+import qualified Data.Vector.Unboxed as V
+
 import Text.Printf
 
 
@@ -102,7 +105,7 @@ lexModel' = conduitParser (choice [parseEEP, parseAgeHeader, parseSectionHeader,
 parseModel ::
   Monad m => ConduitT
     (Either ParseError (PositionRange, MSModelFormat))
-    (Double, [(Double, [Int])])
+    (Double, [(Double, Vector Int)])
     m
     ()
 parseModel =
@@ -124,7 +127,7 @@ parseModel =
           case next of
             Nothing -> doYield
             Just (AgeHeader a) -> do
-              na <- age (a, [])
+              na <- age (a, V.empty)
               section (feh, na:ages)
             Just l -> doYield >> leftover l
             where doYield = yield (feh, reverse ages)
@@ -134,6 +137,6 @@ parseModel =
           next <- await
           case next of
             Nothing -> doReturn
-            Just (EEP eep mass filters) -> age (a, eep:eeps)
+            Just (EEP eep mass filters) -> age (a, eeps `V.snoc` eep)
             Just l -> leftover l >> doReturn
-            where doReturn = return (a, reverse eeps)
+            where doReturn = return (a, eeps)

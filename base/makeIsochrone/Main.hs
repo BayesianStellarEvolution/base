@@ -16,7 +16,7 @@ main = do
   t <- runConduitRes ( sourceFile "/home/elliot/projects/base-models/dsed/dsed_new.model.xz"
                     .| decompress Nothing
                     .| lexModel
-                    .| filterC (either (const True) (not . isComment . snd))
+                    .| parseModel
                     .| lastC
                      )
 

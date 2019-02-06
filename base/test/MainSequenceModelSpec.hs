@@ -1,10 +1,9 @@
-{-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE QuasiQuotes, OverloadedLists #-}
 module MainSequenceModelSpec (main, spec) where
 
 import Conduit
 
 import Data.Attoparsec.ByteString (parseOnly)
-import Data.Coerce (coerce)
 import Data.Either (isLeft, isRight)
 
 import           Data.ByteString (ByteString)
@@ -19,6 +18,7 @@ import MainSequenceModel
 main :: IO ()
 main = hspec spec
 
+spec :: SpecWith ()
 spec = parallel $ do
   describe "MS Model file format" $ do
     describe "taggedDouble" $ do
