@@ -106,7 +106,7 @@ parseModel ::
     m
     ()
 parseModel =
-  mapC handleError .| unpack
+  mapC handleError .| filterC (not . isComment) .| unpack
   where handleError (Left (ParseError _ _ (Position line col _))) =
           throw $ TopLevelException line col
         handleError (Right (_, x)) = x
