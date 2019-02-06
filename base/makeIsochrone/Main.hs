@@ -8,6 +8,7 @@ import Data.Attoparsec.ByteString
 import Data.ByteString (ByteString)
 import Data.Conduit.Lzma
 import Data.Either (isRight)
+import qualified Data.Set as S
 
 import MainSequenceModel
 
@@ -19,4 +20,4 @@ main = do
                            .| parseModel
                            .| lastC )
 
-  print $ fmap PrettyAge $ snd t
+  print $ S.map PrettyAge $ snd t
