@@ -146,9 +146,10 @@ parseModel =
                   Just (_, AgeHeader a) -> do
                     na <- age a
                     go $ na `S.insert` ages
+
                   Just l@(_, SectionHeader _ _ _ _) -> doYield ages >> leftover l
-                  Nothing -> doYield ages
-                  Just (pos, _) -> throw $ ParseException pos
+                  Just (pos, _)                     -> throw $ ParseException pos
+                  Nothing                           -> doYield ages
           in go S.empty
             where doYield ages = yield (feh, ages)
 
@@ -157,8 +158,10 @@ parseModel =
           let go eeps masses = do
                 next <- await
                 case next of
-                  Nothing -> doReturn eeps masses
-                  Just (_, EEP eep mass filters) -> go (eeps `V.snoc` eep) (masses `V.snoc` mass)
-                  Just l -> leftover l >> doReturn eeps masses
+                  Just (_, EEP eep mass filters)    -> go (eeps `V.snoc` eep) (masses `V.snoc` mass)
+                  Just l@(_, AgeHeader _)           -> leftover l >> doReturn eeps masses
+                  Just l@(_, SectionHeader _ _ _ _) -> leftover l >> doReturn eeps masses
+                  Just (pos, _)                     -> throw $ ParseException pos
+                  Nothing                           -> doReturn eeps masses
           in go V.empty V.empty
             where doReturn eeps masses = return $ Age a eeps masses
