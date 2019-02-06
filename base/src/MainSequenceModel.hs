@@ -19,12 +19,16 @@ import qualified Data.Vector.Unboxed as V
 import Text.Printf
 
 
-data ParseException = TopLevelException Int Int
+data MSModelException = LexException Position
+                      | ParseException PositionRange
 
-instance Exception ParseException
+instance Exception MSModelException
 
-instance Show ParseException where
-  showsPrec _ (TopLevelException line col) = showString (printf "Failed to parse MS model at line %d, column %d" line col)
+instance Show MSModelException where
+  showsPrec _ (LexException (Position line col _)) =
+    showString $ printf "Failed to parse MS model at line %d, column %d" line col
+  showsPrec _ (ParseException (PositionRange (Position line _ _) _)) =
+    showString $ printf "Illegal lexeme in MS model on line %d" line
 
 
 data MSModelFormat = Filters [ByteString]
@@ -122,28 +126,29 @@ parseModel ::
     m
     ()
 parseModel =
-  mapC handleError .| filterC (not . isComment) .| unpack
-  where handleError (Left (ParseError _ _ (Position line col _))) =
-          throw $ TopLevelException line col
+  mapC handleError .| filterC (not . isComment . snd) .| unpack
+  where handleError (Left (ParseError _ _ pos)) =
+          throw $ LexException pos
         handleError (Left DivergentParser) = error "Divergent Parser"
-        handleError (Right (_, x)) = x
+        handleError (Right r) = r
 
         unpack = do
           next <- await
           case next of
             Nothing -> return ()
-            Just (SectionHeader feh _ _ _) -> section feh >> unpack
+            Just (_, SectionHeader feh _ _ _) -> section feh >> unpack
             _ -> unpack
 
         section feh =
           let go ages = do
                 next <- await
                 case next of
-                  Nothing -> doYield ages
-                  Just (AgeHeader a) -> do
+                  Just (_, AgeHeader a) -> do
                     na <- age a
                     go $ na `S.insert` ages
-                  Just l -> doYield ages >> leftover l
+                  Just l@(_, SectionHeader _ _ _ _) -> doYield ages >> leftover l
+                  Nothing -> doYield ages
+                  Just (pos, _) -> throw $ ParseException pos
           in go S.empty
             where doYield ages = yield (feh, ages)
 
@@ -153,7 +158,7 @@ parseModel =
                 next <- await
                 case next of
                   Nothing -> doReturn eeps masses
-                  Just (EEP eep mass filters) -> go (eeps `V.snoc` eep) (masses `V.snoc` mass)
+                  Just (_, EEP eep mass filters) -> go (eeps `V.snoc` eep) (masses `V.snoc` mass)
                   Just l -> leftover l >> doReturn eeps masses
           in go V.empty V.empty
             where doReturn eeps masses = return $ Age a eeps masses
