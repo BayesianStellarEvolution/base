@@ -76,7 +76,8 @@ spec = parallel $ do
       it "lexes" $
         let result = sequence $ map (fmap snd) $ runConduitPure $ yield dsed .| lexModel .| sinkList
             expected = [ Comment "(abbreviated) DSED models"
-                       , Filters ["U", "B", "V"]
+                       , Filters ["U", "B"]
+                       , Filters ["V"]
                        , SectionHeader (-2.5) 0 1.938 0.2451
                        , AgeHeader 8.39794
                        , Comment "EEP     Mass         U         B         V"
@@ -137,7 +138,8 @@ spec = parallel $ do
 
 dsed :: ByteString
 dsed = B.pack $ [r|# (abbreviated) DSED models
-%f U B V
+%f U B
+%f V
 %s [Fe/H]=-2.500000    [alpha/Fe]=0.000000    l/Hp=1.938000    Y=0.245100
 %a logAge=8.397940
 # EEP     Mass         U         B         V
