@@ -19,4 +19,4 @@ main = do
                            .| parseModel
                            .| lastC )
 
-  print t
+  print $ fmap PrettyAge $ snd t
