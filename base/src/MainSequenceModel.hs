@@ -11,6 +11,9 @@ import Data.Attoparsec.ByteString.Char8 (isHorizontalSpace, isEndOfLine, endOfLi
 import Data.ByteString (ByteString)
 import Data.Conduit.Attoparsec
 
+import Data.Set (Set)
+import qualified Data.Set as S
+
 import Data.Vector.Unboxed (Vector)
 import qualified Data.Vector.Unboxed as V
 
