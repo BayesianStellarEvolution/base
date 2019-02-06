@@ -117,6 +117,11 @@ data Age = Age !Double (Vector Int) (Vector Double) [Vector Double] deriving (Eq
 instance Ord Age where
   compare = comparing (\(Age a _ _ _) -> a)
 
+newtype PrettyAge = PrettyAge Age
+
+instance Show PrettyAge where
+  showsPrec _ (PrettyAge (Age a _ _ _)) = shows a
+
 parseModel ::
   Monad m => ConduitT
     (Either ParseError (PositionRange, MSModelFormat))
