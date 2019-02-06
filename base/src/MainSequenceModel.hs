@@ -10,11 +10,11 @@ import Data.Attoparsec.ByteString
 import Data.Attoparsec.ByteString.Char8 (isHorizontalSpace, isEndOfLine, endOfLine, double, decimal)
 import Data.ByteString (ByteString)
 import Data.Conduit.Attoparsec
-
+import Data.Ord (comparing)
 import Data.Set (Set)
-import qualified Data.Set as S
-
 import Data.Vector.Unboxed (Vector)
+
+import qualified Data.Set as S
 import qualified Data.Vector.Unboxed as V
 
 import Text.Printf
@@ -105,12 +105,21 @@ lexModel' ::
     ()
 lexModel' = conduitParser (choice [parseEEP, parseAgeHeader, parseSectionHeader, parseComment, parseEmptyLine, parseFilters])
 
+data Age = Age !Double (Vector Int) (Vector Double)
 
+instance Show Age where
+  showsPrec _ (Age a _ _) = shows a
+
+instance Eq Age where
+  (Age a1 _ _) == (Age a2 _ _) = a1 == a2
+
+instance Ord Age where
+  compare = comparing (\(Age a _ _) -> a)
 
 parseModel ::
   Monad m => ConduitT
     (Either ParseError (PositionRange, MSModelFormat))
-    (Double, Set (Double, Vector Int, Vector Double))
+    (Double, Set Age)
     m
     ()
 parseModel =
@@ -132,16 +141,18 @@ parseModel =
           case next of
             Nothing -> doYield
             Just (AgeHeader a) -> do
-              na <- age (a, V.empty, V.empty)
+              na <- age a
               section (feh, na `S.insert` ages)
             Just l -> doYield >> leftover l
             where doYield = yield (feh, ages)
 
 
-        age r@(a, eeps, masses) = do
-          next <- await
-          case next of
-            Nothing -> doReturn
-            Just (EEP eep mass filters) -> age (a, eeps `V.snoc` eep, masses `V.snoc` mass)
-            Just l -> leftover l >> doReturn
-            where doReturn = return r
+        age a =
+          let go eeps masses = do
+                next <- await
+                case next of
+                  Nothing -> doReturn eeps masses
+                  Just (EEP eep mass filters) -> go (eeps `V.snoc` eep) (masses `V.snoc` mass)
+                  Just l -> leftover l >> doReturn eeps masses
+          in go V.empty V.empty
+            where doReturn eeps masses = return $ Age a eeps masses
