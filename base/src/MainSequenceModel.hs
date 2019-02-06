@@ -102,7 +102,7 @@ lexModel' = conduitParser (choice [parseEEP, parseAgeHeader, parseSectionHeader,
 parseModel ::
   Monad m => ConduitT
     (Either ParseError (PositionRange, MSModelFormat))
-    (Double, [Double])
+    (Double, [(Double, [Int])])
     m
     ()
 parseModel =
@@ -122,7 +122,17 @@ parseModel =
           next <- await
           case next of
             Nothing -> doYield
-            Just (AgeHeader age) -> section (feh, age:ages)
-            Just l@(SectionHeader feh _ _ _) -> doYield >> leftover l
-            Just _ -> section s
+            Just (AgeHeader a) -> do
+              na <- age (a, [])
+              section (feh, na:ages)
+            Just l -> doYield >> leftover l
             where doYield = yield (feh, reverse ages)
+
+
+        age (a, eeps) = do
+          next <- await
+          case next of
+            Nothing -> doReturn
+            Just (EEP eep mass filters) -> age (a, eep:eeps)
+            Just l -> leftover l >> doReturn
+            where doReturn = return (a, reverse eeps)
