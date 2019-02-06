@@ -111,16 +111,16 @@ lexModel' ::
     ()
 lexModel' = conduitParser (choice [parseEEP, parseAgeHeader, parseSectionHeader, parseComment, parseEmptyLine, parseFilters])
 
-data Age = Age !Double (Vector Int) (Vector Double)
+data Age = Age !Double (Vector Int) (Vector Double) [Vector Double]
 
 instance Show Age where
-  showsPrec _ (Age a _ _) = shows a
+  showsPrec _ (Age a _ _ _) = shows a
 
 instance Eq Age where
-  (Age a1 _ _) == (Age a2 _ _) = a1 == a2
+  (Age a1 _ _ _) == (Age a2 _ _ _) = a1 == a2
 
 instance Ord Age where
-  compare = comparing (\(Age a _ _) -> a)
+  compare = comparing (\(Age a _ _ _) -> a)
 
 parseModel ::
   Monad m => ConduitT
@@ -188,4 +188,4 @@ parseModel =
                   Just (pos, _)                     -> throw $ ParseException pos
                   Nothing                           -> doReturn eeps masses
           in go V.empty V.empty
-            where doReturn eeps masses = return $ Age a eeps masses
+            where doReturn eeps masses = return $ Age a eeps masses []
