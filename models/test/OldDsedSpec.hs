@@ -1,4 +1,4 @@
-module OldDsedSpec where
+module MainSequenceSpec where
 
 import Conduit
 
@@ -15,7 +15,7 @@ import MainSequenceModel
 loadAndLex :: String -> IO ()
 loadAndLex p =
   runConduitRes ( sourceFile p
---               .| decompress Nothing
+               .| decompress Nothing
                .| lexModel
                .| parseModel
                .| sinkNull )
@@ -25,18 +25,18 @@ main :: IO ()
 main = hspec spec
 
 spec = parallel $ do
-  xdescribe "Old DSED" $ do
+  describe "Old DSED" $ do
     it "loads successfully" $
-      loadAndLex "dsed_old.model.xz"
+      loadAndLex "mainSequence/dsed_old.model.xz"
 
-  xdescribe "New DSED" $ do
+  describe "New DSED" $ do
     it "loads successfully" $
-      loadAndLex "dsed_new.model.xz"
+      loadAndLex "mainSequence/dsed_new.model.xz"
 
   describe "Yale 2018" $ do
     it "loads successfully" $
-      loadAndLex "yale_2018.model"
+      loadAndLex "mainSequence/yale_2018.model"
 
   describe "PARSEC" $ do
     it "loads successfully" $
-      loadAndLex "PARSEC.model"
+      loadAndLex "mainSequence/PARSEC.model"
