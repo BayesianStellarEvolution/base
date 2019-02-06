@@ -81,6 +81,13 @@ lexModel ::
     m
     ()
 lexModel = conduitParserEither (choice [parseEEP, parseAgeHeader, parseSectionHeader, parseComment, parseEmptyLine, parseFilters])
+lexModel' ::
+  MonadThrow m => ConduitT
+    ByteString
+    (PositionRange, MSModelFormat)
+    m
+    ()
+lexModel' = conduitParser (choice [parseEEP, parseAgeHeader, parseSectionHeader, parseComment, parseEmptyLine, parseFilters])
 
 parseModel ::
   Monad m => ConduitT
@@ -96,7 +103,7 @@ parseModel =
             Nothing -> return ()
             Just x  -> handleError x >> loop
         handleError (Left e@(ParseError ctxt msg (Position line col _))) =
-          fail $ printf "Failed to parse MS model at line %d, column %d, %s" line col $ show e
+          fail $ printf "Failed to parse MS model at line %d, column %d" line col
         handleError (Right (_, x)) = unpack x
           where unpack (SectionHeader feh _ _ y) = yield feh
                 unpack _ = return ()
