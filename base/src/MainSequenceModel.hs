@@ -1,7 +1,9 @@
+{-# LANGUAGE TypeApplications #-}
 module MainSequenceModel where
 
 import Conduit
 
+import Control.Exception (Exception, throw)
 import Control.Monad (liftM2, when)
 
 import Data.Attoparsec.ByteString
@@ -10,6 +12,14 @@ import Data.ByteString (ByteString)
 import Data.Conduit.Attoparsec
 
 import Text.Printf
+
+
+data ParseException = TopLevelException Int Int
+
+instance Exception ParseException
+
+instance Show ParseException where
+  showsPrec _ (TopLevelException line col) = showString (printf "Failed to parse MS model at line %d, column %d" line col)
 
 
 data MSModelFormat = Filters [ByteString]
@@ -98,7 +108,7 @@ parseModel ::
 parseModel =
   mapC handleError .| unpack
   where handleError (Left (ParseError _ _ (Position line col _))) =
-          error $ printf "Failed to parse MS model at line %d, column %d" line col
+          throw $ TopLevelException line col
         handleError (Right (_, x)) = x
 
         unpack = do
