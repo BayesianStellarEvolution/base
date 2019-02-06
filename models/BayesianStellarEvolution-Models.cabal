@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 27a2fa20295e688cbaa55e4249c4563318d5bfb4372c552132023cdeb59cc57b
+-- hash: 930a94669cb272b73cc793c0126120409b3ae48dc108b3a102d960bdfe4fc900
 
 name:           BayesianStellarEvolution-Models
 version:        0.0.0
@@ -32,7 +32,7 @@ test-suite model-tests
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      OldDsedSpec
+      MainSequenceSpec
       Paths_BayesianStellarEvolution_Models
   hs-source-dirs:
       test

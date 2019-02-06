@@ -45,5 +45,4 @@ contrib/BUILD/*
 .dir-locals.el
 
 # Temp
-*.xz
 *.model
