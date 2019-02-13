@@ -35,6 +35,8 @@ executables:
       - attoparsec
       - BayesianStellarEvolution
       - bytestring
+      - chart
+      - chart-cairo
       - conduit
       - conduit-extra
       - containers
