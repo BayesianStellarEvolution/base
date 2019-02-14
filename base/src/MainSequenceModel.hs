@@ -146,7 +146,7 @@ instance Show PrettyAge where
 parseModel ::
   Monad m => ConduitT
     (Either ParseError (PositionRange, MSModelFormat))
-    (Double, Set Age)
+    ((Double, Double), Set Age)
     m
     ()
 parseModel =
@@ -164,7 +164,7 @@ parseModel =
                 next <- await
                 case next of
                   Nothing -> return ()
-                  Just (_, SectionHeader feh _ _ _) -> section nFilters feh >> go
+                  Just (_, SectionHeader feh _ _ y) -> section nFilters (feh, y) >> go
                   _ -> go
 
           go
