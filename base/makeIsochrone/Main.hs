@@ -34,12 +34,14 @@ toFeHPlot t = do
           pts <- points (show a) $ V.toList $ V.zip bmv v
           return $ pts & plot_points_style . point_radius .~ 1
 
-  toFile (def & (fo_size .~ (800, 600))
-              & (fo_format .~ PNG)
-         ) ("/tmp/feh" ++ (if feh < 0 then 'm' else 'p'):show (abs feh) ++ "_y" ++ show y ++ ".png") $ do
+  toFile (def & (fo_size .~ (1920, 1440))
+              & (fo_format .~ SVG)
+         ) ("/tmp/feh" ++ (if feh < 0 then 'm' else 'p'):show (abs feh) ++ "_y" ++ show y ++ ".svg") $ do
     setColors (map opaque [blue, green, purple, yellow, red])
 
     layout_title .= "New DSED, [Fe/H] = " ++ show feh ++ ", Y = " ++ show y
-    layout_x_axis .= (def & laxis_title .~ "B - V")
-    layout_y_axis .= (def & laxis_reverse .~ True & laxis_title .~ "V")
+    layout_x_axis .= (def & laxis_title .~ "B - V"
+                          & laxis_generate .~ scaledAxis def (-0.5, 2))
+    layout_y_axis .= (def & laxis_reverse .~ True & laxis_title .~ "V"
+                          & laxis_generate .~ scaledAxis def (-5, 15))
     mapM_ go $ S.elems ages
