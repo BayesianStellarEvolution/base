@@ -14,10 +14,10 @@ import MainSequenceModel
 
 main :: IO ()
 main = do
-  t <- runConduitRes ( sourceFile "/home/elliot/projects/base-models/dsed/dsed_new.model.xz"
-                    .| decompress Nothing
-                    .| lexModel
-                    .| parseModel
-                    .| sinkList )
+  (Just t) <- runConduitRes ( sourceFile "/home/elliot/projects/base-models/dsed/dsed_new.model.xz"
+                           .| decompress Nothing
+                           .| lexModel
+                           .| parseModel
+                           .| lastC )
 
-  print $ S.map PrettyAge $ snd $ head t
+  print $ S.map PrettyAge $ snd t
