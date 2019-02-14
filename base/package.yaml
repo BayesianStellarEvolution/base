@@ -41,6 +41,7 @@ executables:
       - conduit-extra
       - containers
       - lzma-conduit
+      - vector
 
 tests:
   library-tests:
