@@ -18,13 +18,14 @@ import MainSequenceModel
 
 main :: IO ()
 main = do
-  t <- runConduitRes ( sourceFile "../../base-models/dsed/dsed_new.model.xz"
-                     .| decompress Nothing
-                     .| lexModel
-                     .| parseModel
-                     .| sinkList )
+  runConduitRes ( sourceFile "../../base-models/dsed/dsed_new.model.xz"
+                .| decompress Nothing
+                .| lexModel
+                .| parseModel
+                .| mapM_C (liftIO . toFeHPlot))
 
-  let (feh, ages) = t !! 4
+toFeHPlot t = do
+  let (feh, ages) = t
       go (Age a _ _ fs) =
         let b = fs !! 1
             v = fs !! 2
@@ -33,7 +34,9 @@ main = do
           pts <- points (show a) $ V.toList $ V.zip bmv v
           return $ pts & plot_points_style . point_radius .~ 1
 
-  toFile (def & (fo_size .~ (1920, 1440)) & (fo_format .~ SVG)) "/tmp/test.svg" $ do
+  toFile (def & (fo_size .~ (800, 600))
+              & (fo_format .~ PNG)
+         ) ("/tmp/" ++ show feh ++ ".png") $ do
     setColors (map opaque [blue, green, purple, yellow, red])
 
     layout_title .= "New DSED, [Fe/H] = " ++ show feh
