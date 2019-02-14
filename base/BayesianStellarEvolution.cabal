@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 661dfd23199f41d4dc82045ee61cf7de7f5cafd4b00966a9dd41d13d3a54559e
+-- hash: 1c8a7bf6979a82ea10a17fbc89f98590f3f49ec65e25dc9ba7536a4162ee02dd
 
 name:           BayesianStellarEvolution
 version:        0.0.0
@@ -31,7 +31,7 @@ library
   ghc-options: -Wall
   build-depends:
       attoparsec
-    , base >=4.12 && <5
+    , base >=4.10 && <5
     , bytestring
     , conduit
     , conduit-extra
@@ -49,6 +49,8 @@ executable makeIsochrone
   ghc-options: -Wall
   build-depends:
       BayesianStellarEvolution
+    , Chart
+    , Chart-cairo
     , attoparsec
     , base
     , bytestring

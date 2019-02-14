@@ -18,7 +18,7 @@ library:
   exposed-modules:
     - MainSequenceModel
   dependencies:
-    - base >=4.12 && <5
+    - base >=4.10 && <5
     - attoparsec
     - bytestring
     - conduit
@@ -35,8 +35,8 @@ executables:
       - attoparsec
       - BayesianStellarEvolution
       - bytestring
-      - chart
-      - chart-cairo
+      - Chart
+      - Chart-cairo
       - conduit
       - conduit-extra
       - containers

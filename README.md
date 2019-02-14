@@ -23,6 +23,26 @@ On Ubuntu (or other apt-based platforms):
 sudo apt install liblzma-dev
 ```
 
+#### Cairo development files
+
+On Fedora (or other RPM-based platforms)
+
+```
+sudo yum install cairo-devel
+```
+
+On Mac OS X with Homebrew:
+
+```
+brew install cairo
+```
+
+On Ubuntu (or other apt-based platforms):
+
+```
+sudo apt install libcairo2-dev
+```
+
 ### Recommended
 
 #### Homebrew (Mac OS X only)
