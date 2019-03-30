@@ -1,3 +1,17 @@
+* Backlog
+
+| Task                                |
+|-------------------------------------|
+| simCluster                          |
+| sampling history plots              |
+| diagnostic plots                    |
+| WD model loader                     |
+| sampleWDMass                        |
+| Debug metadata generator for models |
+| scatterCluster                      |
+| sampleMass                          |
+| "Sideways" MS models                |
+
 * Tasks in-progress (Kanban board)
 
 | Specify (1)   | [[#specify-done-rule][Done]] | Implement (1) | [[#implement-done-rule][Done]] | Validate (2) | [[#validate-done-rule][Done]] |
@@ -31,17 +45,3 @@
     - End-to-end tests pass
     - Code is deployed to Vega
     - Annotated tag describing the feature is pushed
-
-* Backlog
-
-| Task                                |
-|-------------------------------------|
-| simCluster                          |
-| sampling history plots              |
-| diagnostic plots                    |
-| WD model loader                     |
-| sampleWDMass                        |
-| Debug metadata generator for models |
-| scatterCluster                      |
-| sampleMass                          |
-| "Sideways" MS models                |
