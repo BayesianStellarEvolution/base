@@ -27,9 +27,9 @@ library:
     - vector
 
 executables:
-  makeIsochrone:
+  plotIsochrones:
     main: Main.hs
-    source-dirs: makeIsochrone
+    source-dirs: plotIsochrones
     dependencies:
       - base
       - attoparsec
