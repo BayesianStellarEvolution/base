@@ -4,7 +4,7 @@
 |---------------+--------------------------------------------+---------------+------+----------------+------|
 | makeIsochrone | Load makeIsochrone options from cmdline    |               |      | Load MS Models |      |
 |               | Interpolate MS models w/ Nearest-neighbour |               |      |                |      |
-|               | Output isochrone to DB                     |               |      |                |      |
+|               | Output isochrone to SQLite DB              |               |      |                |      |
 
 * Backlog
 
