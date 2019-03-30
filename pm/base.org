@@ -23,7 +23,7 @@
 
 * Notes
 ** WIP limits
-   Work-in-progress (WIP) limits are in parenthesis after each major category.
+   Work-in-progress (WIP) limits are in parenthesis after each major category. WIP limits apply to each category pair (named and "Done").
 
 ** Pull criteria
    Work should only move from a major column to the corresponding "Done" column when it meets the requirements listed below.
