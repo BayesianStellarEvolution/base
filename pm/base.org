@@ -2,9 +2,11 @@
 
 | Specify (1)   | [[#specify-done-rule][Done]]                                       | Implement (1) | [[#implement-done-rule][Done]] | Validate (2)   | [[#validate-done-rule][Done]] |
 |---------------+--------------------------------------------+---------------+------+----------------+------|
-| makeIsochrone | Load makeIsochrone options from cmdline    |               |      | Load MS Models |      |
+| makeIsochrone | Load general options from cmdline          |               |      | Load MS Models |      |
+|               | Load makeIsochrone options from cmdline    |               |      |                |      |
 |               | Interpolate MS models w/ Nearest-neighbour |               |      |                |      |
 |               | Output isochrone to SQLite DB              |               |      |                |      |
+|               | Visualize photometry from DB by run        |               |      |                |      |
 
 * Backlog
 
