@@ -1,0 +1,47 @@
+* Tasks in-progress (Kanban board)
+
+| Specify (1)   | [[#specify-done-rule][Done]] | Implement (1) | [[#implement-done-rule][Done]] | Validate (2) | [[#validate-done-rule][Done]] |
+|---------------+------+---------------+------+--------------+------|
+| makeIsochrone |      |               |      |              |      |
+
+** WIP limits
+   Work-in-progress (WIP) limits are in parenthesis after each major category.
+
+** Pull criteria
+   Work should only move from a major column to the corresponding "Done" column when it meets the requirements listed below.
+
+*** Specify
+    :PROPERTIES:
+    :CUSTOM_ID: specify-done-rule
+    :END:
+    - All items brken down into tasks that can be finished in less than a day each
+
+*** Implement
+    :PROPERTIES:
+    :CUSTOM_ID: implement-done-rule
+    :END:      
+    - Code is implemented and unit-tested
+    - User-facing documentation is up-to-date
+
+*** Validate
+    :PROPERTIES:
+    :CUSTOM_ID: validate-done-rulE
+    :END:
+    - Code builds on OS X, Linux, and Vega
+    - End-to-end tests pass
+    - Code is deployed to Vega
+    - Annotated tag describing the feature is pushed
+
+* Backlog
+
+| Task                                |
+|-------------------------------------|
+| simCluster                          |
+| sampling history plots              |
+| diagnostic plots                    |
+| WD model loader                     |
+| sampleWDMass                        |
+| Debug metadata generator for models |
+| scatterCluster                      |
+| sampleMass                          |
+| "Sideways" MS models                |
