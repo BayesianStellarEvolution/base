@@ -1,3 +1,9 @@
+* Tasks in-progress (Kanban board)
+
+| Specify (1)   | [[#specify-done-rule][Done]] | Implement (1) | [[#implement-done-rule][Done]] | Validate (2) | [[#validate-done-rule][Done]] |
+|---------------+------+---------------+------+--------------+------|
+| makeIsochrone |      |               |      |              |      |
+
 * Backlog
 
 | Task                                |
@@ -12,12 +18,7 @@
 | sampleMass                          |
 | "Sideways" MS models                |
 
-* Tasks in-progress (Kanban board)
-
-| Specify (1)   | [[#specify-done-rule][Done]] | Implement (1) | [[#implement-done-rule][Done]] | Validate (2) | [[#validate-done-rule][Done]] |
-|---------------+------+---------------+------+--------------+------|
-| makeIsochrone |      |               |      |              |      |
-
+* Notes
 ** WIP limits
    Work-in-progress (WIP) limits are in parenthesis after each major category.
 
