@@ -40,7 +40,7 @@
     :END:      
     - Code is implemented and unit-tested
     - User-facing documentation is up-to-date
-
+    - Citations to relevant technical/scientific literature is provided in code comments
 *** Validate
     :PROPERTIES:
     :CUSTOM_ID: validate-done-rulE
