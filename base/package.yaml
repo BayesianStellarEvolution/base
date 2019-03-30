@@ -27,6 +27,13 @@ library:
     - vector
 
 executables:
+  makeIsochrone:
+    main: Main.hs
+    source-dirs: makeIsochrone
+    dependencies:
+      - base
+      - BayesianStellarEvolution
+
   plotIsochrones:
     main: Main.hs
     source-dirs: plotIsochrones
