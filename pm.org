@@ -10,23 +10,20 @@
 
 * Backlog
 
-| Task                                |
-|-------------------------------------|
-| simCluster                          |
-| sampling history plots              |
-| diagnostic plots                    |
-| WD model loader                     |
-| sampleWDMass                        |
-| Debug metadata generator for models |
-| scatterCluster                      |
-| sampleMass                          |
-| "Sideways" MS models                |
+| Task                                                                                 |
+|--------------------------------------------------------------------------------------|
+| simCluster                                                                           |
+| sampling history plots                                                               |
+| diagnostic plots                                                                     |
+| WD model loader                                                                      |
+| sampleWDMass                                                                         |
+| Debug metadata generator for models                                                  |
+| scatterCluster                                                                       |
+| sampleMass                                                                           |
+| "Sideways" MS models                                                                 |
+| Abstract basic applications into the library so they can be called by test functions |
 
 * Notes
-** WIP limits
-   Work-in-progress (WIP) limits are in parenthesis after each major category. WIP describes the total number of tasks in a category pair (named and "Done").
-
-   As the "Specify" step frequently results in multiple specified tasks per input, the task count in this column is based on the number of input items currently represented (directly or by a derived task) in the category. If, for example, the "Specify" column contained one task, the specification of which resulted in 4 "Done" tasks, any or all of those four tasks count as a single collective task for the purposes of "Specify"'s WIP. Once those items are individually removed from "Done" into "Implement", their individual WIP contribution is 1.
 ** Pull criteria
    Work should only move from a major column to the corresponding "Done" column when it meets the requirements listed below.
 
@@ -43,6 +40,7 @@
     - Code is implemented and unit-tested
     - User-facing documentation is up-to-date
     - Citations to relevant technical/scientific literature is provided in code comments
+
 *** Validate
     :PROPERTIES:
     :CUSTOM_ID: validate-done-rulE
@@ -51,3 +49,8 @@
     - End-to-end tests pass
     - Code is deployed to Vega
     - Annotated tag describing the feature is pushed
+
+** WIP limits
+   Work-in-progress (WIP) limits are in parenthesis after each major category. WIP describes the total number of tasks in a category pair (named and "Done").
+
+   As the "Specify" step frequently results in multiple specified tasks per input, the task count in this column is based on the number of input items currently represented (directly or by a derived task) in the category. If, for example, the "Specify" column contained one task, the specification of which resulted in 4 "Done" tasks, any or all of those four tasks count as a single collective task for the purposes of "Specify"'s WIP. Once those items are individually removed from "Done" into "Implement", their individual WIP contribution is 1.
