@@ -33,6 +33,7 @@ executables:
     dependencies:
       - base
       - BayesianStellarEvolution
+      - data-default
 
   plotIsochrones:
     main: Main.hs
