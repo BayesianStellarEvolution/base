@@ -1,11 +1,17 @@
 module Main where
 
+import Data.Semigroup ((<>))
+
 def :: [a]
-def = []
+def = undefined
+
+
+clusterOptions :: Monoid a => a
+clusterOptions = undefined
 
 
 main :: IO ()
-main = do options <- loadOptions def
+main = do options <- loadOptions (clusterOptions <> def)
           models <- loadModels (model options)
           undefined
 
