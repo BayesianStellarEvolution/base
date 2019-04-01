@@ -14,7 +14,7 @@ main :: IO ()
 main = do options <- loadOptions (clusterOptions <> def)
           models <- loadModels (model options)
           let interpolated = interpolateIsochrone model (cluster options)
-          undefined
+          withDB "db.base" $ \_ -> undefined
 
 
 loadOptions :: Monoid a => a -> b
@@ -32,5 +32,10 @@ model _ = undefined
 cluster :: a -> b
 cluster _ = undefined
 
+
 interpolateIsochrone :: p1 -> p2 -> a
 interpolateIsochrone model cluster = undefined
+
+
+withDB :: String -> (a -> b) -> b
+withDB _ _ = undefined
