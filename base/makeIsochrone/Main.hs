@@ -10,11 +10,14 @@ clusterOptions :: Monoid a => a
 clusterOptions = undefined
 
 
+data InterpolationMethod = Nearest
+
+
 main :: IO ()
 main = do options <- loadOptions (clusterOptions <> def)
           models <- loadModels (model options)
-          let interpolated = interpolateIsochrone model (cluster options)
-          withDB "db.base" $ \_ -> undefined
+          let interpolated = interpolateIsochrone Nearest model (cluster options)
+          withDB "db.base" $ \db -> storePhotometry interpolated
 
 
 loadOptions :: Monoid a => a -> b
@@ -33,9 +36,10 @@ cluster :: a -> b
 cluster _ = undefined
 
 
-interpolateIsochrone :: p1 -> p2 -> a
-interpolateIsochrone model cluster = undefined
+interpolateIsochrone Nearest model cluster = undefined
 
 
 withDB :: String -> (a -> b) -> b
 withDB _ _ = undefined
+
+storePhotometry interpolated = undefined
