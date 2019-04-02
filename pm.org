@@ -1,12 +1,11 @@
 * Tasks in-progress (Kanban board)
 
-| Specify (1) | [[#specify-done-rule][Done]]                                       | Implement (1)                       | [[#implement-done-rule][Done]] | Validate (2)   | [[#validate-done-rule][Done]] |
-|-------------+--------------------------------------------+-------------------------------------+------+----------------+------|
-|             | Load makeIsochrone options from cmdline    | Create new makeIsochrone executable |      | Load MS Models |      |
-|             | Load general options from cmdline          |                                     |      |                |      |
-|             | Interpolate MS models w/ Nearest-neighbour |                                     |      |                |      |
-|             | Output isochrone to SQLite DB              |                                     |      |                |      |
-|             | Visualize photometry from DB by run        |                                     |      |                |      |
+| Specify (1) | [[#specify-done-rule][Done]]                                       | Implement (1)                           | [[#implement-done-rule][Done]] | Validate (2)                        | [[#validate-done-rule][Done]] |
+|-------------+--------------------------------------------+-----------------------------------------+------+-------------------------------------+------|
+|             | Load general options from cmdline          | Load makeIsochrone options from cmdline |      | Load MS Models                      |      |
+|             | Interpolate MS models w/ Nearest-neighbour |                                         |      | Create new makeIsochrone executable |      |
+|             | Output isochrone to SQLite DB              |                                         |      |                                     |      |
+|             | Visualize photometry from DB by run        |                                         |      |                                     |      |
 
 * Backlog
 
