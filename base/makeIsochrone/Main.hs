@@ -44,5 +44,5 @@ interpolateIsochrone :: p1 -> p2 -> p3 -> a
 interpolateIsochrone _ _ _ = undefined
 
 
-storePhotometry :: _p -> _a
+storePhotometry :: p -> a
 storePhotometry _ = undefined
