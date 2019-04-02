@@ -36,10 +36,13 @@ cluster :: a -> b
 cluster _ = undefined
 
 
-interpolateIsochrone Nearest model cluster = undefined
-
-
 withDB :: String -> (a -> b) -> b
 withDB _ _ = undefined
 
-storePhotometry interpolated = undefined
+
+interpolateIsochrone :: p1 -> p2 -> p3 -> a
+interpolateIsochrone _ _ _ = undefined
+
+
+storePhotometry :: p -> a
+storePhotometry _ = undefined
