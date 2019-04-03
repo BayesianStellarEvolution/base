@@ -26,8 +26,8 @@ main = do
 
   let loadModel model = sourceFile (modelPath model "models/") .| decompress Nothing .| lexModel .| parseModel
 
-  runConduitRes ( loadModel cliArgs
-                .| mapM_C (liftIO . toFeHPlot))
+  models <- runConduitRes $ loadModel cliArgs .| sinkList
+  mapM_ toFeHPlot models
 
 toFeHPlot t = do
   let ((feh, y), ages) = t
