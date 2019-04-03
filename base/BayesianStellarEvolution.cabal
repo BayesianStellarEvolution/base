@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 4d94d8f28143627cb37dd7a6c744b09b9d9220ebf1868f29a5fef6ab4039b9a5
+-- hash: 4c3fc2aae1699e17d93799aa2e8c83eb246948bab171927e829fb57e56a2eca7
 
 name:           BayesianStellarEvolution
 version:        0.0.0
@@ -23,6 +23,7 @@ source-repository head
 library
   exposed-modules:
       MainSequenceModel
+      Options
   other-modules:
       Paths_BayesianStellarEvolution
   hs-source-dirs:
@@ -49,9 +50,15 @@ executable makeIsochrone
   ghc-options: -Wall
   build-depends:
       BayesianStellarEvolution
+    , attoparsec
     , base
+    , bytestring
     , cmdargs
+    , conduit
+    , conduit-extra
+    , containers
     , data-default
+    , vector
   default-language: Haskell2010
 
 executable plotIsochrones
@@ -93,6 +100,8 @@ test-suite library-tests
     , base
     , bytestring
     , conduit
+    , conduit-extra
+    , containers
     , hspec
     , raw-strings-qq
     , vector
