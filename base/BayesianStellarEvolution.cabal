@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: af8122dc4c57f981302d79743e7348ae2534dadf848ac62f01bb5bf8ee2b3db3
+-- hash: 4d94d8f28143627cb37dd7a6c744b09b9d9220ebf1868f29a5fef6ab4039b9a5
 
 name:           BayesianStellarEvolution
 version:        0.0.0
@@ -50,6 +50,7 @@ executable makeIsochrone
   build-depends:
       BayesianStellarEvolution
     , base
+    , cmdargs
     , data-default
   default-language: Haskell2010
 
