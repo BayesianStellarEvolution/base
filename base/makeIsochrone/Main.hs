@@ -1,5 +1,7 @@
 module Main where
 
+import Options
+
 import System.Console.CmdArgs.Implicit
 
 
@@ -17,20 +19,8 @@ main = do options <- loadOptions (clusterOptions)
           withDB "db.base" $ \db -> storePhotometry interpolated
 
 
-loadOptions :: Monoid a => a -> b
-loadOptions _ = undefined
-
-
 loadModels :: String -> a
 loadModels _ = undefined
-
-
-model :: a -> b
-model _ = undefined
-
-
-cluster :: a -> b
-cluster _ = undefined
 
 
 withDB :: String -> (a -> b) -> b
