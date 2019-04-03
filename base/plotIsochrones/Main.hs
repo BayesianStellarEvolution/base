@@ -24,10 +24,11 @@ main :: IO ()
 main = do
   cliArgs <- read @MSModel . head <$> getArgs
 
-  let loadModel model = sourceFile (modelPath model "models/") .| decompress Nothing .| lexModel .| parseModel
-
-  models <- runConduitRes $ loadModel cliArgs .| sinkList
+  models <- loadModels cliArgs
   mapM_ toFeHPlot models
+
+loadModels model = runConduitRes $ loadModel .| sinkList
+  where loadModel = sourceFile (modelPath model "models/") .| decompress Nothing .| lexModel .| parseModel
 
 toFeHPlot t = do
   let ((feh, y), ages) = t
