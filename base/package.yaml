@@ -18,6 +18,7 @@ library:
   exposed-modules:
     - MainSequenceModel
     - Options
+    - Output.Sql
 dependencies:
     - base >=4.10 && <5
     - attoparsec
