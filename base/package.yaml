@@ -19,6 +19,7 @@ library:
     - MainSequenceModel
     - Options
     - Output.Sql
+    - Paths
 dependencies:
     - base >=4.10 && <5
     - attoparsec
