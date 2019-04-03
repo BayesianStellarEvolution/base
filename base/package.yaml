@@ -20,6 +20,7 @@ library:
     - Options
     - Output.Sql
     - Paths
+    - Models.Input
 dependencies:
     - base >=4.10 && <5
     - attoparsec
