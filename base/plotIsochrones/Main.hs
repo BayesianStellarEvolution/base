@@ -1,14 +1,6 @@
 {-# LANGUAGE TypeApplications #-}
 module Main where
 
-import Conduit
-
-import Control.Monad (when)
-
-import Data.Attoparsec.ByteString
-import Data.ByteString (ByteString)
-import Data.Conduit.Lzma
-import Data.Either (isRight)
 import qualified Data.Set as S
 import qualified Data.Vector.Unboxed as V
 
@@ -19,6 +11,8 @@ import System.Environment
 
 import MainSequenceModel
 import Paths
+import Models.Input
+
 
 main :: IO ()
 main = do
@@ -27,8 +21,6 @@ main = do
   models <- loadModels cliArgs
   mapM_ toFeHPlot models
 
-loadModels model = runConduitRes $ loadModel .| sinkList
-  where loadModel = sourceFile (modelPath model "models/") .| decompress Nothing .| lexModel .| parseModel
 
 toFeHPlot t = do
   let ((feh, y), ages) = t

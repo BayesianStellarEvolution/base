@@ -28,6 +28,7 @@ dependencies:
     - conduit
     - conduit-extra
     - containers
+    - lzma-conduit
     - vector
 
 executables:
