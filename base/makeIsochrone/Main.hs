@@ -1,12 +1,9 @@
 module Main where
 
-import Data.Semigroup ((<>))
-
-def :: [a]
-def = undefined
+import System.Console.CmdArgs.Implicit
 
 
-clusterOptions :: Monoid a => a
+clusterOptions :: [a]
 clusterOptions = undefined
 
 
@@ -14,7 +11,7 @@ data InterpolationMethod = Nearest
 
 
 main :: IO ()
-main = do options <- loadOptions (clusterOptions <> def)
+main = do options <- loadOptions (clusterOptions)
           models <- loadModels (model options)
           let interpolated = interpolateIsochrone Nearest model (cluster options)
           withDB "db.base" $ \db -> storePhotometry interpolated
