@@ -1,6 +1,7 @@
 module Main where
 
 import Options
+import Output.Sql
 
 import System.Console.CmdArgs.Implicit
 
@@ -23,13 +24,5 @@ loadModels :: String -> a
 loadModels _ = undefined
 
 
-withDB :: String -> (a -> b) -> b
-withDB _ _ = undefined
-
-
 interpolateIsochrone :: p1 -> p2 -> p3 -> a
 interpolateIsochrone _ _ _ = undefined
-
-
-storePhotometry :: p -> a
-storePhotometry _ = undefined
