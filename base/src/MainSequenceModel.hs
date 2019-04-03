@@ -166,7 +166,6 @@ parseModel =
                   Nothing -> return ()
                   Just (_, SectionHeader feh _ _ y) -> section nFilters (feh, y) >> go
                   _ -> go
-
           go
 
         header =

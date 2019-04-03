@@ -24,10 +24,9 @@ main :: IO ()
 main = do
   cliArgs <- read @MSModel . head <$> getArgs
 
-  runConduitRes ( sourceFile (modelPath cliArgs "models/")
-                .| decompress Nothing
-                .| lexModel
-                .| parseModel
+  let loadModel model = sourceFile (modelPath model "models/") .| decompress Nothing .| lexModel .| parseModel
+
+  runConduitRes ( loadModel cliArgs
                 .| mapM_C (liftIO . toFeHPlot))
 
 toFeHPlot t = do
