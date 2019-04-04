@@ -1,10 +1,12 @@
 module Options where
 
+import Paths
+
 loadOptions :: Monoid a => a -> b
 loadOptions _ = undefined
 
 
-model :: a -> b
+model :: a -> MSModel
 model _ = undefined
 
 
