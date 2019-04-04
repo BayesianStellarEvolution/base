@@ -41,7 +41,6 @@ executables:
       - base
       - BayesianStellarEvolution
       - data-default
-      - cmdargs
 
   plotIsochrones:
     main: Main.hs
