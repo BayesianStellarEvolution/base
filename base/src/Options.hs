@@ -10,5 +10,8 @@ model :: a -> MSModel
 model _ = undefined
 
 
-cluster :: a -> b
+cluster :: a -> Cluster
 cluster _ = undefined
+
+
+data Cluster
