@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b20119b1b751c2e49cb0f66a7ee62dd736fc0d7a6b84cb2bcde88d301b838c56
+-- hash: a6616de069d32cadb3c7a4385ff5073eadb26a655743c9b1e7baecc20d4f3177
 
 name:           BayesianStellarEvolution
 version:        0.0.0
@@ -43,6 +43,7 @@ library
     , conduit-extra
     , containers
     , lzma-conduit
+    , optparse-applicative
     , vector
   default-language: Haskell2010
 
@@ -64,6 +65,7 @@ executable makeIsochrone
     , containers
     , data-default
     , lzma-conduit
+    , optparse-applicative
     , vector
   default-language: Haskell2010
 
@@ -86,6 +88,7 @@ executable plotIsochrones
     , conduit-extra
     , containers
     , lzma-conduit
+    , optparse-applicative
     , vector
   default-language: Haskell2010
 
@@ -110,6 +113,7 @@ test-suite library-tests
     , containers
     , hspec
     , lzma-conduit
+    , optparse-applicative
     , raw-strings-qq
     , vector
   default-language: Haskell2010
