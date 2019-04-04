@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.31.0.
+-- This file has been generated from package.yaml by hpack version 0.31.1.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 4c7004ba8e3884c909a063fcfa15b50d6d6b6843a8c1080dcf7b5f659c6bdf3f
+-- hash: d92b8481feafcfa559a5d11b5e943ee494de8ac0f676983a9fa7063e13097086
 
 name:           BayesianStellarEvolution
 version:        0.0.0
@@ -89,6 +89,8 @@ executable plotIsochrones
     , lzma-conduit
     , optparse-applicative
     , vector
+  if os(windows)
+    buildable: False
   default-language: Haskell2010
 
 test-suite library-tests

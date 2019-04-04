@@ -2,3 +2,5 @@ resolver: lts-11.22
 packages:
   - base
   - models
+extra-deps:
+  - lzma-clib-5.2.2

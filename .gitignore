@@ -30,6 +30,9 @@
 BUILD/*
 contrib/BUILD/*
 
+# Cabal build artifacts
+dist/
+
 # Stack build artifacts
 .stack-work/
 *.cabal  # YOU MUST USE package.yaml FOR THIS TO WORK

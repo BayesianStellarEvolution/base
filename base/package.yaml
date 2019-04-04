@@ -50,6 +50,9 @@ executables:
       - BayesianStellarEvolution
       - Chart
       - Chart-cairo
+    when:
+    - condition: os(windows)
+      buildable: false
 
 tests:
   library-tests:
@@ -61,10 +64,10 @@ tests:
       - -with-rtsopts=-N
     dependencies:
       - base
+      - BayesianStellarEvolution
       - attoparsec
       - bytestring
       - conduit
-      - BayesianStellarEvolution
       - hspec
       - QuickCheck
       - raw-strings-qq
