@@ -48,7 +48,6 @@ executables:
     dependencies:
       - base
       - BayesianStellarEvolution
-      - bytestring
       - Chart
       - Chart-cairo
       - containers
