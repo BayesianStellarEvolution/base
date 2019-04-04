@@ -5,8 +5,6 @@ import Output.Sql
 import Models.Input
 import Models.Interpolate
 
-import System.Console.CmdArgs.Implicit
-
 
 clusterOptions :: [a]
 clusterOptions = undefined
