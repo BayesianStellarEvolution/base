@@ -47,7 +47,6 @@ executables:
     source-dirs: plotIsochrones
     dependencies:
       - base
-      - attoparsec
       - BayesianStellarEvolution
       - bytestring
       - Chart
