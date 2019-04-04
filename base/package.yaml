@@ -21,6 +21,7 @@ library:
     - Output.Sql
     - Paths
     - Models.Input
+    - Models.Interpolate
 dependencies:
     - base >=4.10 && <5
     - attoparsec
