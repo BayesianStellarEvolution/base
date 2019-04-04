@@ -33,9 +33,11 @@ contrib/BUILD/*
 # Cabal build artifacts
 dist/
 
+# YOU MUST USE package.yaml FOR THIS TO WORK
+*.cabal
+
 # Stack build artifacts
 .stack-work/
-*.cabal  # YOU MUST USE package.yaml FOR THIS TO WORK
 
 # Testing artifacts
 .hspec-failures
