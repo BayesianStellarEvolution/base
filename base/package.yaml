@@ -53,8 +53,6 @@ executables:
       - bytestring
       - Chart
       - Chart-cairo
-      - conduit
-      - conduit-extra
       - containers
       - lzma-conduit
       - vector
