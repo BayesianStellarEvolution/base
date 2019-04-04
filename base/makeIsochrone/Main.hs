@@ -6,7 +6,7 @@ import Models.Input
 import Models.Interpolate
 
 
-clusterOptions :: [a]
+
 clusterOptions = undefined
 
 

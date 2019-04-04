@@ -6,8 +6,12 @@ import Paths
 import Options.Applicative
 import Data.Semigroup ((<>))
 
-loadOptions :: Monoid a => a -> b
-loadOptions _ = undefined
+loadOptions :: Parser a -> IO a
+loadOptions p = execParser opts
+  where opts = info (p <**> helper)
+                     ( fullDesc
+                    <> progDesc "Print a greeting for TARGET"
+                    <> header "hello - a test for optparse-applicative" )
 
 
 model :: a -> MSModel
