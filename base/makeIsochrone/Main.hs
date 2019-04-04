@@ -5,8 +5,9 @@ import Output.Sql
 import Models.Input
 import Models.Interpolate
 
+import Options.Applicative
 
-clusterOptions :: a
+clusterOptions :: Parser a
 clusterOptions = undefined
 
 
