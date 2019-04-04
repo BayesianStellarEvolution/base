@@ -11,15 +11,14 @@ clusterOptions :: [a]
 clusterOptions = undefined
 
 
-data InterpolationMethod = Nearest
-
-
 main :: IO ()
 main = do options <- loadOptions (clusterOptions)
           models <- loadModels (model options)
-          let interpolated = interpolateIsochrone Nearest model (cluster options)
+          let interpolated = interpolateIsochrone Nearest models (cluster options)
           withDB "db.base" $ \db -> storePhotometry interpolated
 
 
-interpolateIsochrone :: p1 -> p2 -> p3 -> a
+data InterpolationMethod = Nearest
+
+interpolateIsochrone :: InterpolationMethod -> p2 -> p3 -> a
 interpolateIsochrone _ _ _ = undefined
