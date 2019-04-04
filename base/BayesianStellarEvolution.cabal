@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 2790d10a4065b382771b206c245de77eae548de05a58e34231f8f8709b2afa5f
+-- hash: 05f353c222d659bed6a7bd714f96a1e9592d02af7f3e9e93668a2f3b5c5b3270
 
 name:           BayesianStellarEvolution
 version:        0.0.0
@@ -22,6 +22,7 @@ source-repository head
 
 library
   exposed-modules:
+      Cluster
       MainSequenceModel
       Options
       Output.Sql
