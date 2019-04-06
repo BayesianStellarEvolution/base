@@ -20,6 +20,7 @@
 | sampleMass                                                                           |
 | "Sideways" MS models                                                                 |
 | Abstract basic applications into the library so they can be called by test functions |
+| Profile model loading and apply INLINE as appropriate                                |
 
 * Notes
 ** Pull criteria
