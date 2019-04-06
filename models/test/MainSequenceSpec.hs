@@ -24,19 +24,23 @@ loadAndLex p =
 main :: IO ()
 main = hspec spec
 
-spec = parallel $ do
-  describe "Old DSED" $ do
-    it "loads successfully" $
-      loadAndLex "mainSequence/dsed_old.model.xz"
+spec = heavyTests >> lightTests
 
-  describe "New DSED" $ do
-    it "loads successfully" $
-      loadAndLex "mainSequence/dsed_new.model.xz"
 
-  describe "Yale 2018" $ do
-    it "loads successfully" $
-      loadAndLex "mainSequence/yale_2018.model.xz"
+lightTests = describe "light" $ do it "works" (True `shouldBe` True)
 
-  describe "PARSEC" $ do
-    it "loads successfully" $
-      loadAndLex "mainSequence/PARSEC.model.xz"
+
+heavyTests = describe "heavy" $ do
+  describe "Loading Tests" $ do
+    describe "Old DSED" $ do
+      it "loads successfully" $
+        loadAndLex "mainSequence/dsed_old.model.xz"
+    describe "New DSED" $ do
+      it "loads successfully" $
+        loadAndLex "mainSequence/dsed_new.model.xz"
+    describe "Yale 2018" $ do
+      it "loads successfully" $
+        loadAndLex "mainSequence/yale_2018.model.xz"
+    describe "PARSEC" $ do
+      it "loads successfully" $
+        loadAndLex "mainSequence/PARSEC.model.xz"
