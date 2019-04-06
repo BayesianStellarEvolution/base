@@ -37,6 +37,7 @@
     :CUSTOM_ID: implement-done-rule
     :END:      
     - Code is implemented and unit-tested
+    - Code compiles with all warnings and -Werror enabled
     - User-facing documentation is up-to-date
     - Citations to relevant technical/scientific literature is provided in code comments
 
