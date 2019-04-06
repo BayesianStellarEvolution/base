@@ -24,10 +24,8 @@ loadAndLex p =
 main :: IO ()
 main = hspec spec
 
-spec = heavyTests >> lightTests
 
-
-lightTests = describe "light" $ do it "works" (True `shouldBe` True)
+spec = heavyTests
 
 
 heavyTests = describe "heavy" $ do
