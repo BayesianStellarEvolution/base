@@ -10,9 +10,21 @@ default-extensions:
   - OverloadedStrings
 
 library:
-  dependencies:
-    - base
-  
+  source-dirs: src
+  exposed-modules:
+    - Cluster
+    - MainSequenceModel
+dependencies:
+    - base >=4.10 && <5
+    - attoparsec
+    - bytestring
+    - conduit
+    - conduit-extra
+    - containers
+    - lzma-conduit
+    - optparse-applicative
+    - vector
+
 tests:
   model-tests:
     main: Spec.hs
@@ -21,7 +33,7 @@ tests:
       - -rtsopts
     dependencies:
       - base
-      - BayesianStellarEvolution
+      - BayesianStellarEvolution-Models
 
       - attoparsec
       - bytestring
