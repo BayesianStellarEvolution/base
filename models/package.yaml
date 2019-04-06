@@ -22,7 +22,6 @@ dependencies:
     - conduit-extra
     - containers
     - lzma-conduit
-    - optparse-applicative
     - vector
 
 tests:
