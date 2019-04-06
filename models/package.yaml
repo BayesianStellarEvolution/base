@@ -12,8 +12,8 @@ default-extensions:
 library:
   source-dirs: src
   exposed-modules:
-    - Cluster
     - MainSequenceModel
+    - Paths
 dependencies:
     - base >=4.10 && <5
     - attoparsec

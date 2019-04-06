@@ -16,9 +16,9 @@ ghc-options:
 library:
   source-dirs: src
   exposed-modules:
+    - Cluster
     - Options
     - Output.Sql
-    - Paths
     - Models.Input
     - Models.Interpolate
 dependencies:
