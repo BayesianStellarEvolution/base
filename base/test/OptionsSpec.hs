@@ -1,4 +1,3 @@
-{-# LANGUAGE QuasiQuotes, OverloadedLists #-}
 module OptionsSpec (main, spec) where
 
 import Test.Hspec
