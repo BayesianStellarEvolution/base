@@ -11,10 +11,7 @@ data Sample = Sample
 
 sample :: Parser Sample
 sample = Sample
-      <$> strOption
-          ( long "hello"
-         <> metavar "TARGET"
-         <> help "Target for the greeting" )
+      <$> helloParser
       <*> switch
           ( long "quiet"
          <> short 'q'
@@ -25,6 +22,12 @@ sample = Sample
          <> showDefault
          <> value 1
          <> metavar "INT" )
+
+helloParser :: Parser String
+helloParser =  strOption
+               ( long "hello"
+              <> metavar "TARGET"
+              <> help "Target for the greeting" )
 
 main :: IO ()
 main = greet =<< execParser opts
