@@ -13,37 +13,11 @@ clusterParser = Cluster
 
 
 data Sample = Sample
-  { cluster :: Cluster
-  , hello      :: (String, String)
-  , quiet      :: Bool
-  , enthusiasm :: Int }
+  { cluster :: Cluster }
 
 sample :: Parser Sample
 sample = Sample
       <$> clusterParser
-      <*> helloParser
-      <*> switch
-          ( long "quiet"
-         <> short 'q'
-         <> help "Whether to be quiet" )
-      <*> option auto
-          ( long "enthusiasm"
-         <> help "How enthusiastically to greet"
-         <> showDefault
-         <> value 1
-         <> metavar "INT" )
-
-helloParser :: Parser (String, String)
-helloParser = (,)
-              <$> strOption
-                    (long "hello"
-                     <> metavar "TARGET"
-                     <> help "Target for the greeting" )
-              <*> strOption
-                    (long "last"
-                     <> value ""
-                     <> metavar "LASTNAME"
-                     <> help "test")
 
 main :: IO ()
 main = greet =<< execParser opts
@@ -54,5 +28,5 @@ main = greet =<< execParser opts
      <> header "hello - a test for optparse-applicative" )
 
 greet :: Sample -> IO ()
-greet (Sample c h False n) = putStrLn $ "Hello, " ++ show (feh c) ++ replicate n '!'
+greet (Sample c) = print (feh c)
 greet _ = return () >>= \_ -> return ()
