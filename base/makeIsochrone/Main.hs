@@ -31,6 +31,7 @@ main :: IO ()
 main = do options <- execParser opts
           models <- loadModels OldDSED
           print $ lookup (feh . cluster $ options, y . cluster $ options) models
+          print $ map fst models
   where
     opts = info (makeIsochroneOptionParser <**> helper)
       ( fullDesc
