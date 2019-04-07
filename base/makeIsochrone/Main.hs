@@ -4,14 +4,24 @@ import Options.Applicative
 import Data.Semigroup ((<>))
 
 
+data Cluster = Cluster { feh :: Double, y :: Double }
+
+clusterParser :: Parser Cluster
+clusterParser = Cluster
+                <$> option auto (long "clusterFeH" <> metavar "FeH" <> help "Specify cluster FeH")
+                <*> option auto (long "clusterY" <> metavar "Y" <> help "Specify cluster Y")
+
+
 data Sample = Sample
-  { hello      :: (String, String)
+  { cluster :: Cluster
+  , hello      :: (String, String)
   , quiet      :: Bool
   , enthusiasm :: Int }
 
 sample :: Parser Sample
 sample = Sample
-      <$> helloParser
+      <$> clusterParser
+      <*> helloParser
       <*> switch
           ( long "quiet"
          <> short 'q'
@@ -34,7 +44,6 @@ helloParser = (,)
                      <> value ""
                      <> metavar "LASTNAME"
                      <> help "test")
-              <* subparser (commandGroup "Test")
 
 main :: IO ()
 main = greet =<< execParser opts
@@ -45,5 +54,5 @@ main = greet =<< execParser opts
      <> header "hello - a test for optparse-applicative" )
 
 greet :: Sample -> IO ()
-greet (Sample h False n) = putStrLn $ "Hello, " ++ show n ++ replicate n '!'
+greet (Sample c h False n) = putStrLn $ "Hello, " ++ show (feh c) ++ replicate n '!'
 greet _ = return () >>= \_ -> return ()
