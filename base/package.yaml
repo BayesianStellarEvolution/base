@@ -16,11 +16,7 @@ ghc-options:
 library:
   source-dirs: src
   exposed-modules:
-    - Cluster
-    - Options
-    - Output.Sql
     - Models.Input
-    - Models.Interpolate
 dependencies:
     - base >=4.10 && <5
     - BayesianStellarEvolution-Models
