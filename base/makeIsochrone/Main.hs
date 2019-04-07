@@ -8,8 +8,8 @@ data Cluster = Cluster { feh :: Double, y :: Double }
 
 clusterParser :: Parser Cluster
 clusterParser = Cluster
-                <$> option auto (long "clusterFeH" <> metavar "FeH" <> help "Specify cluster FeH")
-                <*> option auto (long "clusterY" <> metavar "Y" <> help "Specify cluster Y")
+                <$> option auto (long "clusterFeH" <> metavar "VALUE" <> help "Specify cluster FeH")
+                <*> option auto (long "clusterY" <> metavar "VALUE" <> help "Specify cluster Y")
 
 
 data Sample = Sample
