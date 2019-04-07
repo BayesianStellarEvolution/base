@@ -5,7 +5,7 @@ import Data.Semigroup ((<>))
 
 
 data Sample = Sample
-  { hello      :: String
+  { hello      :: (String, String)
   , quiet      :: Bool
   , enthusiasm :: Int }
 
@@ -23,11 +23,18 @@ sample = Sample
          <> value 1
          <> metavar "INT" )
 
-helloParser :: Parser String
-helloParser =  strOption
-               ( long "hello"
-              <> metavar "TARGET"
-              <> help "Target for the greeting" )
+helloParser :: Parser (String, String)
+helloParser = (,)
+              <$> strOption
+                    (long "hello"
+                     <> metavar "TARGET"
+                     <> help "Target for the greeting" )
+              <*> strOption
+                    (long "last"
+                     <> value ""
+                     <> metavar "LASTNAME"
+                     <> help "test")
+              <* subparser (commandGroup "Test")
 
 main :: IO ()
 main = greet =<< execParser opts
@@ -38,5 +45,5 @@ main = greet =<< execParser opts
      <> header "hello - a test for optparse-applicative" )
 
 greet :: Sample -> IO ()
-greet (Sample h False n) = putStrLn $ "Hello, " ++ h ++ replicate n '!'
-greet _ = return ()
+greet (Sample h False n) = putStrLn $ "Hello, " ++ show n ++ replicate n '!'
+greet _ = return () >>= \_ -> return ()
