@@ -15,11 +15,12 @@ clusterParser = Cluster
                 <*> option auto (long "clusterY" <> metavar "VALUE" <> help "Specify cluster Y")
 
 
-data Sample = Sample
+data MakeIsochroneOptions = MakeIsochroneOptions
   { cluster :: Cluster }
 
-sample :: Parser Sample
-sample = Sample
+
+sample :: Parser MakeIsochroneOptions
+sample = MakeIsochroneOptions
       <$> clusterParser
 
 main :: IO ()
@@ -27,9 +28,9 @@ main = greet =<< execParser opts
   where
     opts = info (sample <**> helper)
       ( fullDesc
-     <> progDesc "Print a greeting for TARGET"
-     <> header "hello - a test for optparse-applicative" )
+     <> progDesc "Generate an isochrone from the models based on cluster parameters"
+     <> header "makeIsochrone" )
 
-greet :: Sample -> IO ()
-greet (Sample c) = print (feh c)
+greet :: MakeIsochroneOptions -> IO ()
+greet (MakeIsochroneOptions c) = print (feh c)
 greet _ = return () >>= \_ -> return ()
