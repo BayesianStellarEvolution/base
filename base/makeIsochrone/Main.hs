@@ -3,6 +3,7 @@ module Main where
 import Options.Applicative
 import Data.Semigroup ((<>))
 import Models.Input
+import Paths
 
 data Cluster = Cluster { feh :: Double, y :: Double }
 
@@ -27,12 +28,10 @@ makeIsochroneOptionParser = MakeIsochroneOptions
                              <$> clusterParser
 
 main :: IO ()
-main = greet =<< execParser opts
+main = do options <- execParser opts
+          models <- loadModels OldDSED
+          undefined
   where
     opts = info (makeIsochroneOptionParser <**> helper)
       ( fullDesc
      <> progDesc "Generate an isochrone from the models based on cluster parameters")
-
-greet :: MakeIsochroneOptions -> IO ()
-greet (MakeIsochroneOptions c) = print (feh c)
-greet _ = return ()
