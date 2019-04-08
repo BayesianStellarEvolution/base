@@ -1,5 +1,7 @@
 module Main where
 
+import qualified Data.Set as S
+
 import Options.Applicative
 import Data.Semigroup ((<>))
 
@@ -33,7 +35,7 @@ makeIsochroneOptionParser = MakeIsochroneOptions <$> clusterParser
 main :: IO ()
 main = do options <- execParser opts
           models <- loadModels NewDSED
-          print $ map fst models
+          print $ PrettyAge $ S.elemAt 0 $ head $ map snd models
           print $ interpolateIsochrone (feh . cluster $ options, y . cluster $ options) models
   where
     opts = info (makeIsochroneOptionParser <**> helper)
