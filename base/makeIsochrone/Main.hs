@@ -2,8 +2,11 @@ module Main where
 
 import Options.Applicative
 import Data.Semigroup ((<>))
+
 import Models.Input
 import Paths
+
+import MainSequenceModel
 
 data Cluster = Cluster { feh :: Double, y :: Double }
 
