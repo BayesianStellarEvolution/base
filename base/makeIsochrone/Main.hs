@@ -29,7 +29,7 @@ makeIsochroneOptionParser = MakeIsochroneOptions <$> clusterParser
 
 main :: IO ()
 main = do options <- execParser opts
-          models <- loadModels OldDSED
+          models <- loadModels NewDSED
           print $ map fst models
           print $ interpolateIsochrone (feh . cluster $ options, y . cluster $ options) models
   where
