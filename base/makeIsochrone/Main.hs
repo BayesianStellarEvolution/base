@@ -38,5 +38,4 @@ main = do options <- execParser opts
      <> progDesc "Generate an isochrone from the models based on cluster parameters")
 
 
-interpolateIsochrone :: (Eq b1, Eq a) => (a, b1) -> [((a, b1), b2)] -> Maybe b2
-interpolateIsochrone (feh, y) model = lookup (feh, y) model
+interpolateIsochrone (feh, y) model = map fst model
