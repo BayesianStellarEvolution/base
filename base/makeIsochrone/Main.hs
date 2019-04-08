@@ -30,9 +30,13 @@ makeIsochroneOptionParser = MakeIsochroneOptions <$> clusterParser
 main :: IO ()
 main = do options <- execParser opts
           models <- loadModels OldDSED
-          print $ lookup (feh . cluster $ options, y . cluster $ options) models
+          print $ interpolateIsochrone (feh . cluster $ options, y . cluster $ options) models
           print $ map fst models
   where
     opts = info (makeIsochroneOptionParser <**> helper)
       ( fullDesc
      <> progDesc "Generate an isochrone from the models based on cluster parameters")
+
+
+interpolateIsochrone :: (Eq b1, Eq a) => (a, b1) -> [((a, b1), b2)] -> Maybe b2
+interpolateIsochrone (feh, y) model = lookup (feh, y) model
