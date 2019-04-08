@@ -40,5 +40,5 @@ main = do options <- execParser opts
 
 interpolateIsochrone (feh, y) model = let fsts = dropWhile ((< feh) . fst) $ map fst model
                                           low_feh  = head fsts
-                                          high_feh = head $ tail fsts
+                                          high_feh = head $ dropWhile ((<= feh) . fst) fsts
                                       in (low_feh, high_feh)
