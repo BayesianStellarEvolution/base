@@ -39,6 +39,7 @@ main = do options <- execParser opts
 
 
 interpolateIsochrone (feh, y) model = let fsts = dropWhile ((< feh) . fst) $ map fst model
-                                          low_feh  = head fsts
-                                          high_feh = head $ dropWhile ((<= feh) . fst) fsts
-                                      in (low_feh, takeWhile ((<= feh) . fst) fsts, high_feh, takeWhile ((<= fst high_feh) . fst) $ dropWhile ((<= fst high_feh) . fst) fsts)
+                                          (low_fehs, rest)  = span ((<= feh) . fst) fsts
+                                          next = head rest
+                                          high_fehs = takeWhile ((<= fst next) . fst) $ rest
+                                      in (low_fehs, high_fehs)
