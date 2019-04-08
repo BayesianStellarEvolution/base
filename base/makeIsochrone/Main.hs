@@ -38,4 +38,7 @@ main = do options <- execParser opts
      <> progDesc "Generate an isochrone from the models based on cluster parameters")
 
 
-interpolateIsochrone (feh, y) model = map fst model
+interpolateIsochrone (feh, y) model = let fsts = dropWhile ((< feh) . fst) $ map fst model
+                                          low_feh  = head fsts
+                                          high_feh = head $ tail fsts
+                                      in (low_feh, high_feh)
