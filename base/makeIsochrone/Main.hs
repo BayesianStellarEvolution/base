@@ -24,8 +24,8 @@ data MakeIsochroneOptions = MakeIsochroneOptions
 
 
 makeIsochroneOptionParser :: Parser MakeIsochroneOptions
-makeIsochroneOptionParser = MakeIsochroneOptions
-                             <$> clusterParser
+makeIsochroneOptionParser = MakeIsochroneOptions <$> clusterParser
+
 
 main :: IO ()
 main = do options <- execParser opts
