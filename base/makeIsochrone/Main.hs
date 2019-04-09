@@ -1,5 +1,7 @@
 module Main where
 
+import Control.Arrow
+
 import qualified Data.Set as S
 
 import Options.Applicative
@@ -45,7 +47,8 @@ main = do options <- execParser opts
 
 interpolateIsochrone (feh, y) model =
   let fsts = dropWhile ((< feh) . fst) $ map fst model
-      (low_fehs, rest)  = span ((<= feh) . fst) fsts
+      (low_fehs, rest) = first go $ span ((<= feh) . fst) fsts
       next = head rest
-      high_fehs = takeWhile ((<= fst next) . fst) $ rest
+      high_fehs = go $ takeWhile ((<= fst next) . fst) $ rest
   in (low_fehs, high_fehs)
+  where go = id
