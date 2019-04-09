@@ -51,4 +51,4 @@ interpolateIsochrone (feh, y) model =
       next = head rest
       high_fehs = go $ takeWhile ((<= fst next) . fst) $ rest
   in (low_fehs, high_fehs)
-  where go = id
+  where go = span ((<= y) . snd)
