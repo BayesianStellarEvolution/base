@@ -34,7 +34,7 @@ makeIsochroneOptionParser = MakeIsochroneOptions <$> clusterParser
 
 main :: IO ()
 main = do options <- execParser opts
-          models <- loadModels NewDSED
+          models  <- loadModels NewDSED
           print $ S.map PrettyAge $ head $ map snd models
           print $ interpolateIsochrone (feh . cluster $ options, y . cluster $ options) models
   where
