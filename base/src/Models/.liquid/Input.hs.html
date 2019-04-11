@@ -1,0 +1,29 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<title>src/Models/Input.hs</title>
+</head>
+<head>
+<link type='text/css' rel='stylesheet' href='liquid.css' />
+</head>
+
+<body>
+<hr>
+Put mouse over identifiers to see inferred types
+<pre><span class=hs-linenum> 1: </span><span class='hs-keyword'>module</span> <span class=hs-error><span class='hs-conid'>Models.Input</span></span> <span class='hs-keyword'>where</span>
+<span class=hs-linenum> 2: </span>
+<span class=hs-linenum> 3: </span><span class=hs-error><span class='hs-keyword'>import</span></span><span class=hs-error> </span><span class=hs-error><span class='hs-conid'>Conduit</span></span>
+<span class=hs-linenum> 4: </span>
+<span class=hs-linenum> 5: </span><span class=hs-error><span class='hs-keyword'>import</span></span><span class=hs-error> </span><span class=hs-error><span class='hs-conid'>Data.Conduit.Lzma</span></span>
+<span class=hs-linenum> 6: </span><span class=hs-error><span class='hs-keyword'>import</span></span><span class=hs-error> </span><span class=hs-error><span class='hs-keyword'>qualified</span></span><span class=hs-error> </span><span class=hs-error><span class='hs-conid'>Data.Set</span></span><span class=hs-error> </span><span class=hs-error><span class='hs-keyword'>as</span></span><span class=hs-error> </span><span class=hs-error><span class='hs-conid'>S</span></span>
+<span class=hs-linenum> 7: </span>
+<span class=hs-linenum> 8: </span><span class=hs-error><span class='hs-keyword'>import</span></span><span class=hs-error> </span><span class=hs-error><span class='hs-conid'>MainSequenceModel</span></span>
+<span class=hs-linenum> 9: </span><span class=hs-error><span class='hs-keyword'>import</span></span><span class=hs-error> </span><span class=hs-error><span class='hs-conid'>Paths</span></span>
+<span class=hs-linenum>10: </span>
+<span class=hs-linenum>11: </span>
+<span class=hs-linenum>12: </span><span class='hs-definition'>loadModels</span> <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-conid'>MonadThrow</span> <span class='hs-varid'>m</span><span class='hs-layout'>,</span> <span class='hs-conid'>HasModelPath</span> <span class='hs-varid'>p</span><span class='hs-layout'>,</span> <span class='hs-conid'>MonadUnliftIO</span> <span class='hs-varid'>m</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>p</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-keyglyph'>[</span><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>Double</span><span class='hs-layout'>,</span> <span class='hs-conid'>Double</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-conid'>S.Set</span> <span class='hs-conid'>Age</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>]</span>
+<span class=hs-linenum>13: </span><span class='hs-definition'>loadModels</span> <span class='hs-varid'>model</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>runConduitRes</span> <span class='hs-varop'>$</span> <span class='hs-varid'>loadModel</span> <span class='hs-varop'>.|</span> <span class='hs-varid'>sinkList</span>
+<span class=hs-linenum>14: </span>  <span class='hs-keyword'>where</span> <span class='hs-varid'>loadModel</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>sourceFile</span> <span class='hs-layout'>(</span><span class='hs-varid'>modelPath</span> <span class='hs-varid'>model</span> <span class='hs-str'>"models/"</span><span class='hs-layout'>)</span> <span class='hs-varop'>.|</span> <span class='hs-varid'>decompress</span> <span class='hs-conid'>Nothing</span> <span class='hs-varop'>.|</span> <span class='hs-varid'>lexModel</span> <span class='hs-varop'>.|</span> <span class='hs-varid'>parseModel</span>
+</pre>
+</body>
+</html>
