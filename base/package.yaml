@@ -37,18 +37,6 @@ executables:
       - base
       - BayesianStellarEvolution
 
-  plotIsochrones:
-    main: Main.hs
-    source-dirs: plotIsochrones
-    dependencies:
-      - base
-      - BayesianStellarEvolution
-      - Chart
-      - Chart-cairo
-    when:
-    - condition: true || os(windows)
-      buildable: false
-
 tests:
   library-tests:
     main: Spec.hs
