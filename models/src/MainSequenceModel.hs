@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeApplications, OverloadedStrings #-}
 module MainSequenceModel where
 
 import Conduit
@@ -7,7 +7,7 @@ import Control.Exception (Exception, throw)
 import Control.Monad (liftM2, when)
 
 import Data.Attoparsec.ByteString
-import Data.Attoparsec.ByteString.Char8 (isHorizontalSpace, isEndOfLine, double, decimal, char, notChar)
+import Data.Attoparsec.ByteString.Char8 (isHorizontalSpace, isEndOfLine, double, decimal, char)
 import Data.ByteString (ByteString)
 import Data.Conduit.Attoparsec
 import Data.Ord (comparing)
