@@ -51,10 +51,3 @@ interpolateIsochrone ::
   -> [((a, b1), b2)]
   -> (([(a, b1)], [(a, b1)]), ([(a, b1)], [(a, b1)]))
 interpolateIsochrone (feh, y) model = error "not defined"
-{-  let fsts = dropWhile ((< feh) . fst) $ map fst model
-      (low_fehs, rest) = first go $ span ((<= feh) . fst) fsts
-      next = head rest
-      high_fehs = go $ takeWhile ((<= fst next) . fst) $ rest
-  in (low_fehs, high_fehs)
-  where go = span ((<= y) . snd)
--}
