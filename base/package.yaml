@@ -17,6 +17,7 @@ library:
   source-dirs: src
   exposed-modules:
     - Models.Input
+    - Interpolate
 dependencies:
     - base >=4.10 && <5
     - BayesianStellarEvolution-Models
