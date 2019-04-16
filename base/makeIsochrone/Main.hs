@@ -1,8 +1,5 @@
 module Main where
 
-import Control.Arrow
-import Control.Monad (unless)
-
 import qualified Data.Set as S
 
 import Options.Applicative
@@ -12,7 +9,7 @@ import Models.Input
 import Paths
 
 import MainSequenceModel
-import GHC.Base
+import Interpolate
 
 data Cluster = Cluster { feh :: Double, y :: Double }
 
@@ -45,11 +42,3 @@ main = do options <- execParser opts
     opts = info (makeIsochroneOptionParser <**> helper)
       ( fullDesc
      <> progDesc "Generate an isochrone from the models based on cluster parameters")
-
-
-interpolateIsochrone ::
-  (Ord b1, Ord a) =>
-  (a, b1)
-  -> [((a, b1), b2)]
-  -> (([(a, b1)], [(a, b1)]), ([(a, b1)], [(a, b1)]))
-interpolateIsochrone (feh, y) model = error "not defined"
