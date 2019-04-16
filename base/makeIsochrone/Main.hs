@@ -1,5 +1,7 @@
 module Main where
 
+import Control.Arrow
+
 import qualified Data.Set as S
 
 import Options.Applicative
