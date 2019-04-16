@@ -3,6 +3,7 @@ module Main where
 import Control.Arrow
 
 import qualified Data.Set as S
+import Data.Function
 
 import Options.Applicative
 import Data.Semigroup ((<>))
@@ -13,7 +14,7 @@ import Paths
 import MainSequenceModel
 import Interpolate
 
-data Cluster = Cluster { feh :: Double, y :: Double }
+data Cluster = Cluster { feh :: Double, y :: Double, age :: Double }
 
 clusterParser :: Parser Cluster
 clusterParser = Cluster
@@ -25,6 +26,10 @@ clusterParser = Cluster
                       (long "cluster-y"
                        <> metavar "Y"
                        <> help "Specify cluster Y")
+                <*> option auto
+                      (long "cluster-age"
+                       <> metavar "AGE"
+                       <> help "Specify cluster age in log years")
 
 
 data MakeIsochroneOptions = MakeIsochroneOptions
@@ -39,7 +44,7 @@ main :: IO ()
 main = do options <- execParser opts
           models  <- loadModels NewDSED
           if length models /= 0 then (print $ S.map PrettyAge $ head $ map snd models) else return ()
-          print $ interpolateIsochrone (feh &&& y $ cluster options) models
+          print $ interpolateIsochrone (cluster options & feh, cluster options & y, cluster options & age) models
   where
     opts = info (makeIsochroneOptionParser <**> helper)
       ( fullDesc

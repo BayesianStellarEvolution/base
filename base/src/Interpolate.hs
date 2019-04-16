@@ -1,8 +1,4 @@
 module Interpolate where
 
-interpolateIsochrone ::
-  (Ord b1, Ord a) =>
-  (a, b1)
-  -> [((a, b1), b2)]
-  -> (([(a, b1)], [(a, b1)]), ([(a, b1)], [(a, b1)]))
-interpolateIsochrone (feh, y) model = error "not defined"
+interpolateIsochrone :: (Double, Double, Double) -> p -> [Double]
+interpolateIsochrone (feh, y, age) model = [feh, y, age]
