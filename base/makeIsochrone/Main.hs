@@ -1,6 +1,7 @@
 module Main where
 
 import Control.Arrow
+import Control.Monad (unless)
 
 import qualified Data.Set as S
 
@@ -11,6 +12,7 @@ import Models.Input
 import Paths
 
 import MainSequenceModel
+import GHC.Base
 
 data Cluster = Cluster { feh :: Double, y :: Double }
 
@@ -37,7 +39,7 @@ makeIsochroneOptionParser = MakeIsochroneOptions <$> clusterParser
 main :: IO ()
 main = do options <- execParser opts
           models  <- loadModels NewDSED
-          print $ S.map PrettyAge $ head $ map snd models
+          if length models /= 0 then (print $ S.map PrettyAge $ head $ map snd models) else return ()
           print $ interpolateIsochrone (feh . cluster $ options, y . cluster $ options) models
   where
     opts = info (makeIsochroneOptionParser <**> helper)
