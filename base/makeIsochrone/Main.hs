@@ -39,7 +39,7 @@ main :: IO ()
 main = do options <- execParser opts
           models  <- loadModels NewDSED
           if length models /= 0 then (print $ S.map PrettyAge $ head $ map snd models) else return ()
-          print $ interpolateIsochrone (feh . cluster $ options, y . cluster $ options) models
+          print $ interpolateIsochrone (feh &&& y $ cluster options) models
   where
     opts = info (makeIsochroneOptionParser <**> helper)
       ( fullDesc
