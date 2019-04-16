@@ -1,10 +1,9 @@
 * Tasks in-progress (Kanban board)
 
-| Specify (1) | [[#specify-done-rule][Done]]                                       | Implement (1)                           | [[#implement-done-rule][Done]] | Validate (2)                        | [[#validate-done-rule][Done]] |
-|-------------+--------------------------------------------+-----------------------------------------+------+-------------------------------------+------|
-|             | Interpolate MS models w/ Nearest-neighbour | Load makeIsochrone options from cmdline |      | Load MS Models                      |      |
-|             | Output isochrone to SQLite DB              |                                         |      | Create new makeIsochrone executable |      |
-|             | Visualize photometry from DB by run        |                                         |      |                                     |      |
+| Specify (1) | [[#specify-done-rule][Done]]                                | Implement (1)                              | [[#implement-done-rule][Done]]                                    | Validate (2)                        | [[#validate-done-rule][Done]] |
+|-------------+-------------------------------------+--------------------------------------------+-----------------------------------------+-------------------------------------+------|
+|             | Output isochrone to SQLite DB       | Interpolate MS models w/ Nearest-neighbour | Load makeIsochrone options from cmdline | Load MS Models                      |      |
+|             | Visualize photometry from DB by run |                                            |                                         | Create new makeIsochrone executable |      |
 
 * Backlog
 
