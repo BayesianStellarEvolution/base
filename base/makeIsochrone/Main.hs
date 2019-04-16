@@ -42,7 +42,7 @@ makeIsochroneOptionParser = MakeIsochroneOptions <$> clusterParser
 
 main :: IO ()
 main = do options <- execParser opts
-          models  <- loadModels NewDSED
+          models  <- loadModels OldDSED
           if length models /= 0 then (print $ S.map PrettyAge $ head $ map snd models) else return ()
           print $ interpolateIsochrone (cluster options & feh, cluster options & y, cluster options & age) models
   where
