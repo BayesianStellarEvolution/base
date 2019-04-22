@@ -1,7 +1,12 @@
+{-@ LIQUID "--higherorder" @-}
 module InterpolateSpec (main, spec) where
 
 import Test.Hspec
+import Test.QuickCheck
+import Test.QuickCheck.Gen
+
 import Interpolate
+
 
 main :: IO ()
 main = hspec spec
@@ -19,31 +24,42 @@ spec = do
 
   describe "log interpolation (per paper)" $ do
     it "returns x1 when f = 0"
-       (logInterpolate (log 1) (log 5) 0.0 `shouldBe` (log 1))
+       (logInterpolate (exp 1) (exp 5) 0.0 `shouldBe` (exp 1))
     it "returns x2 when f = 1"
-       (logInterpolate (log 1) (log 5) 1.0 `shouldBe` (log 5))
-    xit "returns x1 or x2"
-        (logInterpolate (log 1) (log 5) 0.5 `shouldBe` (log 3))
+       (logInterpolate (exp 1) (exp 5) 1.0 `shouldBe` (exp 5))
+    it "returns x1 or x2"
+       (logInterpolate (exp 1) (exp 5) 0.5 `shouldBe` (exp 3))
     it "returns x1 when f = 0"
-       (logInterpolate (log 2) (log 3) 0.0 `shouldBe` (log 2))
+       (logInterpolate (exp 2) (exp 3) 0.0 `shouldBe` (exp 2))
     it "returns x2 when f = 1"
-       (logInterpolate (log 2) (log 3) 1.0 `shouldBe` (log 3))
-    xit "returns x1 or x2"
-        (logInterpolate (log 2) (log 3) 0.5 `shouldBe` (log 2.5))
+       (logInterpolate (exp 2) (exp 3) 1.0 `shouldBe` (exp 3))
+    it "returns x1 or x2"
+       (logInterpolate (exp 2) (exp 3) 0.5 `shouldBeCloseTo` (exp 2.5))
 
   describe "log interpolation (alt)" $ do
-    it "returns x1 when f = 0"
-       (logInterpolate_alt (log 1) (log 5) 0.0 `shouldBe` (log 1))
-    it "returns x2 when f = 1"
-       (logInterpolate_alt (log 1) (log 5) 1.0 `shouldBe` (log 5))
-    it "returns x1 or x2"
-       (logInterpolate_alt (log 1) (log 5) 0.5 `shouldBeCloseTo` (log 3))
-    it "returns x1 when f = 0"
-       (logInterpolate_alt (log 2) (log 3) 0.0 `shouldBe` (log 2))
-    it "returns x2 when f = 1"
-       (logInterpolate_alt (log 2) (log 3) 1.0 `shouldBe` (log 3))
-    it "returns x1 or x2"
-       (logInterpolate_alt (log 2) (log 3) 0.5 `shouldBe` (log 2.5))
+    it "is equivalent to the mathematical method" $ property $
+       \(PositiveDouble x) (PositiveDouble y) (Percentage f) ->
+          (logInterpolate_alt (exp x) (exp y) f) `shouldBeCloseTo` logInterpolate (exp x) (exp y) f
+
+
+{-@ type Percentage = {v:Double | 0 <= v && 1 >= v} @-}
+{-@ newtype Percentage = Percentage Percentage @-}
+newtype Percentage = Percentage Double
+                   deriving (Show)
+
+instance Arbitrary Percentage where
+  arbitrary = choose (0.0, 1.0) >>= \val -> if val >= 0.0 && val <= 1.0
+                                             then return $ Percentage val
+                                             else error "Should never happen"
+
+{-@ assume abs :: _ -> {v:_ | 0 <= v} @-}
+{-@ type PositiveDouble = {v:Double | 0 <= v} @-}
+{-@ newtype PositiveDouble = PositiveDouble PositiveDouble @-}
+newtype PositiveDouble = PositiveDouble Double
+                       deriving (Show)
+
+instance Arbitrary PositiveDouble where
+  arbitrary = PositiveDouble . abs <$> chooseAny
 
 
 linearInterpolateSpec :: SpecWith ()
