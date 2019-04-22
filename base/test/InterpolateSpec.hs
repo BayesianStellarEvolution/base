@@ -26,3 +26,4 @@ spec = do
          (linearInterpolate 0.0 5.0 1.0 `shouldBe` 5.0)
       it "returns halfway between x1 and x2 when f = 0.5"
          (linearInterpolate 0.0 5.0 0.5 `shouldBe` 2.5)
+    describe "log interpolation" $ do it "returns x1 when f = 0" (logInterpolate (log 1) (log 5) 0.0 `shouldBe` (log 1))
