@@ -18,7 +18,7 @@ spec = do
       it "returns x2 when f = 1"
          (linearInterpolate 0.0 0.0 1.0 `shouldBe` 0.0)
       it "returns x1 or x2"
-         (linearInterpolate 0.0 0.0 0.5 `shouldBe` 0)
+         (linearInterpolate 0.0 0.0 0.5 `shouldBe` 0.0)
     describe "when delta x = 5" $ do
       it "returns x1 when f = 0"
          (linearInterpolate 0.0 5.0 0.0 `shouldBe` 0.0)
