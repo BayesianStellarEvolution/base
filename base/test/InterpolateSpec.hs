@@ -25,7 +25,7 @@ spec = do
   describe "log interpolation (per paper)" $ do
     it "is a linear interpolation in log space" $ property $
        \(PositiveDouble x) (PositiveDouble y) (Percentage f) ->
-          (logInterpolate_alt (exp x) (exp y) f) `shouldBeCloseTo` exp (linearInterpolate x y f)
+          (logInterpolate (exp x) (exp y) f) `shouldBeCloseTo` exp (linearInterpolate x y f)
 
   describe "log interpolation (alt)" $ do
     it "is equivalent to the mathematical method" $ property $
