@@ -31,5 +31,11 @@ spec = do
          (logInterpolate (log 1) (log 5) 0.0 `shouldBe` (log 1))
       it "returns x2 when f = 1"
          (logInterpolate (log 1) (log 5) 1.0 `shouldBe` (log 5))
-      it "returns x1 or x2"
-         (logInterpolate (log 1) (log 5) 0.0 `shouldBe` (log 1))
+      xit "returns x1 or x2"
+          (logInterpolate (log 1) (log 5) 0.5 `shouldBe` (log 1))
+      it "returns x1 when f = 0"
+         (logInterpolate (log 2) (log 3) 0.0 `shouldBe` (log 2))
+      it "returns x2 when f = 1"
+         (logInterpolate (log 2) (log 3) 1.0 `shouldBe` (log 3))
+      xit "returns x1 or x2"
+          (logInterpolate (log 2) (log 3) 0.5 `shouldBe` (log 2))
