@@ -6,6 +6,9 @@ import Interpolate
 main :: IO ()
 main = hspec spec
 
+shouldBeCloseTo :: Double -> Double -> Expectation
+shouldBeCloseTo x1 x2 = abs (x2 - x1) `shouldSatisfy` (< 0.0001)
+
 spec :: SpecWith ()
 spec = do
   linearInterpolateSpec
@@ -34,7 +37,7 @@ spec = do
     it "returns x2 when f = 1"
        (logInterpolate_alt (log 1) (log 5) 1.0 `shouldBe` (log 5))
     xit "returns x1 or x2"
-        (logInterpolate_alt (log 1) (log 5) 0.5 `shouldBe` (log 1))
+        (logInterpolate_alt (log 1) (log 5) 0.5 `shouldBeCloseTo` (log 3))
     it "returns x1 when f = 0"
        (logInterpolate_alt (log 2) (log 3) 0.0 `shouldBe` (log 2))
     it "returns x2 when f = 1"
