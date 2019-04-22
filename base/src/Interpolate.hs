@@ -7,4 +7,4 @@ linearInterpolate :: Double -> Double -> Double -> Double
 linearInterpolate x1 x2 f = f * x2 + (1 - f) * x1
 
 logInterpolate :: Double -> Double -> Double -> Double
-logInterpolate x1 x2 f = x2 ** f * x1 ** (1 - f)
+logInterpolate x1 x2 f = (x2 ** f) * (x1 ** (1 - f))
