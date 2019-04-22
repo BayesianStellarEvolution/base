@@ -30,8 +30,7 @@ spec = do
 
 
 linearInterpolateSpec :: SpecWith ()
-linearInterpolateSpec =
-  describe "linear interpolation" $ do
+linearInterpolateSpec = describe "linear interpolation" $ do
     describe "when delta x = 0" $ do
       it "returns x1 when f = 0"
          (linearInterpolate 0.0 0.0 0.0 `shouldBe` 0.0)
