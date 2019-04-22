@@ -4,4 +4,4 @@ interpolateIsochrone :: (Double, Double, Double) -> p -> [Double]
 interpolateIsochrone (feh, y, age) model = [feh, y, age]
 
 linearInterpolate :: Double -> Double -> Double -> Double
-linearInterpolate _ _ _ = 0.0
+linearInterpolate x1 x2 f = f * x2 + (1 - f) * x1
