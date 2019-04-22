@@ -23,18 +23,9 @@ spec = do
        (interpolateIsochrone (0, 0, 0) [] `shouldBe` [0, 0, 0])
 
   describe "log interpolation (per paper)" $ do
-    it "returns x1 when f = 0"
-       (logInterpolate (exp 1) (exp 5) 0.0 `shouldBe` (exp 1))
-    it "returns x2 when f = 1"
-       (logInterpolate (exp 1) (exp 5) 1.0 `shouldBe` (exp 5))
-    it "returns x1 or x2"
-       (logInterpolate (exp 1) (exp 5) 0.5 `shouldBe` (exp 3))
-    it "returns x1 when f = 0"
-       (logInterpolate (exp 2) (exp 3) 0.0 `shouldBe` (exp 2))
-    it "returns x2 when f = 1"
-       (logInterpolate (exp 2) (exp 3) 1.0 `shouldBe` (exp 3))
-    it "returns x1 or x2"
-       (logInterpolate (exp 2) (exp 3) 0.5 `shouldBeCloseTo` (exp 2.5))
+    it "is a linear interpolation in log space" $ property $
+       \(PositiveDouble x) (PositiveDouble y) (Percentage f) ->
+          (logInterpolate_alt (exp x) (exp y) f) `shouldBeCloseTo` exp (linearInterpolate x y f)
 
   describe "log interpolation (alt)" $ do
     it "is equivalent to the mathematical method" $ property $
