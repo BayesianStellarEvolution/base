@@ -53,8 +53,11 @@ positive f | f > 0     = Just $ MkPositive f
            | otherwise = Nothing
 
 
+{-@ positive' :: GT 0 -> Positive @-}
 positive' :: Double -> Positive
-positive' = fromJust . positive
+positive' f = if f >= 0
+                 then MkPositive f
+                 else error "Negative value in nonNegative'"
 
 
 {-@ newtype NonNegative = MkNonNegative { unNonNegative :: GTE 0 } @-}
