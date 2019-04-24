@@ -35,3 +35,8 @@ newtype PositiveDouble = PositiveDouble Double
 
 instance Arbitrary PositiveDouble where
   arbitrary = PositiveDouble . abs <$> chooseAny
+
+
+positive :: Double -> Maybe PositiveDouble
+positive f | f >= 0    = Just $ PositiveDouble f
+           | otherwise = Nothing
