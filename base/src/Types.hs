@@ -3,9 +3,11 @@ module Types where
 
 import Data.Maybe (fromJust)
 
-import qualified Test.QuickCheck as Q
 import Test.QuickCheck     (Arbitrary (..))
 import Test.QuickCheck.Gen (choose, chooseAny, suchThat)
+
+import Numeric.MathFunctions.Comparison (addUlps)
+
 
 {-@ type GT  N = {v:Double | v >  N} @-}
 {-@ type GTE N = {v:Double | v >= N} @-}
@@ -15,6 +17,7 @@ import Test.QuickCheck.Gen (choose, chooseAny, suchThat)
 
 {-@ assume abs :: _ -> {v:_ | 0 <= v} @-}
 {-@ assume choose :: System.Random.Random a => t:(a, a) -> Test.QuickCheck.Gen {v:a | v >= fst t && v <= snd t} @-}
+{-@ assume addUlps :: {u:Int | u > 0} -> v:Double -> {r:Double | r > v} @-}
 
 {-@ newtype Percentage = Percentage (Btwn 0 1) @-}
 newtype Percentage = Percentage Double
@@ -39,7 +42,10 @@ newtype Positive = MkPositive { unPositive :: Double }
                        deriving (Show)
 
 instance Arbitrary Positive where
-  arbitrary = MkPositive . abs <$> chooseAny
+  arbitrary = do val <- abs <$> chooseAny
+                 return $ if val == 0
+                             then MkPositive (addUlps 1 val)
+                             else MkPositive val
 
 
 positive :: Double -> Maybe Positive

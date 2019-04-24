@@ -28,6 +28,7 @@ dependencies:
     - conduit-extra
     - containers
     - lzma-conduit
+    - math-functions
     - optparse-applicative
     - QuickCheck
     - vector
