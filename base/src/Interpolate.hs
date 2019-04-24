@@ -1,11 +1,13 @@
 module Interpolate where
 
+import Types
+
 interpolateIsochrone :: (Double, Double, Double) -> p -> [Double]
 interpolateIsochrone (feh, y, age) model = [feh, y, age]
 
 
-linearInterpolate :: Double -> Double -> Double -> Double
-linearInterpolate x1 x2 f = f * x2 + (1 - f) * x1
+linearInterpolate :: Double -> Double -> Percentage -> Double
+linearInterpolate x1 x2 (Percentage f) = f * x2 + (1 - f) * x1
 {-
 Ref:
   published_other/interpolation/log_interpol.pdf
@@ -13,8 +15,8 @@ Ref:
 -}
 
 
-logInterpolate :: Double -> Double -> Double -> Double
-logInterpolate x1 x2 f = (x2 ** f) * (x1 ** (1 - f))
+logInterpolate :: Double -> Double -> Percentage -> Double
+logInterpolate x1 x2 (Percentage f) = (x2 ** f) * (x1 ** (1 - f))
 {-
 Ref:
   published_other/interpolation/log_interpol.pdf
@@ -22,5 +24,12 @@ Ref:
 -}
 
 
-logInterpolate_alt :: Double -> Double -> Double -> Double
+logInterpolate_alt :: Double -> Double -> Percentage -> Double
 logInterpolate_alt x1 x2 f = exp $ linearInterpolate (log x1) (log x2) f
+
+
+class Interpolate a where
+  interpolate :: a -> a -> Percentage -> a
+
+instance Interpolate Double where
+  interpolate a b f = linearInterpolate a b f
