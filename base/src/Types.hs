@@ -5,7 +5,7 @@ import Data.Maybe (fromJust)
 
 import qualified Test.QuickCheck as Q
 import Test.QuickCheck     (Arbitrary (..))
-import Test.QuickCheck.Gen (choose, chooseAny)
+import Test.QuickCheck.Gen (choose, chooseAny, suchThat)
 
 
 {-@ assume abs :: _ -> {v:_ | 0 <= v} @-}
@@ -50,17 +50,17 @@ positive' = fromJust . positive
 
 {-@ type NonNegative = {v:Double | 0 <= v} @-}
 {-@ newtype NonNegative a = MkNonNegative {getNonNegative :: NonNegative} @-}
-newtype NonNegative a = MkNonNegative {getNonNegative :: Double}
+newtype NonNegative a = MkNonNegative {getNonNegative :: a}
                     deriving (Ord, Num, Eq, Enum, Show, Read)
 
 instance (Ord a, Num a, Arbitrary a) => Arbitrary (NonNegative a) where
-  arbitrary = MkNonNegative . abs <$> chooseAny
+  arbitrary = MkNonNegative <$> (fmap abs arbitrary `suchThat` (>= 0))
 
 
-nonNegative :: Double -> Maybe (NonNegative a)
+nonNegative :: (Ord a, Num a) => a -> Maybe (NonNegative a)
 nonNegative f | f >= 0    = Just $ MkNonNegative f
               | otherwise = Nothing
 
 
-nonNegative' :: Double -> (NonNegative a)
+nonNegative' :: (Ord a, Num a) => a -> (NonNegative a)
 nonNegative' = fromJust . nonNegative
