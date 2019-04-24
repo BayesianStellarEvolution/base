@@ -19,8 +19,8 @@ import Numeric.MathFunctions.Comparison (addUlps)
 {-@ assume choose :: System.Random.Random a => t:(a, a) -> Test.QuickCheck.Gen {v:a | v >= fst t && v <= snd t} @-}
 {-@ assume addUlps :: {u:Int | u > 0} -> v:Double -> {r:Double | r > v} @-}
 
-{-@ newtype Percentage = MkPercentage (Btwn 0 1) @-}
-newtype Percentage = MkPercentage Double
+{-@ newtype Percentage = MkPercentage { unPercentage :: Btwn 0 1 } @-}
+newtype Percentage = MkPercentage { unPercentage :: Double }
                    deriving (Show)
 
 instance Arbitrary Percentage where
