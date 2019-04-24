@@ -34,20 +34,20 @@ percentage' :: Double -> Percentage
 percentage' = fromJust . percentage
 
 
-{-@ newtype PositiveDouble = PositiveDouble (GT 0) @-}
-newtype PositiveDouble = PositiveDouble Double
+{-@ newtype Positive = MkPositive (GT 0) @-}
+newtype Positive = MkPositive { unPositive :: Double }
                        deriving (Show)
 
-instance Arbitrary PositiveDouble where
-  arbitrary = PositiveDouble . abs <$> chooseAny
+instance Arbitrary Positive where
+  arbitrary = MkPositive . abs <$> chooseAny
 
 
-positive :: Double -> Maybe PositiveDouble
-positive f | f >= 0    = Just $ PositiveDouble f
+positive :: Double -> Maybe Positive
+positive f | f > 0     = Just $ MkPositive f
            | otherwise = Nothing
 
 
-positive' :: Double -> PositiveDouble
+positive' :: Double -> Positive
 positive' = fromJust . positive
 
 

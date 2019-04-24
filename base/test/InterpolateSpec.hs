@@ -1,8 +1,7 @@
 module InterpolateSpec (main, spec) where
 
 import Test.Hspec
-import Test.QuickCheck
-import Test.QuickCheck.Gen
+import Test.QuickCheck hiding (Positive(..))
 
 import Interpolate
 import Types
@@ -29,12 +28,12 @@ logInterpolateSpec :: SpecWith ()
 logInterpolateSpec = parallel $ do
   describe "log interpolation (per paper)" $ do
     it "is a linear interpolation in log space" $ property $
-       \(PositiveDouble x) (PositiveDouble y) f ->
+       \(MkPositive x) (MkPositive y) f ->
           (logInterpolate (exp x) (exp y) f) `shouldBeCloseTo` exp (linearInterpolate x y f)
 
   describe "log interpolation (alt)" $ do
     it "is equivalent to the mathematical method" $ property $
-       \(PositiveDouble x) (PositiveDouble y) f ->
+       \(MkPositive x) (MkPositive y) f ->
           (logInterpolate_alt (exp x) (exp y) f) `shouldBeCloseTo` logInterpolate (exp x) (exp y) f
 
 
