@@ -16,6 +16,7 @@ shouldBeCloseTo x1 x2 = abs (x2 - x1) `shouldSatisfy` (< 0.0001)
 spec :: SpecWith ()
 spec = do
   linearInterpolateSpec
+  logInterpolateSpec
 
   describe "isochrone interpolation" $ do
     it "should function"
