@@ -49,7 +49,7 @@ positive' = fromJust . positive
 
 
 {-@ type NonNegative = {v:Double | 0 <= v} @-}
-{-@ newtype NonNegative a = MkNonNegative {getNonNegative :: NonNegative} @-}
+{-@ newtype NonNegative a = MkNonNegative {getNonNegative :: a} @-}
 newtype NonNegative a = MkNonNegative {getNonNegative :: a}
                     deriving (Ord, Num, Eq, Enum, Show, Read)
 
