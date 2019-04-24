@@ -7,6 +7,11 @@ import qualified Test.QuickCheck as Q
 import Test.QuickCheck     (Arbitrary (..))
 import Test.QuickCheck.Gen (choose, chooseAny, suchThat)
 
+{-@ type GT  N = {v:_ | v >  N} @-}
+{-@ type GTE N = {v:_ | v >= N} @-}
+{-@ type LT  N = {v:_ | v <  N} @-}
+{-@ type LTE N = {v:_ | v <= N} @-}
+{-@ type BTWN LO HI = {v:_ | LO <= t && t <= HI} @-}
 
 {-@ assume abs :: _ -> {v:_ | 0 <= v} @-}
 {-@ assume choose :: System.Random.Random a => t:(a, a) -> Test.QuickCheck.Gen {v:a | v >= fst t && v <= snd t} @-}
@@ -49,9 +54,9 @@ positive' :: Double -> PositiveDouble
 positive' = fromJust . positive
 
 
-{-@ type ANonNeg a = {v:a | 0 <= v} @-}
+
 {-@ data NonNegative a where
-      MkNonNegative :: {v:a | 0 <= v} -> NonNegative {v2:a | 0 <= v2} @-}
+      MkNonNegative :: GTE 0 -> NonNegative a @-}
 data NonNegative a where
   MkNonNegative :: Num a => !a -> NonNegative a
 
@@ -77,7 +82,7 @@ nonNegative :: (Ord a, Num a) => a -> Maybe (NonNegative a)
 nonNegative f | f >= 0    = Just $ MkNonNegative f
               | otherwise = Nothing
 
-{-@ nonNegative' :: (Ord a, Num a) => {v:a | 0 <= v} -> NonNegative a @-}
+{-@ nonNegative' :: (Ord a, Num a) => GTE 0 -> NonNegative a @-}
 nonNegative' :: (Ord a, Num a) => a -> (NonNegative a)
 nonNegative' f = if f >= 0
                     then MkNonNegative f
