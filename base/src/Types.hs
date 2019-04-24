@@ -44,3 +44,21 @@ positive f | f >= 0    = Just $ PositiveDouble f
 
 positive' :: Double -> PositiveDouble
 positive' = fromJust . positive
+
+
+{-@ type NonNegativeDouble = {v:Double | 0 <= v} @-}
+{-@ newtype NonNegativeDouble = NonNegativeDouble NonNegativeDouble @-}
+newtype NonNegativeDouble = NonNegativeDouble Double
+                       deriving (Show)
+
+instance Arbitrary NonNegativeDouble where
+  arbitrary = NonNegativeDouble . abs <$> chooseAny
+
+
+nonNegative :: Double -> Maybe NonNegativeDouble
+nonNegative f | f >= 0    = Just $ NonNegativeDouble f
+              | otherwise = Nothing
+
+
+nonNegative' :: Double -> NonNegativeDouble
+nonNegative' = fromJust . nonNegative
