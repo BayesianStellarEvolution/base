@@ -2,6 +2,7 @@ module Types where
 
 import Data.Maybe (fromJust)
 
+import qualified Test.QuickCheck as Q
 import Test.QuickCheck     (Arbitrary (..))
 import Test.QuickCheck.Gen (choose, chooseAny)
 
