@@ -16,6 +16,7 @@ instance Arbitrary Percentage where
                                              then return $ Percentage val
                                              else error "Should never happen"
 
+
 {-@ type PositiveDouble = {v:Double | 0 <= v} @-}
 {-@ newtype PositiveDouble = PositiveDouble PositiveDouble @-}
 newtype PositiveDouble = PositiveDouble Double
