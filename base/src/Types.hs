@@ -7,11 +7,11 @@ import qualified Test.QuickCheck as Q
 import Test.QuickCheck     (Arbitrary (..))
 import Test.QuickCheck.Gen (choose, chooseAny, suchThat)
 
-{-@ type GT  N = {v:_ | v >  N} @-}
-{-@ type GTE N = {v:_ | v >= N} @-}
-{-@ type LT  N = {v:_ | v <  N} @-}
-{-@ type LTE N = {v:_ | v <= N} @-}
-{-@ type Btwn LO HI = {v:_ | LO <= v && v <= HI} @-}
+{-@ type GT  N = {v:Double | v >  N} @-}
+{-@ type GTE N = {v:Double | v >= N} @-}
+{-@ type LT  N = {v:Double | v <  N} @-}
+{-@ type LTE N = {v:Double | v <= N} @-}
+{-@ type Btwn LO HI = {v:Double | LO <= v && v <= HI} @-}
 
 {-@ assume abs :: _ -> {v:_ | 0 <= v} @-}
 {-@ assume choose :: System.Random.Random a => t:(a, a) -> Test.QuickCheck.Gen {v:a | v >= fst t && v <= snd t} @-}
@@ -29,12 +29,12 @@ percentage f | f >= 0 && f <= 1.0 = Just $ Percentage f
              | otherwise          = Nothing
 
 
+{-@ percentage' :: GT 0 -> Percentage @-}
 percentage' :: Double -> Percentage
 percentage' = fromJust . percentage
 
 
-{-@ type PositiveDouble = {v:Double | 0 <= v} @-}
-{-@ newtype PositiveDouble = PositiveDouble PositiveDouble @-}
+{-@ newtype PositiveDouble = PositiveDouble (GT 0) @-}
 newtype PositiveDouble = PositiveDouble Double
                        deriving (Show)
 
@@ -51,36 +51,18 @@ positive' :: Double -> PositiveDouble
 positive' = fromJust . positive
 
 
+{-@ newtype NonNegative = MkNonNegative { unNonNegative :: GTE 0 } @-}
+newtype NonNegative = MkNonNegative { unNonNegative :: Double }
 
-{-@ data NonNegative a where
-      MkNonNegative :: GTE 0 -> NonNegative a @-}
-data NonNegative a where
-  MkNonNegative :: Num a => !a -> NonNegative a
-
-deriving instance Eq a => Eq (NonNegative a)
-deriving instance Ord a => Ord (NonNegative a)
-
-{-@ measure unNonNegative @-}
-unNonNegative :: NonNegative a -> a
-unNonNegative (MkNonNegative a) = a
-
-instance (Ord a, Num a) => Num (NonNegative a) where
-  (+) a b = MkNonNegative (unNonNegative a + unNonNegative b)
-  (*) a b = MkNonNegative (unNonNegative a * unNonNegative b)
-  negate = error "Can't negate a non-negative"
-  abs = id
-  signum a = MkNonNegative (signum (unNonNegative a))
-  fromInteger a = MkNonNegative (fromInteger a)
-
-instance (Ord a, Num a, Arbitrary a) => Arbitrary (NonNegative a) where
+instance Arbitrary NonNegative where
   arbitrary = MkNonNegative <$> (fmap abs arbitrary `suchThat` (>= 0))
 
-nonNegative :: (Ord a, Num a) => a -> Maybe (NonNegative a)
+nonNegative :: Double -> Maybe NonNegative
 nonNegative f | f >= 0    = Just $ MkNonNegative f
               | otherwise = Nothing
 
-{-@ nonNegative' :: (Ord a, Num a) => GTE 0 -> NonNegative a @-}
-nonNegative' :: (Ord a, Num a) => a -> (NonNegative a)
+{-@ nonNegative' :: GTE 0 -> NonNegative @-}
+nonNegative' :: Double -> NonNegative
 nonNegative' f = if f >= 0
                     then MkNonNegative f
                     else error "Negative value in nonNegative'"
