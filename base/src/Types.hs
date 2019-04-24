@@ -32,7 +32,7 @@ percentage f | f >= 0 && f <= 1.0 = Just $ MkPercentage f
              | otherwise          = Nothing
 
 
-{-@ percentage' :: GT 0 -> Percentage @-}
+{-@ percentage' :: Btwn 0 1 -> Percentage @-}
 percentage' :: Double -> Percentage
 percentage' = fromJust . percentage
 
@@ -66,9 +66,11 @@ newtype NonNegative = MkNonNegative { unNonNegative :: Double }
 instance Arbitrary NonNegative where
   arbitrary = MkNonNegative <$> (fmap abs arbitrary `suchThat` (>= 0))
 
+
 nonNegative :: Double -> Maybe NonNegative
 nonNegative f | f >= 0    = Just $ MkNonNegative f
               | otherwise = Nothing
+
 
 {-@ nonNegative' :: GTE 0 -> NonNegative @-}
 nonNegative' :: Double -> NonNegative
