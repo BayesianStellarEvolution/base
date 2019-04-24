@@ -40,3 +40,7 @@ instance Arbitrary PositiveDouble where
 positive :: Double -> Maybe PositiveDouble
 positive f | f >= 0    = Just $ PositiveDouble f
            | otherwise = Nothing
+
+
+positive' :: Double -> PositiveDouble
+positive' = fromJust . positive
