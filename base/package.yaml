@@ -18,6 +18,7 @@ library:
   exposed-modules:
     - Models.Input
     - Interpolate
+    - Types
 dependencies:
     - base >=4.10 && <5
     - BayesianStellarEvolution-Models
