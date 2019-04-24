@@ -18,6 +18,7 @@ library:
   exposed-modules:
     - Models.Input
     - Interpolate
+    - Liquid
     - Types
 dependencies:
     - base >=4.10 && <5
