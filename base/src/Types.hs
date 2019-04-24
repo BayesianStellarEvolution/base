@@ -58,22 +58,18 @@ data NonNegative a where
 deriving instance Eq a => Eq (NonNegative a)
 deriving instance Ord a => Ord (NonNegative a)
 
-{-@ measure getNonNegative @-}
-getNonNegative :: NonNegative a -> a
-getNonNegative (MkNonNegative a) = a
+{-@ measure unNonNegative @-}
+unNonNegative :: NonNegative a -> a
+unNonNegative (MkNonNegative a) = a
 
-{-@ instance Num (NonNegative a) where
-    (+) :: f:NonNegative {f1:a | 0 <= f1} -> s:NonNegative {f2:a | 0 <= f2} -> NonNegative {v:a | 0 <= (f1 + f2)} @-}
 instance (Ord a, Num a) => Num (NonNegative a) where
-  (+) a b = MkNonNegative (getNonNegative a + getNonNegative b)
-  (*) a b = MkNonNegative (getNonNegative a * getNonNegative b)
+  (+) a b = MkNonNegative (unNonNegative a + unNonNegative b)
+  (*) a b = MkNonNegative (unNonNegative a * unNonNegative b)
   negate = error "Can't negate a non-negative"
   abs = id
-  signum a = MkNonNegative (signum (getNonNegative a))
+  signum a = MkNonNegative (signum (unNonNegative a))
   fromInteger a = MkNonNegative (fromInteger a)
 
-{-@ instance (Ord a, Num a, Arbitrary a) => Arbitrary (NonNegative a) where
-      arbitrary :: NonNegative {v:a | -1 <= v} @-}
 instance (Ord a, Num a, Arbitrary a) => Arbitrary (NonNegative a) where
   arbitrary = MkNonNegative <$> (fmap abs arbitrary `suchThat` (>= 0))
 
