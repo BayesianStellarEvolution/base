@@ -21,6 +21,9 @@ spec = do
     it "should function"
        (interpolateIsochrone (0, 0, 0) [] `shouldBe` [0, 0, 0])
 
+
+logInterpolateSpec :: SpecWith ()
+logInterpolateSpec = do
   describe "log interpolation (per paper)" $ do
     it "is a linear interpolation in log space" $ property $
        \(PositiveDouble x) (PositiveDouble y) (Percentage f) ->
