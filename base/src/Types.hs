@@ -46,19 +46,19 @@ positive' :: Double -> PositiveDouble
 positive' = fromJust . positive
 
 
-{-@ type NonNegativeDouble = {v:Double | 0 <= v} @-}
-{-@ newtype NonNegativeDouble = NonNegativeDouble NonNegativeDouble @-}
-newtype NonNegativeDouble = NonNegativeDouble Double
-                       deriving (Show)
+{-@ type NonNegative = {v:Double | 0 <= v} @-}
+{-@ newtype NonNegative = NonNegative NonNegative @-}
+newtype NonNegative = NonNegative Double
+                    deriving (Show)
 
-instance Arbitrary NonNegativeDouble where
-  arbitrary = NonNegativeDouble . abs <$> chooseAny
+instance Arbitrary NonNegative where
+  arbitrary = NonNegative . abs <$> chooseAny
 
 
-nonNegative :: Double -> Maybe NonNegativeDouble
-nonNegative f | f >= 0    = Just $ NonNegativeDouble f
+nonNegative :: Double -> Maybe NonNegative
+nonNegative f | f >= 0    = Just $ NonNegative f
               | otherwise = Nothing
 
 
-nonNegative' :: Double -> NonNegativeDouble
+nonNegative' :: Double -> NonNegative
 nonNegative' = fromJust . nonNegative
