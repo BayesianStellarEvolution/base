@@ -1,3 +1,4 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Types where
 
 import Data.Maybe (fromJust)
@@ -50,7 +51,7 @@ positive' = fromJust . positive
 {-@ type NonNegative = {v:Double | 0 <= v} @-}
 {-@ newtype NonNegative a = MkNonNegative {getNonNegative :: NonNegative} @-}
 newtype NonNegative a = MkNonNegative {getNonNegative :: Double}
-                    deriving (Show)
+                    deriving (Ord, Num, Eq, Enum, Show, Read)
 
 instance Arbitrary (NonNegative a) where
   arbitrary = MkNonNegative . abs <$> chooseAny
