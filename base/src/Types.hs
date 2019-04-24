@@ -20,6 +20,3 @@ instance Arbitrary Percentage where
 {-@ newtype PositiveDouble = PositiveDouble PositiveDouble @-}
 newtype PositiveDouble = PositiveDouble Double
                        deriving (Show)
-
-instance Arbitrary PositiveDouble where
-  arbitrary = PositiveDouble . abs <$> chooseAny

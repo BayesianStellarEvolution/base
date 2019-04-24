@@ -13,6 +13,9 @@ main = hspec spec
 shouldBeCloseTo :: Double -> Double -> Expectation
 shouldBeCloseTo x1 x2 = abs (x2 - x1) `shouldSatisfy` (< 0.0001)
 
+instance Arbitrary PositiveDouble where
+  arbitrary = PositiveDouble . abs <$> chooseAny
+
 spec :: SpecWith ()
 spec = do
   linearInterpolateSpec
