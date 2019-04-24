@@ -48,16 +48,16 @@ positive' = fromJust . positive
 
 
 {-@ type NonNegative = {v:Double | 0 <= v} @-}
-{-@ newtype NonNegative = NonNegative NonNegative @-}
-newtype NonNegative = NonNegative Double
+{-@ newtype NonNegative = MkNonNegative {getNonNegative :: NonNegative} @-}
+newtype NonNegative = MkNonNegative {getNonNegative :: Double}
                     deriving (Show)
 
 instance Arbitrary NonNegative where
-  arbitrary = NonNegative . abs <$> chooseAny
+  arbitrary = MkNonNegative . abs <$> chooseAny
 
 
 nonNegative :: Double -> Maybe NonNegative
-nonNegative f | f >= 0    = Just $ NonNegative f
+nonNegative f | f >= 0    = Just $ MkNonNegative f
               | otherwise = Nothing
 
 
