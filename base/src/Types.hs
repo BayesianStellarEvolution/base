@@ -53,7 +53,7 @@ positive' = fromJust . positive
 newtype NonNegative a = MkNonNegative {getNonNegative :: Double}
                     deriving (Ord, Num, Eq, Enum, Show, Read)
 
-instance Arbitrary (NonNegative a) where
+instance (Ord a, Num a, Arbitrary a) => Arbitrary (NonNegative a) where
   arbitrary = MkNonNegative . abs <$> chooseAny
 
 
