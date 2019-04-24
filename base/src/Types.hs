@@ -1,4 +1,4 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE GADTs, StandaloneDeriving #-}
 module Types where
 
 import Data.Maybe (fromJust)
@@ -9,6 +9,7 @@ import Test.QuickCheck.Gen (choose, chooseAny, suchThat)
 
 
 {-@ assume abs :: _ -> {v:_ | 0 <= v} @-}
+{-@ assume choose :: System.Random.Random a => t:(a, a) -> Test.QuickCheck.Gen {v:a | v >= fst t && v <= snd t} @-}
 
 {-@ type Percentage = {v:Double | 0 <= v && 1 >= v} @-}
 {-@ newtype Percentage = Percentage Percentage @-}
@@ -48,19 +49,40 @@ positive' :: Double -> PositiveDouble
 positive' = fromJust . positive
 
 
-{-@ type NonNegative a = {v:a | 0 <= v} @-}
-{-@ newtype NonNegative a = MkNonNegative {getNonNegative :: a} @-}
-newtype NonNegative a = MkNonNegative {getNonNegative :: a}
-                    deriving (Ord, Num, Eq, Enum, Show, Read)
+{-@ type ANonNeg a = {v:a | 0 <= v} @-}
+{-@ data NonNegative a where
+      MkNonNegative :: {v:a | 0 <= v} -> NonNegative {v2:a | 0 <= v2} @-}
+data NonNegative a where
+  MkNonNegative :: Num a => !a -> NonNegative a
 
+deriving instance Eq a => Eq (NonNegative a)
+deriving instance Ord a => Ord (NonNegative a)
+
+{-@ measure getNonNegative @-}
+getNonNegative :: NonNegative a -> a
+getNonNegative (MkNonNegative a) = a
+
+{-@ instance Num (NonNegative a) where
+    (+) :: f:NonNegative {f1:a | 0 <= f1} -> s:NonNegative {f2:a | 0 <= f2} -> NonNegative {v:a | 0 <= (f1 + f2)} @-}
+instance (Ord a, Num a) => Num (NonNegative a) where
+  (+) a b = MkNonNegative (getNonNegative a + getNonNegative b)
+  (*) a b = MkNonNegative (getNonNegative a * getNonNegative b)
+  negate = error "Can't negate a non-negative"
+  abs = id
+  signum a = MkNonNegative (signum (getNonNegative a))
+  fromInteger a = MkNonNegative (fromInteger a)
+
+{-@ instance (Ord a, Num a, Arbitrary a) => Arbitrary (NonNegative a) where
+      arbitrary :: NonNegative {v:a | -1 <= v} @-}
 instance (Ord a, Num a, Arbitrary a) => Arbitrary (NonNegative a) where
   arbitrary = MkNonNegative <$> (fmap abs arbitrary `suchThat` (>= 0))
-
 
 nonNegative :: (Ord a, Num a) => a -> Maybe (NonNegative a)
 nonNegative f | f >= 0    = Just $ MkNonNegative f
               | otherwise = Nothing
 
-
+{-@ nonNegative' :: (Ord a, Num a) => {v:a | 0 <= v} -> NonNegative a @-}
 nonNegative' :: (Ord a, Num a) => a -> (NonNegative a)
-nonNegative' = fromJust . nonNegative
+nonNegative' f = if f >= 0
+                    then MkNonNegative f
+                    else error "Negative value in nonNegative'"
