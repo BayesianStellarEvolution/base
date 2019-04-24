@@ -7,7 +7,7 @@ interpolateIsochrone (feh, y, age) model = [feh, y, age]
 
 
 linearInterpolate :: Double -> Double -> Percentage -> Double
-linearInterpolate x1 x2 (Percentage f) = f * x2 + (1 - f) * x1
+linearInterpolate x1 x2 (MkPercentage f) = f * x2 + (1 - f) * x1
 {-
 Ref:
   published_other/interpolation/log_interpol.pdf
@@ -16,7 +16,7 @@ Ref:
 
 
 logInterpolate :: Double -> Double -> Percentage -> Double
-logInterpolate x1 x2 (Percentage f) = (x2 ** f) * (x1 ** (1 - f))
+logInterpolate x1 x2 (MkPercentage f) = (x2 ** f) * (x1 ** (1 - f))
 {-
 Ref:
   published_other/interpolation/log_interpol.pdf

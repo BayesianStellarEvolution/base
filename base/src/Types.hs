@@ -19,16 +19,16 @@ import Numeric.MathFunctions.Comparison (addUlps)
 {-@ assume choose :: System.Random.Random a => t:(a, a) -> Test.QuickCheck.Gen {v:a | v >= fst t && v <= snd t} @-}
 {-@ assume addUlps :: {u:Int | u > 0} -> v:Double -> {r:Double | r > v} @-}
 
-{-@ newtype Percentage = Percentage (Btwn 0 1) @-}
-newtype Percentage = Percentage Double
+{-@ newtype Percentage = MkPercentage (Btwn 0 1) @-}
+newtype Percentage = MkPercentage Double
                    deriving (Show)
 
 instance Arbitrary Percentage where
-  arbitrary = choose (0.0, 1.0) >>= return . Percentage
+  arbitrary = choose (0.0, 1.0) >>= return . MkPercentage
 
 
 percentage :: Double -> Maybe Percentage
-percentage f | f >= 0 && f <= 1.0 = Just $ Percentage f
+percentage f | f >= 0 && f <= 1.0 = Just $ MkPercentage f
              | otherwise          = Nothing
 
 
