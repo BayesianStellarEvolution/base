@@ -31,7 +31,7 @@ percentage f | f >= 0 && f <= 1.0 = Just $ MkPercentage f
              | otherwise          = Nothing
 
 
-{-@ percentage' :: {v:Double | v == 0} -> Percentage @-}
+{-@ percentage' :: Btwn 0 1 -> Percentage @-}
 percentage' :: Double -> Percentage
 percentage' = fromJust . percentage
 
