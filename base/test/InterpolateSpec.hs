@@ -24,7 +24,7 @@ spec = do
 
 
 logInterpolateSpec :: SpecWith ()
-logInterpolateSpec = do
+logInterpolateSpec = parallel $ do
   describe "log interpolation (per paper)" $ do
     it "is a linear interpolation in log space" $ property $
        \(PositiveDouble x) (PositiveDouble y) (Percentage f) ->
