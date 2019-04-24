@@ -16,8 +16,7 @@ import Test.QuickCheck.Gen (choose, chooseAny, suchThat)
 {-@ assume abs :: _ -> {v:_ | 0 <= v} @-}
 {-@ assume choose :: System.Random.Random a => t:(a, a) -> Test.QuickCheck.Gen {v:a | v >= fst t && v <= snd t} @-}
 
-{-@ type Percentage = {v:Double | 0 <= v && 1 >= v} @-}
-{-@ newtype Percentage = Percentage Percentage @-}
+{-@ newtype Percentage = Percentage (Btwn 0 1) @-}
 newtype Percentage = Percentage Double
                    deriving (Show)
 
