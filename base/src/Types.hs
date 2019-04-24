@@ -1,6 +1,6 @@
 module Types where
 
-import Test.QuickCheck (Arbitrary (..))
+import Test.QuickCheck     (Arbitrary (..))
 import Test.QuickCheck.Gen (choose, chooseAny)
 
 
