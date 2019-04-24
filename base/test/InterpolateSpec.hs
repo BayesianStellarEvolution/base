@@ -1,4 +1,3 @@
-{-@ LIQUID "--higherorder" @-}
 module InterpolateSpec (main, spec) where
 
 import Test.Hspec
