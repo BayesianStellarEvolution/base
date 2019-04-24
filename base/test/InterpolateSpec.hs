@@ -5,7 +5,7 @@ import Test.QuickCheck
 import Test.QuickCheck.Gen
 
 import Interpolate
-
+import Types
 
 main :: IO ()
 main = hspec spec
@@ -34,26 +34,6 @@ logInterpolateSpec = parallel $ do
     it "is equivalent to the mathematical method" $ property $
        \(PositiveDouble x) (PositiveDouble y) (Percentage f) ->
           (logInterpolate_alt (exp x) (exp y) f) `shouldBeCloseTo` logInterpolate (exp x) (exp y) f
-
-
-{-@ type Percentage = {v:Double | 0 <= v && 1 >= v} @-}
-{-@ newtype Percentage = Percentage Percentage @-}
-newtype Percentage = Percentage Double
-                   deriving (Show)
-
-instance Arbitrary Percentage where
-  arbitrary = choose (0.0, 1.0) >>= \val -> if val >= 0.0 && val <= 1.0
-                                             then return $ Percentage val
-                                             else error "Should never happen"
-
-{-@ assume abs :: _ -> {v:_ | 0 <= v} @-}
-{-@ type PositiveDouble = {v:Double | 0 <= v} @-}
-{-@ newtype PositiveDouble = PositiveDouble PositiveDouble @-}
-newtype PositiveDouble = PositiveDouble Double
-                       deriving (Show)
-
-instance Arbitrary PositiveDouble where
-  arbitrary = PositiveDouble . abs <$> chooseAny
 
 
 linearInterpolateSpec :: SpecWith ()

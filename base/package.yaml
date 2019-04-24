@@ -29,6 +29,7 @@ dependencies:
     - containers
     - lzma-conduit
     - optparse-applicative
+    - QuickCheck
     - vector
 
 executables:
