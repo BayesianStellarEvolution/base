@@ -21,9 +21,7 @@ newtype Percentage = Percentage Double
                    deriving (Show)
 
 instance Arbitrary Percentage where
-  arbitrary = choose (0.0, 1.0) >>= \val -> if val >= 0.0 && val <= 1.0
-                                             then return $ Percentage val
-                                             else error "Should never happen"
+  arbitrary = choose (0.0, 1.0) >>= return . Percentage
 
 
 percentage :: Double -> Maybe Percentage
