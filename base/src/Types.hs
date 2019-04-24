@@ -11,7 +11,7 @@ import Test.QuickCheck.Gen (choose, chooseAny, suchThat)
 {-@ type GTE N = {v:_ | v >= N} @-}
 {-@ type LT  N = {v:_ | v <  N} @-}
 {-@ type LTE N = {v:_ | v <= N} @-}
-{-@ type BTWN LO HI = {v:_ | LO <= v && v <= HI} @-}
+{-@ type Btwn LO HI = {v:_ | LO <= v && v <= HI} @-}
 
 {-@ assume abs :: _ -> {v:_ | 0 <= v} @-}
 {-@ assume choose :: System.Random.Random a => t:(a, a) -> Test.QuickCheck.Gen {v:a | v >= fst t && v <= snd t} @-}
