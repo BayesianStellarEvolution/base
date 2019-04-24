@@ -1,7 +1,7 @@
 module Types where
 
 import Test.QuickCheck
-import Test.QuickCheck.Gen
+import Test.QuickCheck.Gen (choose, chooseAny)
 
 
 {-@ assume abs :: _ -> {v:_ | 0 <= v} @-}
