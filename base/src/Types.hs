@@ -1,4 +1,3 @@
-{-# LANGUAGE GADTs, StandaloneDeriving #-}
 module Types where
 
 import Data.Maybe (fromJust)
@@ -21,10 +20,10 @@ import Numeric.MathFunctions.Comparison (addUlps)
 
 {-@ newtype Percentage = MkPercentage { unPercentage :: Btwn 0 1 } @-}
 newtype Percentage = MkPercentage { unPercentage :: Double }
-                   deriving (Show)
+                     deriving (Show)
 
 instance Arbitrary Percentage where
-  arbitrary = choose (0.0, 1.0) >>= return . MkPercentage
+  arbitrary = choose (0.0, 1.1) >>= return . MkPercentage
 
 
 percentage :: Double -> Maybe Percentage
@@ -32,14 +31,14 @@ percentage f | f >= 0 && f <= 1.0 = Just $ MkPercentage f
              | otherwise          = Nothing
 
 
-{-@ percentage' :: Btwn 0 1 -> Percentage @-}
+{-@ percentage' :: {v:Double | v == 0} -> Percentage @-}
 percentage' :: Double -> Percentage
 percentage' = fromJust . percentage
 
 
 {-@ newtype Positive = MkPositive (GT 0) @-}
 newtype Positive = MkPositive { unPositive :: Double }
-                       deriving (Show)
+                   deriving (Show)
 
 instance Arbitrary Positive where
   arbitrary = do val <- abs <$> chooseAny
