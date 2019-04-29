@@ -39,9 +39,9 @@ logInterpolateSpec = parallel $ do
 
 linearInterpolateSpec :: SpecWith ()
 linearInterpolateSpec = describe "linear interpolation" $ do
-    let zero = percentage' 0.0
-        one  = percentage' 1.0
-        half = percentage' 0.5
+    let zero = closedUnitInterval' 0.0
+        one  = closedUnitInterval' 1.0
+        half = closedUnitInterval' 0.5
 
     describe "when delta x = 0" $ do
       it "returns x1 when f = 0"

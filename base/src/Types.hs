@@ -19,22 +19,22 @@ import Numeric.MathFunctions.Comparison (addUlps)
 {-@ assume addUlps :: {u:Int | u > 0} -> v:Double -> {r:Double | r > v} @-}
 
 
-{-@ newtype Percentage = MkPercentage { unPercentage :: Btwn 0 1 } @-}
-newtype Percentage = MkPercentage { unPercentage :: Double }
+{-@ newtype ClosedUnitInterval = MkClosedUnitInterval { unClosedUnitInterval :: Btwn 0 1 } @-}
+newtype ClosedUnitInterval = MkClosedUnitInterval { unClosedUnitInterval :: Double }
                      deriving (Show)
 
-instance Arbitrary Percentage where
-  arbitrary = choose (0.0, 1.1) >>= return . MkPercentage
+instance Arbitrary ClosedUnitInterval where
+  arbitrary = choose (0.0, 1.0) >>= return . MkClosedUnitInterval
 
 
-percentage :: Double -> Maybe Percentage
-percentage f | f >= 0 && f <= 1.0 = Just $ MkPercentage f
-             | otherwise          = Nothing
+closedUnitInterval :: Double -> Maybe ClosedUnitInterval
+closedUnitInterval f | f >= 0 && f <= 1.0 = Just $ MkClosedUnitInterval f
+                     | otherwise          = Nothing
 
 
-{-@ percentage' :: Btwn 0 1 -> Percentage @-}
-percentage' :: Double -> Percentage
-percentage' = fromJust . percentage
+{-@ closedUnitInterval' :: Double -> ClosedUnitInterval @-}
+closedUnitInterval' :: Double -> ClosedUnitInterval
+closedUnitInterval' = fromJust . closedUnitInterval
 
 
 {-@ newtype Positive = MkPositive (GT 0) @-}
