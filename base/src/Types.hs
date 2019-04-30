@@ -78,6 +78,7 @@ positive' f = if f > 0
 
 {-@ newtype NonNegative = MkNonNegative { unNonNegative :: GTE 0 } @-}
 newtype NonNegative = MkNonNegative { unNonNegative :: Double }
+             deriving (Show)
 
 instance Arbitrary NonNegative where
   arbitrary = MkNonNegative <$> (fmap abs arbitrary `suchThat` (> 0))
