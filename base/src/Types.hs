@@ -25,8 +25,6 @@ import Numeric.MathFunctions.Comparison (addUlps)
 {-@ assume logBase :: Floating a => a -> a -> {v:a | v >= 0} @-}
 
 {-@ type ClosedUnitIntervalR = Btwn 0 1 @-}
-
-
 {-@ newtype ClosedUnitInterval = MkClosedUnitInterval { unClosedUnitInterval :: {v:Double | (v >= 0.0) && (v <= 1.0)} } @-}
 newtype ClosedUnitInterval = MkClosedUnitInterval { unClosedUnitInterval :: Double }
                      deriving (Show)
@@ -49,7 +47,8 @@ closedUnitInterval' f = if 0 <= f && f <= 1
 
 
 
-{-@ newtype Positive = MkPositive ( unPositive :: GT 0) @-}
+{-@ type PositiveR = GT 0 @-}
+{-@ newtype Positive = MkPositive ( unPositive :: PositiveR) @-}
 newtype Positive = MkPositive { unPositive :: Double }
                    deriving (Show)
 
