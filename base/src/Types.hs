@@ -64,7 +64,7 @@ positive f | f > 0     = Just $ MkPositive f
            | otherwise = Nothing
 
 
-{-@ positive' :: GT 0 -> Positive @-}
+{-@ positive' :: PositiveR -> Positive @-}
 positive' :: Double -> Positive
 positive' f = if f > 0
                  then MkPositive f
