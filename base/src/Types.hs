@@ -131,3 +131,13 @@ toLog2Space = MkLog2 . logBase 2 . coerce
 
 fromLog2Space :: Log2 -> NonNegative
 fromLog2Space = nonNegative' . (2 **) . coerce
+
+
+
+
+newtype FeH = MkFeH { unFeH :: Log10 }
+            deriving (Show)
+
+
+newtype LogAge = MkLogAge { unLogAge :: Log10 }
+               deriving (Show)
