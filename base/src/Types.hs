@@ -76,7 +76,8 @@ positive' f = if f > 0
 
 
 
-{-@ newtype NonNegative = MkNonNegative { unNonNegative :: GTE 0 } @-}
+{-@ type NonNegativeR = GTE 0 @-}
+{-@ newtype NonNegative = MkNonNegative { unNonNegative :: NonNegativeR } @-}
 newtype NonNegative = MkNonNegative { unNonNegative :: Double }
              deriving (Show)
 
@@ -89,7 +90,6 @@ nonNegative f | f >= 0    = Just $ MkNonNegative f
               | otherwise = Nothing
 
 
-{-@ type NonNegativeR = GTE 0 @-}
 {-@ nonNegative' :: NonNegativeR -> NonNegative @-}
 nonNegative' :: Double -> NonNegative
 nonNegative' f = if f >= 0
@@ -135,6 +135,10 @@ fromLog2Space = nonNegative' . (2 **) . coerce
 
 
 
+newtype Percentage = MkPercentage { unPercentage :: ClosedUnitInterval }
+                   deriving (Show)
+
+
 newtype FeH = MkFeH { unFeH :: Log10 }
             deriving (Show)
 
@@ -147,7 +151,18 @@ newtype Magnitude = MkMagnitude { unMagnitude :: Log10 }
                   deriving (Show)
 
 
-newtype HeliumFraction = MkHeliumFraction { unHeliumFraction :: ClosedUnitInterval }
+newtype HeliumFraction = MkHeliumFraction { unHeliumFraction :: Percentage }
+                       deriving (Show)
 
 
 newtype Parallax = MkParallax { unParallax :: NonNegative }
+                 deriving (Show)
+
+
+newtype CarbonFraction = MkCarbonFraction { unCarbonFraction :: Percentage }
+
+
+newtype Mass = MkMass { unMass :: NonNegative }
+
+{-@ sub :: Num a => f:a -> {s:a | s <= f} -> {v:a | v == f - s && v > 0 } @-}
+sub a b = a - b
