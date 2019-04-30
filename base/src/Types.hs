@@ -23,6 +23,8 @@ import Numeric.MathFunctions.Comparison (addUlps)
 {-@ assume addUlps :: {u:Int | u > 0} -> v:Double -> {r:Double | r > v} @-}
 {-@ assume log :: Floating a => a -> {v:a | v >= 0} @-}
 {-@ assume logBase :: Floating a => a -> a -> {v:a | v >= 0} @-}
+{-@ assert GHC.Float.** :: Floating a => {base:a | base >= 0} -> a -> {v:a | v >= 0} @-}
+
 
 {-@ type ClosedUnitIntervalR = Btwn 0 1 @-}
 {-@ newtype ClosedUnitInterval = MkClosedUnitInterval { unClosedUnitInterval :: {v:Double | (v >= 0.0) && (v <= 1.0)} } @-}
@@ -85,7 +87,8 @@ nonNegative f | f >= 0    = Just $ MkNonNegative f
               | otherwise = Nothing
 
 
-{-@ nonNegative' :: GTE 0 -> NonNegative @-}
+{-@ type NonNegativeR = GTE 0 @-}
+{-@ nonNegative' :: NonNegativeR -> NonNegative @-}
 nonNegative' :: Double -> NonNegative
 nonNegative' f = if f >= 0
                     then MkNonNegative f
@@ -110,10 +113,10 @@ newtype Log10 = MkLog10 { unLog10 :: Double }
              deriving (Show)
 
 toLog10Space :: NonNegative -> Log10
-toLog10Space = MkLog10 . (10 **) . coerce
+toLog10Space = MkLog10 . logBase 10 . coerce
 
 fromLog10Space :: Log10 -> NonNegative
-fromLog10Space = nonNegative' . logBase 10 . coerce
+fromLog10Space = nonNegative' . (10 **) . coerce
 
 
 
