@@ -169,6 +169,3 @@ newtype Mass = MkMass { unMass :: NonNegative }
 
 newtype Likelihood = MkLikelihood { unLikelihood :: ClosedUnitInterval }
         deriving (Show)
-
-test :: CarbonFraction
-test = MkCarbonFraction $ MkPercentage $ MkClosedUnitInterval (1.0 :: Double)
