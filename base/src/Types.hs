@@ -96,6 +96,7 @@ nonNegative' f = if f >= 0
 
 
 newtype NaturalLog = MkNaturalLog { unNaturalLog :: Double }
+             deriving (Show)
 
 toNaturalLogSpace :: NonNegative -> NaturalLog
 toNaturalLogSpace = MkNaturalLog . exp . coerce
@@ -107,9 +108,22 @@ fromNaturalLogSpace = nonNegative' . log . coerce
 
 
 newtype Log10 = MkLog10 { unLog10 :: Double }
+             deriving (Show)
 
 toLog10Space :: NonNegative -> Log10
-toLog10Space = MkLog10 . logBase 10 . coerce
+toLog10Space = MkLog10 . (10 **) . coerce
 
 fromLog10Space :: Log10 -> NonNegative
 fromLog10Space = nonNegative' . logBase 10 . coerce
+
+
+
+
+newtype Log2 = MkLog2 { unLog2 :: Double }
+             deriving (Show)
+
+toLog2Space :: NonNegative -> Log2
+toLog2Space = MkLog2 . (2 **) . coerce
+
+fromLog2Space :: Log2 -> NonNegative
+fromLog2Space = nonNegative' . logBase 2 . coerce
