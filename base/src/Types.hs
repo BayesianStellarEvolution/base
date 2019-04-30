@@ -18,12 +18,14 @@ import Numeric.MathFunctions.Comparison (addUlps)
 {-@ type Btwn LO HI = {v:Double | (LO <= v) && (v <= HI)} @-}
 
 
-{-@ assume abs :: _ -> {v:_ | 0 <= v} @-}
+{-@ assume abs :: __-> {v:_ | 0 <= v} @-}
 {-@ assume choose :: System.Random.Random a => t:(a, a) -> Test.QuickCheck.Gen {v:a | (v >= fst t) && (v <= snd t)} @-}
 {-@ assume addUlps :: {u:Int | u > 0} -> v:Double -> {r:Double | r > v} @-}
-
+{-@ assume log :: Floating a => a -> {v:a | v >= 0} @-}
+{-@ assume logBase :: Floating a => a -> a -> {v:a | v >= 0} @-}
 
 {-@ type ClosedUnitIntervalR = Btwn 0 1 @-}
+
 
 {-@ newtype ClosedUnitInterval = MkClosedUnitInterval { unClosedUnitInterval :: {v:Double | (v >= 0.0) && (v <= 1.0)} } @-}
 newtype ClosedUnitInterval = MkClosedUnitInterval { unClosedUnitInterval :: Double }
@@ -95,5 +97,19 @@ nonNegative' f = if f >= 0
 
 newtype NaturalLog = MkNaturalLog { unNaturalLog :: Double }
 
-naturalLog :: Positive -> NaturalLog
-naturalLog = MkNaturalLog . exp . coerce
+toNaturalLogSpace :: NonNegative -> NaturalLog
+toNaturalLogSpace = MkNaturalLog . exp . coerce
+
+fromNaturalLogSpace :: NaturalLog -> NonNegative
+fromNaturalLogSpace = nonNegative' . log . coerce
+
+
+
+
+newtype Log10 = MkLog10 { unLog10 :: Double }
+
+toLog10Space :: NonNegative -> Log10
+toLog10Space = MkLog10 . logBase 10 . coerce
+
+fromLog10Space :: Log10 -> NonNegative
+fromLog10Space = nonNegative' . logBase 10 . coerce
