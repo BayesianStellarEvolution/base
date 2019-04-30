@@ -169,7 +169,3 @@ newtype Mass = MkMass { unMass :: NonNegative }
 
 newtype Likelihood = MkLikelihood { unLikelihood :: ClosedUnitInterval }
         deriving (Show)
-
-
-test :: Mass
-test = MkMass . MkNonNegative $ (8)
