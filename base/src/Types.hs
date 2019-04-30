@@ -21,8 +21,9 @@ import Numeric.MathFunctions.Comparison (addUlps)
 {-@ assume abs :: __-> {v:_ | 0 <= v} @-}
 {-@ assume choose :: System.Random.Random a => t:(a, a) -> Test.QuickCheck.Gen {v:a | (v >= fst t) && (v <= snd t)} @-}
 {-@ assume addUlps :: {u:Int | u > 0} -> v:Double -> {r:Double | r > v} @-}
-{-@ assume log :: Floating a => a -> {v:a | v >= 0} @-}
-{-@ assume logBase :: Floating a => a -> a -> {v:a | v >= 0} @-}
+{-@ assume log :: Floating a => {v:a | v >= 0} -> a @-}
+{-@ assume exp :: Floating a => a -> {v:a | v >= 0} @-}
+{-@ assume logBase :: Floating a => {base:a | base >= 0} -> {v:a | v >= 0} -> a @-}
 {-@ assert GHC.Float.** :: Floating a => {base:a | base >= 0} -> a -> {v:a | v >= 0} @-}
 
 
@@ -101,10 +102,10 @@ newtype NaturalLog = MkNaturalLog { unNaturalLog :: Double }
              deriving (Show)
 
 toNaturalLogSpace :: NonNegative -> NaturalLog
-toNaturalLogSpace = MkNaturalLog . exp . coerce
+toNaturalLogSpace = MkNaturalLog . log . coerce
 
 fromNaturalLogSpace :: NaturalLog -> NonNegative
-fromNaturalLogSpace = nonNegative' . log . coerce
+fromNaturalLogSpace = nonNegative' . exp . coerce
 
 
 
@@ -125,7 +126,7 @@ newtype Log2 = MkLog2 { unLog2 :: Double }
              deriving (Show)
 
 toLog2Space :: NonNegative -> Log2
-toLog2Space = MkLog2 . (2 **) . coerce
+toLog2Space = MkLog2 . logBase 2 . coerce
 
 fromLog2Space :: Log2 -> NonNegative
-fromLog2Space = nonNegative' . logBase 2 . coerce
+fromLog2Space = nonNegative' . (2 **) . coerce
