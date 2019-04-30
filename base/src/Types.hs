@@ -30,7 +30,7 @@ import Numeric.MathFunctions.Comparison (addUlps)
 {-@ type ClosedUnitIntervalR = Btwn 0 1 @-}
 {-@ newtype ClosedUnitInterval = MkClosedUnitInterval { unClosedUnitInterval :: {v:Double | (v >= 0.0) && (v <= 1.0)} } @-}
 newtype ClosedUnitInterval = MkClosedUnitInterval { unClosedUnitInterval :: Double }
-                     deriving (Show)
+        deriving (Show)
 
 instance Arbitrary ClosedUnitInterval where
   arbitrary = choose (0, 1) >>= return . MkClosedUnitInterval
@@ -53,7 +53,7 @@ closedUnitInterval' f = if 0 <= f && f <= 1
 {-@ type PositiveR = GT 0 @-}
 {-@ newtype Positive = MkPositive ( unPositive :: PositiveR) @-}
 newtype Positive = MkPositive { unPositive :: Double }
-                   deriving (Show)
+        deriving (Show)
 
 instance Arbitrary Positive where
   arbitrary = do val <- abs <$> chooseAny
@@ -79,7 +79,7 @@ positive' f = if f > 0
 {-@ type NonNegativeR = GTE 0 @-}
 {-@ newtype NonNegative = MkNonNegative { unNonNegative :: NonNegativeR } @-}
 newtype NonNegative = MkNonNegative { unNonNegative :: Double }
-             deriving (Show)
+        deriving (Show)
 
 instance Arbitrary NonNegative where
   arbitrary = MkNonNegative <$> (fmap abs arbitrary `suchThat` (> 0))
@@ -100,7 +100,7 @@ nonNegative' f = if f >= 0
 
 
 newtype NaturalLog = MkNaturalLog { unNaturalLog :: Double }
-             deriving (Show)
+        deriving (Show)
 
 toNaturalLogSpace :: NonNegative -> NaturalLog
 toNaturalLogSpace = MkNaturalLog . log . coerce
@@ -112,7 +112,7 @@ fromNaturalLogSpace = nonNegative' . exp . coerce
 
 
 newtype Log10 = MkLog10 { unLog10 :: Double }
-             deriving (Show)
+        deriving (Show)
 
 toLog10Space :: NonNegative -> Log10
 toLog10Space = MkLog10 . logBase 10 . coerce
@@ -124,7 +124,7 @@ fromLog10Space = nonNegative' . (10 **) . coerce
 
 
 newtype Log2 = MkLog2 { unLog2 :: Double }
-             deriving (Show)
+        deriving (Show)
 
 toLog2Space :: NonNegative -> Log2
 toLog2Space = MkLog2 . logBase 2 . coerce
@@ -136,33 +136,40 @@ fromLog2Space = nonNegative' . (2 **) . coerce
 
 
 newtype Percentage = MkPercentage { unPercentage :: ClosedUnitInterval }
-                   deriving (Show)
+        deriving (Show)
 
 
 newtype FeH = MkFeH { unFeH :: Log10 }
-            deriving (Show)
+        deriving (Show)
 
 
 newtype LogAge = MkLogAge { unLogAge :: Log10 }
-               deriving (Show)
+        deriving (Show)
 
 
 newtype Magnitude = MkMagnitude { unMagnitude :: Log10 }
-                  deriving (Show)
+        deriving (Show)
 
 
 newtype HeliumFraction = MkHeliumFraction { unHeliumFraction :: Percentage }
-                       deriving (Show)
+        deriving (Show)
 
 
 newtype Parallax = MkParallax { unParallax :: NonNegative }
-                 deriving (Show)
+        deriving (Show)
 
 
 newtype CarbonFraction = MkCarbonFraction { unCarbonFraction :: Percentage }
+        deriving (Show)
 
 
 newtype Mass = MkMass { unMass :: NonNegative }
+        deriving (Show)
 
-{-@ sub :: Num a => f:a -> {s:a | s <= f} -> {v:a | v == f - s && v > 0 } @-}
-sub a b = a - b
+
+newtype Likelihood = MkLikelihood { unLikelihood :: ClosedUnitInterval }
+        deriving (Show)
+
+
+test :: Mass
+test = MkMass . MkNonNegative $ (8)
