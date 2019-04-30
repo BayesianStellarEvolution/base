@@ -141,3 +141,13 @@ newtype FeH = MkFeH { unFeH :: Log10 }
 
 newtype LogAge = MkLogAge { unLogAge :: Log10 }
                deriving (Show)
+
+
+newtype Magnitude = MkMagnitude { unMagnitude :: Log10 }
+                  deriving (Show)
+
+
+newtype HeliumFraction = MkHeliumFraction { unHeliumFraction :: ClosedUnitInterval }
+
+
+newtype Parallax = MkParallax { unParallax :: NonNegative }
