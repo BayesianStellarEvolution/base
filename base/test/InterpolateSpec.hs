@@ -10,8 +10,12 @@ main :: IO ()
 main = hspec spec
 
 
-shouldBeCloseTo :: Double -> Double -> Expectation
-shouldBeCloseTo x1 x2 = abs (x2 - x1) `shouldSatisfy` (< 0.0001)
+shouldBeCloseToD :: (Num a, Ord a, Show a) => a -> a -> a -> Expectation
+shouldBeCloseToD delta x1 x2 = abs (x2 - x1) `shouldSatisfy` (< delta)
+
+
+shouldBeCloseTo :: (Num a, Ord a, Fractional a, Show a) => a -> a -> Expectation
+shouldBeCloseTo = shouldBeCloseToD (realToFrac 0.0001)
 
 
 spec :: SpecWith ()
@@ -29,12 +33,20 @@ logInterpolateSpec = parallel $ do
   describe "log interpolation (per paper)" $ do
     describe "hard-coded" $ do
       it "two average stellar ages" $
-         exp (logInterpolate (log 0) (log 5) (closedUnitInterval' 0.5)) `shouldBeCloseTo` 2.5
+         fromLogSpace (logInterpolate ((toLogSpace 0) :: Log10) (toLogSpace 5) (closedUnitInterval' 0.5))
+           `shouldBeCloseTo` 2.5
 
-    it "is a linear interpolation in log space" $ do
-       property $
-         \(MkPositive x) (MkPositive y) f ->
-            (logInterpolate (log x) (log y) f) `shouldBeCloseTo` log (linearInterpolate x y f)
+    it "is a linear interpolation in log space" $ property $
+       \x y f ->
+         let x_unpacked = unpack x
+             y_unpacked = unpack y
+         in unpack (logInterpolate x y f)
+              `shouldBeCloseTo`
+              linearInterpolate x_unpacked y_unpacked f
+
+  where unpack :: Log10 -> Double
+        unpack = unNonNegative . fromLogSpace
+        shouldBeCloseToL x y = shouldBeCloseTo (unLog10 x) (unLog10 y)
 
 
 linearInterpolateSpec :: SpecWith ()
