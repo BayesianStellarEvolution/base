@@ -17,17 +17,27 @@ Ref:
 -}
 
 
-logInterpolate :: Double -> Double -> ClosedUnitInterval -> Double
-logInterpolate x1 x2 f' = let f = coerce f' in (x2 ** f) * (x1 ** (1 - f))
+logInterpolate_broken :: Double -> Double -> ClosedUnitInterval -> Double
+logInterpolate_broken x1 x2 f' = let f = coerce f' in (x2 ** f) * (x1 ** (1 - f)) -- Note [Log Interpolation]
 {-
 Ref:
   published_other/interpolation/log_interpol.pdf
   unpublished/robinson/interpolation/log_proof.txt
 -}
 
+{- Note [Log interpolation]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-logInterpolate_alt :: Double -> Double -> ClosedUnitInterval -> Double
-logInterpolate_alt x1 x2 f = exp $ linearInterpolate (log x1) (log x2) f
+Log interpolation, despite the proof, is broken. The result of raising a
+negative Fractional to a non-integer power is Complex, which results in NaN in many cases.
+
+We may want to look back at this eventually for performance purposes, but it's
+possible that the (**) is going through exp/log anyway (i.e., no benefit).
+-}
+
+
+logInterpolate :: Double -> Double -> ClosedUnitInterval -> Double
+logInterpolate x1 x2 f = log $ linearInterpolate (exp x1) (exp x2) f
 
 
 class Interpolate a where

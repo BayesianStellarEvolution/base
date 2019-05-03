@@ -27,14 +27,14 @@ spec = do
 logInterpolateSpec :: SpecWith ()
 logInterpolateSpec = parallel $ do
   describe "log interpolation (per paper)" $ do
-    it "is a linear interpolation in log space" $ property $
-       \(MkPositive x) (MkPositive y) f ->
-          (logInterpolate (exp x) (exp y) f) `shouldBeCloseTo` exp (linearInterpolate x y f)
+    describe "hard-coded" $ do
+      it "two average stellar ages" $
+         exp (logInterpolate (log 0) (log 5) (closedUnitInterval' 0.5)) `shouldBeCloseTo` 2.5
 
-  describe "log interpolation (alt)" $ do
-    it "is equivalent to the mathematical method" $ property $
-       \(MkPositive x) (MkPositive y) f ->
-          (logInterpolate_alt (exp x) (exp y) f) `shouldBeCloseTo` logInterpolate (exp x) (exp y) f
+    it "is a linear interpolation in log space" $ do
+       property $
+         \(MkPositive x) (MkPositive y) f ->
+            (logInterpolate (log x) (log y) f) `shouldBeCloseTo` log (linearInterpolate x y f)
 
 
 linearInterpolateSpec :: SpecWith ()
