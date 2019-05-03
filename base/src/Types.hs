@@ -1,11 +1,9 @@
 {-# LANGUAGE OverloadedStrings, BangPatterns #-}
-
 module Types where
 
 import Control.Exception (Exception, throw)
 
 import Data.Coerce (coerce)
-import Data.Maybe (fromJust)
 
 import Test.QuickCheck     (Arbitrary (..))
 import Test.QuickCheck.Gen (choose, chooseAny, suchThat)
