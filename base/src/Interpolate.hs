@@ -43,4 +43,13 @@ class Interpolate a where
   interpolate :: a -> a -> ClosedUnitInterval -> a
 
 instance Interpolate Double where
-  interpolate a b f = linearInterpolate a b f
+  interpolate = linearInterpolate
+
+instance Interpolate NaturalLog where
+  interpolate = logInterpolate
+
+instance Interpolate Log10 where
+  interpolate = logInterpolate
+
+instance Interpolate Log2 where
+  interpolate = logInterpolate
