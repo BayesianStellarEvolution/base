@@ -135,6 +135,18 @@ fromLog2Space = nonNegative' . (2 **) . coerce
 
 
 
+class LogSpace a where
+  fromLogSpace :: a -> NonNegative
+  toLogSpace   :: NonNegative -> a
+
+
+instance LogSpace Log2 where
+  fromLogSpace = fromLog2Space
+  toLogSpace   = toLog2Space
+
+
+
+
 newtype Percentage = MkPercentage { unPercentage :: ClosedUnitInterval }
         deriving (Show)
 
