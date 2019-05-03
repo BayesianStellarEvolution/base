@@ -99,6 +99,13 @@ nonNegative' f = if f >= 0
 
 
 
+class LogSpace a where
+  fromLogSpace :: a -> NonNegative
+  toLogSpace   :: NonNegative -> a
+
+
+
+
 newtype NaturalLog = MkNaturalLog { unNaturalLog :: Double }
         deriving (Show)
 
@@ -120,6 +127,10 @@ toLog10Space = MkLog10 . logBase 10 . coerce
 fromLog10Space :: Log10 -> NonNegative
 fromLog10Space = nonNegative' . (10 **) . coerce
 
+instance LogSpace Log10 where
+  fromLogSpace = fromLog10Space
+  toLogSpace   = toLog10Space
+
 
 
 
@@ -131,14 +142,6 @@ toLog2Space = MkLog2 . logBase 2 . coerce
 
 fromLog2Space :: Log2 -> NonNegative
 fromLog2Space = nonNegative' . (2 **) . coerce
-
-
-
-
-class LogSpace a where
-  fromLogSpace :: a -> NonNegative
-  toLogSpace   :: NonNegative -> a
-
 
 instance LogSpace Log2 where
   fromLogSpace = fromLog2Space
