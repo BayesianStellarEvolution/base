@@ -33,7 +33,7 @@ logInterpolateSpec = parallel $ do
   describe "log interpolation (per paper)" $ do
     describe "hard-coded" $ do
       it "two average stellar ages" $
-         fromLogSpace (logInterpolate ((toLogSpace 0) :: Log10) (toLogSpace 5) (closedUnitInterval' 0.5))
+         unpack (logInterpolate ((toLogSpace 0) :: Log10) (toLogSpace 5) (closedUnitInterval' 0.5))
            `shouldBeCloseTo` 2.5
 
     it "is a linear interpolation in log space" $ property $
@@ -46,7 +46,6 @@ logInterpolateSpec = parallel $ do
 
   where unpack :: Log10 -> Double
         unpack = unNonNegative . fromLogSpace
-        shouldBeCloseToL x y = shouldBeCloseTo (unLog10 x) (unLog10 y)
 
 
 linearInterpolateSpec :: SpecWith ()

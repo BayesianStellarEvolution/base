@@ -9,8 +9,8 @@ interpolateIsochrone :: (Double, Double, Double) -> p -> [Double]
 interpolateIsochrone (feh, y, age) model = [feh, y, age]
 
 
-
-linearInterpolate :: (Num a, Fractional a) => a -> a -> ClosedUnitInterval -> a
+{-@ assume linearInterpolate :: (Fractional a) => f:a -> s:a -> ClosedUnitInterval -> {v:a | f <= v && v <= s} @-}
+linearInterpolate :: Fractional a => a -> a -> ClosedUnitInterval -> a
 linearInterpolate x1 x2 f' = let f = realToFrac . unClosedUnitInterval $ f' in f * x2 + (1 - f) * x1
 {-
 Ref:
@@ -20,7 +20,8 @@ Ref:
 
 
 logInterpolate :: LogSpace a => a -> a -> ClosedUnitInterval -> a
-logInterpolate x1 x2 f = toLogSpace $ linearInterpolate (fromLogSpace x1) (fromLogSpace x2) f -- Note [Log Interpolation]
+logInterpolate x1 x2 f = toLogSpace $ nonNegative' $ linearInterpolate (unpack x1) (unpack x2) f -- Note [Log Interpolation]
+  where unpack = unNonNegative . fromLogSpace
 
 {- Note [Log interpolation]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

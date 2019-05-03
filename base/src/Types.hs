@@ -24,8 +24,8 @@ import Numeric.MathFunctions.Comparison (addUlps)
 {-@ assume log :: Floating a => {v:a | v >= 0} -> a @-}
 {-@ assume exp :: Floating a => a -> {v:a | v >= 0} @-}
 {-@ assume logBase :: Floating a => {base:a | base >= 0} -> {v:a | v >= 0} -> a @-}
-{-@ assert GHC.Float.** :: Floating a => {base:a | base >= 0} -> a -> {v:a | v >= 0} @-}
-{-@ assert GHC.Float.pi :: Floating a => {v:a | v > 3.141592 && v < 3.141593} @-}
+{-@ assume GHC.Float.** :: Floating a => {base:a | base >= 0} -> a -> {v:a | v >= 0} @-}
+{-@ assume GHC.Float.pi :: Floating a => {v:a | v > 3.141592 && v < 3.141593} @-}
 
 {-@ type ClosedUnitIntervalR = Btwn 0 1 @-}
 {-@ newtype ClosedUnitInterval = MkClosedUnitInterval { unClosedUnitInterval :: ClosedUnitIntervalR} @-}
@@ -114,25 +114,6 @@ instance Num NonNegative where
   fromInteger = nonNegative_unsafe . realToFrac
   negate _ = throw NonNegativeBoundsException
 
-instance Fractional NonNegative where
-  (/) (MkNonNegative a) (MkNonNegative b) = MkNonNegative $ a / b
-  recip (MkNonNegative a) = MkNonNegative a
-  fromRational = nonNegative_unsafe . realToFrac
-
-instance Floating NonNegative where
-  pi   = MkNonNegative pi
-  exp  = MkNonNegative . exp . unNonNegative
-  log  = MkNonNegative . log . unNonNegative
-  sin  = MkNonNegative . sin . unNonNegative
-  cos  = MkNonNegative . cos . unNonNegative
-  asin = MkNonNegative . asin . unNonNegative
-  acos = MkNonNegative . acos . unNonNegative
-  atan = MkNonNegative . atan . unNonNegative
-  sinh = MkNonNegative . sinh . unNonNegative
-  cosh = MkNonNegative . cosh . unNonNegative
-  asinh = MkNonNegative . asinh . unNonNegative
-  acosh = MkNonNegative . acosh . unNonNegative
-  atanh = MkNonNegative . atanh . unNonNegative
 
 data NonNegativeBoundsException = NonNegativeBoundsException
      deriving (Show)
