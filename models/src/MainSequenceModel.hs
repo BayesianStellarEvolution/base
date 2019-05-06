@@ -146,7 +146,7 @@ instance Show PrettyAge where
 parseModel ::
   Monad m => ConduitT
     (Either ParseError (PositionRange, MSModelFormat))
-    ((Double, Double), Set Age)
+    (([ByteString], Double, Double), Set Age)
     m
     ()
 parseModel =
@@ -164,7 +164,7 @@ parseModel =
                 next <- await
                 case next of
                   Nothing -> return ()
-                  Just (_, SectionHeader feh _ _ y) -> section nFilters (feh, y) >> go
+                  Just (_, SectionHeader feh _ _ y) -> section nFilters (filters, feh, y) >> go
                   _ -> go
           go
 
@@ -177,7 +177,7 @@ parseModel =
                   Nothing              -> return ()
           in go
 
-        section nFilters feh =
+        section nFilters sectionHeader =
           let go ages = do
                 next <- await
                 case next of
@@ -189,7 +189,7 @@ parseModel =
                   Just (pos, _)                     -> throw $ ParseException pos
                   Nothing                           -> doYield ages
           in go S.empty
-            where doYield ages = yield (feh, ages)
+            where doYield ages = yield (sectionHeader, ages)
 
 
         age nFilters a =

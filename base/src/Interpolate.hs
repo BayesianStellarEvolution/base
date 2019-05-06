@@ -1,8 +1,6 @@
 {-# LANGUAGE FlexibleContexts, StandaloneDeriving, GeneralizedNewtypeDeriving #-}
 module Interpolate where
 
-import Data.Coerce
-
 import Types
 
 interpolateIsochrone :: (Double, Double, Double) -> p -> [Double]

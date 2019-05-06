@@ -6,13 +6,14 @@ import Data.Conduit.Lzma
 import qualified Data.Set as S
 import qualified Data.Vector.Unboxed as V
 
+import Data.ByteString (ByteString)
 import Data.Ord (comparing)
 
 import MainSequenceModel
 import Paths
 import Types
 
-loadModels :: (MonadThrow m, HasModelPath p, MonadUnliftIO m) => p -> m [((Double, Double), S.Set Age)]
+loadModels :: (MonadThrow m, HasModelPath p, MonadUnliftIO m) => p -> m [(([ByteString], Double, Double), S.Set Age)]
 loadModels model = runConduitRes $ loadModel .| sinkList
   where loadModel = sourceFile (modelPath model "models/") .| decompress Nothing .| lexModel .| parseModel
 
@@ -25,9 +26,9 @@ data CAge = CAge LogAge (V.Vector EEP) (V.Vector Mass) [V.Vector Magnitude]
 instance Ord CAge where
   compare = comparing (\(CAge a _ _ _) -> a)
 
-convertModels :: [((Double, Double), S.Set Age)] -> [((FeH, HeliumFraction), S.Set CAge)]
+convertModels :: [([ByteString], (Double, Double), S.Set Age)] -> [((FeH, HeliumFraction), S.Set CAge)]
 convertModels = map go
-  where go ((feh, y), isochrone) =
+  where go (_, (feh, y), isochrone) =
           let feh'  = MkFeH . packLog $ feh
               y'    = MkHeliumFraction . MkPercentage . closedUnitInterval' $ y
               iso'  = S.map repackAge isochrone
