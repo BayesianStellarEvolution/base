@@ -96,7 +96,6 @@ positive_unsafe :: Double -> Positive
 positive_unsafe = MkPositive
 
 
-
 {-@ type NonNegativeR = GTE 0 @-}
 {-@ newtype NonNegative = MkNonNegative { unNonNegative :: NonNegativeR } @-}
 newtype NonNegative = MkNonNegative { unNonNegative :: Double }
@@ -155,7 +154,7 @@ toNaturalLogSpace :: NonNegative -> NaturalLog
 toNaturalLogSpace = MkNaturalLog . log . coerce
 
 fromNaturalLogSpace :: NaturalLog -> NonNegative
-fromNaturalLogSpace = nonNegative' . exp . coerce
+fromNaturalLogSpace = nonNegative_unsafe . exp . coerce
 
 instance LogSpace NaturalLog where
   toLogSpace   = toNaturalLogSpace
@@ -176,7 +175,7 @@ toLog10Space :: NonNegative -> Log10
 toLog10Space = MkLog10 . logBase 10 . coerce
 
 fromLog10Space :: Log10 -> NonNegative
-fromLog10Space = nonNegative' . (10 **) . coerce
+fromLog10Space = nonNegative_unsafe . (10 **) . coerce
 
 instance LogSpace Log10 where
   toLogSpace   = toLog10Space
@@ -197,7 +196,7 @@ toLog2Space :: NonNegative -> Log2
 toLog2Space = MkLog2 . logBase 2 . coerce
 
 fromLog2Space :: Log2 -> NonNegative
-fromLog2Space = nonNegative' . (2 **) . coerce
+fromLog2Space = nonNegative_unsafe . (2 **) . coerce
 
 instance LogSpace Log2 where
   toLogSpace   = toLog2Space
