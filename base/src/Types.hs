@@ -47,18 +47,18 @@ closedUnitInterval f | f >= 0 && f <= 1 = Just $ MkClosedUnitInterval f
                      | otherwise        = Nothing
 
 
-{-@ closedUnitInterval' :: ClosedUnitIntervalR -> ClosedUnitInterval @-}
 closedUnitInterval' :: Double -> ClosedUnitInterval
-closedUnitInterval' = closedUnitInterval_unsafe
+closedUnitInterval' f = if 0 <= f && f <= 1
+                           then MkClosedUnitInterval f
+                           else throw ClosedUnitIntervalBoundsException
 
 
 -- | This drops the refinement on the first parameter for circumstances where
 -- it's non-trivial to prove the refinement. It should only be used by internal
 -- code, if possible.
+{-@ closedUnitInterval_unsafe :: ClosedUnitIntervalR -> ClosedUnitInterval @-}
 closedUnitInterval_unsafe :: Double -> ClosedUnitInterval
-closedUnitInterval_unsafe f = if 0 <= f && f <= 1
-                                 then MkClosedUnitInterval f
-                                 else throw ClosedUnitIntervalBoundsException
+closedUnitInterval_unsafe = MkClosedUnitInterval
 
 
 
@@ -85,15 +85,15 @@ positive f | f > 0     = Just $ MkPositive f
            | otherwise = Nothing
 
 
-{-@ positive' :: PositiveR -> Positive @-}
 positive' :: Double -> Positive
-positive' = positive_unsafe
+positive' f = if f > 0
+                 then MkPositive f
+                 else throw PositiveBoundsException
 
 
+{-@ positive_unsafe :: PositiveR -> Positive @-}
 positive_unsafe :: Double -> Positive
-positive_unsafe f = if f > 0
-                       then MkPositive f
-                       else throw PositiveBoundsException
+positive_unsafe = MkPositive
 
 
 
@@ -106,12 +106,12 @@ instance Arbitrary NonNegative where
   arbitrary = MkNonNegative <$> (fmap abs arbitrary `suchThat` (> 0))
 
 instance Num NonNegative where
-  (+) (MkNonNegative a) (MkNonNegative b) = MkNonNegative      $ a + b
-  (-) (MkNonNegative a) (MkNonNegative b) = nonNegative_unsafe $ a - b
-  (*) (MkNonNegative a) (MkNonNegative b) = MkNonNegative      $ a * b
+  (+) (MkNonNegative a) (MkNonNegative b) = MkNonNegative $ a + b
+  (-) (MkNonNegative a) (MkNonNegative b) = nonNegative'  $ a - b
+  (*) (MkNonNegative a) (MkNonNegative b) = MkNonNegative $ a * b
   abs = id
   signum = const 0
-  fromInteger = nonNegative_unsafe . realToFrac
+  fromInteger = nonNegative' . realToFrac
   negate _ = throw NonNegativeBoundsException
 
 
@@ -126,15 +126,15 @@ nonNegative f | f >= 0    = Just $ MkNonNegative f
               | otherwise = Nothing
 
 
-{-@ nonNegative' :: NonNegativeR -> NonNegative @-}
 nonNegative' :: Double -> NonNegative
-nonNegative' = nonNegative_unsafe
+nonNegative' f = if f >= 0
+                    then MkNonNegative f
+                    else throw NonNegativeBoundsException
 
 
+{-@ nonNegative_unsafe :: NonNegativeR -> NonNegative @-}
 nonNegative_unsafe :: Double -> NonNegative
-nonNegative_unsafe f = if f >= 0
-                          then MkNonNegative f
-                          else throw NonNegativeBoundsException
+nonNegative_unsafe = MkNonNegative
 
 
 
