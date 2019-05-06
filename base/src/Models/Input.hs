@@ -3,11 +3,11 @@ module Models.Input where
 import Conduit
 
 import Data.Conduit.Lzma
+import Data.ByteString   (ByteString)
+import Data.Ord          (comparing)
+import qualified Data.Map as M
 import qualified Data.Set as S
 import qualified Data.Vector.Unboxed as V
-
-import Data.ByteString (ByteString)
-import Data.Ord (comparing)
 
 import MainSequenceModel
 import Paths
@@ -19,8 +19,9 @@ loadModels model = runConduitRes $ loadModel .| sinkList
 
 
 type EEP = Word
+type Filter = ByteString
 
-data CAge = CAge LogAge (V.Vector EEP) (V.Vector Mass) [V.Vector Magnitude]
+data CAge = CAge LogAge (V.Vector EEP) (V.Vector Mass) (M.Map Filter (V.Vector Magnitude))
           deriving (Eq, Show)
 
 instance Ord CAge where
@@ -28,16 +29,19 @@ instance Ord CAge where
 
 convertModels :: [([ByteString], (Double, Double), S.Set Age)] -> [((FeH, HeliumFraction), S.Set CAge)]
 convertModels = map go
-  where go (_, (feh, y), isochrone) =
+  where go (fs, (feh, y), isochrone) =
           let feh'  = MkFeH . packLog $ feh
               y'    = MkHeliumFraction . MkPercentage . closedUnitInterval' $ y
-              iso'  = S.map repackAge isochrone
+              iso'  = S.map (repackAge fs) isochrone
           in ((feh', y'), iso')
-        repackAge (Age age eeps masses magnitudes) =
+        repackAge fs (Age age eeps masses magnitudes) =
           let age'    = MkLogAge . packLog $ age
               eeps'   = V.map toEnum eeps
               masses' = repackMass masses
-              mags'   = rotateMags magnitudes
+              mags'   = rotateMags fs magnitudes
           in CAge age' eeps' masses' mags'
         repackMass v = V.map (MkMass . nonNegative') v
-        rotateMags v = map (V.map (MkMagnitude . packLog)) v
+        rotateMags fs v =
+          let indices    = map fst . zip [0..] $ fs
+              filterSets = map (\n -> V.fromList $ map (MkMagnitude . packLog . (V.! n)) v) indices
+          in M.fromList $ zip fs filterSets
