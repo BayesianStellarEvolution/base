@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleContexts, StandaloneDeriving, GeneralizedNewtypeDeriving #-}
 module Interpolate where
 
 import Data.Coerce
@@ -53,3 +53,7 @@ instance Interpolate Log10 where
 
 instance Interpolate Log2 where
   interpolate = logInterpolate
+
+deriving instance Interpolate FeH
+deriving instance Interpolate LogAge
+deriving instance Interpolate Magnitude
