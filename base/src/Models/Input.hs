@@ -1,4 +1,4 @@
-module Models.Input (loadModels) where
+module Models.Input where
 
 import Conduit
 
@@ -20,20 +20,22 @@ loadModels model = runConduitRes $ loadModel .| sinkList
 
 type EEP = Word
 
-data CAge = CAge LogAge (V.Vector EEP) -- (V.Vector Mass) [V.Vector Magnitude] deriving (Eq, Show)
-          deriving (Eq)
+data CAge = CAge LogAge (V.Vector EEP) (V.Vector Mass) -- [V.Vector Magnitude] deriving (Eq, Show)
+          deriving (Eq, Show)
 
 instance Ord CAge where
-  compare = comparing (\(CAge a _) -> a)
+  compare = comparing (\(CAge a _ _) -> a)
 
 convertModels :: [((Double, Double), S.Set Age)] -> [((FeH, HeliumFraction), S.Set CAge)]
 convertModels = map go
   where go ((feh, y), isochrone) =
-          let feh' = MkFeH . packLog $ feh
-              y'   = MkHeliumFraction . MkPercentage . closedUnitInterval' $ y
-              iso' = S.map repackAge isochrone
+          let feh'  = MkFeH . packLog $ feh
+              y'    = MkHeliumFraction . MkPercentage . closedUnitInterval' $ y
+              iso'  = S.map repackAge isochrone
           in ((feh', y'), iso')
         repackAge (Age age eeps masses magnitudes) =
-          let age'  = MkLogAge . packLog $ age
-              eeps' = V.map toEnum eeps
-          in CAge age' eeps'
+          let age'    = MkLogAge . packLog $ age
+              eeps'   = V.map toEnum eeps
+              masses' = rotateMass masses
+          in CAge age' eeps' masses'
+        rotateMass v = V.map (MkMass . nonNegative') v

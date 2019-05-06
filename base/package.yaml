@@ -32,6 +32,7 @@ dependencies:
     - optparse-applicative
     - QuickCheck
     - vector
+    - vector-th-unbox
 
 executables:
   makeIsochrone:

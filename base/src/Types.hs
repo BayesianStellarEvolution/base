@@ -1,9 +1,11 @@
+{-# LANGUAGE MultiParamTypeClasses, TypeFamilies, TemplateHaskell #-}
 {-# LANGUAGE OverloadedStrings, BangPatterns #-}
 module Types where
 
 import Control.Exception (Exception, throw)
 
 import Data.Coerce (coerce)
+import Data.Vector.Unboxed.Deriving
 
 import Test.QuickCheck     (Arbitrary (..))
 import Test.QuickCheck.Gen (choose, chooseAny, suchThat)
@@ -135,6 +137,11 @@ nonNegative' f = if f >= 0
 nonNegative_unsafe :: Double -> NonNegative
 nonNegative_unsafe = MkNonNegative
 
+derivingUnbox "NonNegative"
+  [t| NonNegative -> Double |]
+  [| unNonNegative |]
+  [| nonNegative'  |]
+
 
 
 
@@ -237,10 +244,13 @@ newtype Parallax = MkParallax { unParallax :: NonNegative }
 newtype CarbonFraction = MkCarbonFraction { unCarbonFraction :: Percentage }
         deriving (Show, Eq, Ord)
 
-
 newtype Mass = MkMass { unMass :: NonNegative }
         deriving (Show, Eq, Ord)
 
+derivingUnbox "Mass"
+  [t| Mass -> NonNegative |]
+  [| unMass |]
+  [| MkMass |]
 
 newtype Likelihood = MkLikelihood { unLikelihood :: ClosedUnitInterval }
         deriving (Show, Eq, Ord)
