@@ -193,6 +193,10 @@ instance LogSpace Log10 where
 instance Arbitrary Log10 where
   arbitrary = toLogSpace <$> arbitrary
 
+derivingUnbox "Log10"
+  [t| Log10 -> Double |]
+  [| unLog10 |]
+  [| MkLog10 |]
 
 
 
@@ -231,6 +235,11 @@ newtype LogAge = MkLogAge { unLogAge :: Log10 }
 
 newtype Magnitude = MkMagnitude { unMagnitude :: Log10 }
         deriving (Show, Eq, Ord)
+
+derivingUnbox "Magnitude"
+  [t| Magnitude -> Log10 |]
+  [| unMagnitude |]
+  [| MkMagnitude |]
 
 
 newtype HeliumFraction = MkHeliumFraction { unHeliumFraction :: Percentage }

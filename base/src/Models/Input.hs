@@ -7,7 +7,6 @@ import qualified Data.Set as S
 import qualified Data.Vector.Unboxed as V
 
 import Data.Ord (comparing)
-import Data.Word
 
 import MainSequenceModel
 import Paths
@@ -20,11 +19,11 @@ loadModels model = runConduitRes $ loadModel .| sinkList
 
 type EEP = Word
 
-data CAge = CAge LogAge (V.Vector EEP) (V.Vector Mass) -- [V.Vector Magnitude] deriving (Eq, Show)
+data CAge = CAge LogAge (V.Vector EEP) (V.Vector Mass) [V.Vector Magnitude]
           deriving (Eq, Show)
 
 instance Ord CAge where
-  compare = comparing (\(CAge a _ _) -> a)
+  compare = comparing (\(CAge a _ _ _) -> a)
 
 convertModels :: [((Double, Double), S.Set Age)] -> [((FeH, HeliumFraction), S.Set CAge)]
 convertModels = map go
@@ -37,5 +36,7 @@ convertModels = map go
           let age'    = MkLogAge . packLog $ age
               eeps'   = V.map toEnum eeps
               masses' = repackMass masses
-          in CAge age' eeps' masses'
+              mags'   = rotateMags magnitudes
+          in CAge age' eeps' masses' mags'
         repackMass v = V.map (MkMass . nonNegative') v
+        rotateMags v = map (V.map (MkMagnitude . packLog)) v
