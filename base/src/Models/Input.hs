@@ -36,6 +36,6 @@ convertModels = map go
         repackAge (Age age eeps masses magnitudes) =
           let age'    = MkLogAge . packLog $ age
               eeps'   = V.map toEnum eeps
-              masses' = rotateMass masses
+              masses' = repackMass masses
           in CAge age' eeps' masses'
-        rotateMass v = V.map (MkMass . nonNegative') v
+        repackMass v = V.map (MkMass . nonNegative') v
