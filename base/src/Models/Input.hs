@@ -27,9 +27,9 @@ data CAge = CAge LogAge (V.Vector EEP) (V.Vector Mass) (M.Map Filter (V.Vector M
 instance Ord CAge where
   compare = comparing (\(CAge a _ _ _) -> a)
 
-convertModels :: [([ByteString], (Double, Double), S.Set Age)] -> [((FeH, HeliumFraction), S.Set CAge)]
+convertModels :: [(([ByteString], Double, Double), S.Set Age)] -> [((FeH, HeliumFraction), S.Set CAge)]
 convertModels = map go
-  where go (fs, (feh, y), isochrone) =
+  where go ((fs, feh, y), isochrone) =
           let feh'  = MkFeH . packLog $ feh
               y'    = MkHeliumFraction . MkPercentage . closedUnitInterval' $ y
               iso'  = S.map (repackAge fs) isochrone
@@ -38,10 +38,9 @@ convertModels = map go
           let age'    = MkLogAge . packLog $ age
               eeps'   = V.map toEnum eeps
               masses' = repackMass masses
-              mags'   = rotateMags fs magnitudes
+              mags'   = repackMags fs magnitudes
           in CAge age' eeps' masses' mags'
         repackMass v = V.map (MkMass . nonNegative') v
-        rotateMags fs v =
-          let indices    = map fst . zip [0..] $ fs
-              filterSets = map (\n -> V.fromList $ map (MkMagnitude . packLog . (V.! n)) v) indices
+        repackMags fs v =
+          let filterSets = map (V.map (MkMagnitude . packLog)) v
           in M.fromList $ zip fs filterSets
