@@ -64,7 +64,7 @@ convertedDsed =
              [ ("U", V.map packMag [12.5728, 11.6188, 11.3348, 11.2034])
              , ("B", V.map packMag [11.7446, 10.9382, 10.6947, 10.5822])
              , ("V", V.map packMag [10.4768, 9.7498,  9.5277,  9.4251])] ])
-  , ((MkFeH . packLog $ -2.0, MkHeliumFraction . MkPercentage . closedUnitInterval' $ 0.2453)
+  , ((packFeH (-2.0), packHeliumFraction 0.2453)
     , [ CAge (packAge 8.397940)
              [2, 3, 4, 5]
              (V.map packMass [0.297801, 0.335484, 0.338823, 0.355097])
