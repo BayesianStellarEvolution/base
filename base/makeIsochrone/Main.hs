@@ -1,7 +1,5 @@
 module Main where
 
-import Control.Arrow
-
 import qualified Data.Set as S
 import Data.Function
 

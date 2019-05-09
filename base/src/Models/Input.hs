@@ -18,16 +18,7 @@ loadModels model = runConduitRes $ loadModel .| sinkList
   where loadModel = sourceFile (modelPath model "models/") .| decompress Nothing .| lexModel .| parseModel
 
 
-type EEP = Word
-type Filter = ByteString
-
-data CAge = CAge LogAge (V.Vector EEP) (V.Vector Mass) (M.Map Filter (V.Vector Magnitude))
-          deriving (Eq, Show)
-
-instance Ord CAge where
-  compare = comparing (\(CAge a _ _ _) -> a)
-
-convertModels :: [(([ByteString], Double, Double), S.Set Age)] -> [((FeH, HeliumFraction), S.Set CAge)]
+convertModels :: [(([ByteString], Double, Double), S.Set Age)] -> [((FeH, HeliumFraction), S.Set Isochrone)]
 convertModels = map go
   where go ((fs, feh, y), isochrone) =
           let feh'  = MkFeH . packLog $ feh
@@ -39,7 +30,7 @@ convertModels = map go
               eeps'   = V.map toEnum eeps
               masses' = repackMass masses
               mags'   = repackMags fs magnitudes
-          in CAge age' eeps' masses' mags'
+          in Isochrone age' eeps' masses' mags'
         repackMass v = V.map (MkMass . nonNegative') v
         repackMags fs v =
           let filterSets = map (V.map (MkMagnitude . packLog)) v

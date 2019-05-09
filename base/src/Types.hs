@@ -5,6 +5,11 @@ module Types where
 import Control.Exception (Exception, throw)
 
 import Data.Coerce (coerce)
+import Data.ByteString   (ByteString)
+import Data.Ord          (comparing)
+import qualified Data.Map as M
+import qualified Data.Set as S
+import qualified Data.Vector.Unboxed as V
 import Data.Vector.Unboxed.Deriving
 
 import Test.QuickCheck     (Arbitrary (..))
@@ -263,3 +268,13 @@ derivingUnbox "Mass"
 
 newtype Likelihood = MkLikelihood { unLikelihood :: ClosedUnitInterval }
         deriving (Show, Eq, Ord)
+
+
+type EEP = Word
+type Filter = ByteString
+
+data Isochrone = Isochrone LogAge (V.Vector EEP) (V.Vector Mass) (M.Map Filter (V.Vector Magnitude))
+          deriving (Eq, Show)
+
+instance Ord Isochrone where
+  compare = comparing (\(Isochrone a _ _ _) -> a)
