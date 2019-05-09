@@ -1,9 +1,11 @@
 {-# LANGUAGE FlexibleContexts, StandaloneDeriving, GeneralizedNewtypeDeriving #-}
 module Interpolate where
 
+import qualified Data.Set as S
+
 import Types
 
-interpolateIsochrone :: (Double, Double, Double) -> p -> [Double]
+interpolateIsochrone :: (Double, Double, Double) -> [((FeH, HeliumFraction), S.Set Isochrone)] -> [Double]
 interpolateIsochrone (feh, y, age) model = [feh, y, age]
 
 

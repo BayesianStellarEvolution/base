@@ -3,8 +3,11 @@ module InterpolateSpec (main, spec) where
 import Test.Hspec
 import Test.QuickCheck hiding (Positive(..))
 
+import Models.Input
 import Interpolate
 import Types
+
+import TestHelpers (dsed)
 
 main :: IO ()
 main = hspec spec
@@ -25,7 +28,7 @@ spec = do
 
   describe "isochrone interpolation" $ do
     it "should function"
-       (interpolateIsochrone (0, 0, 0) [] `shouldBe` [0, 0, 0])
+       (interpolateIsochrone (0, 0, 0) (convertModels dsed) `shouldBe` [0, 0, 0])
 
 
 logInterpolateSpec :: SpecWith ()
