@@ -17,6 +17,7 @@ library:
   source-dirs: src
   exposed-modules:
     - Models.Input
+    - Models.Sample
     - Interpolate
     - Types
 dependencies:
