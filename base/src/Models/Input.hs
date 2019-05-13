@@ -37,8 +37,8 @@ convertModels = map go
           in M.fromList $ zip fs filterSets
 
 
-convertModels_Maps :: [(([ByteString], Double, Double), S.Set Age)] -> [(FeH, (M.Map HeliumFraction (S.Set Isochrone)))]
-convertModels_Maps = map go
+convertModels_Maps :: [(([ByteString], Double, Double), S.Set Age)] -> M.Map FeH (M.Map HeliumFraction (S.Set Isochrone))
+convertModels_Maps = M.fromListWith (M.union) . map go
   where go ((fs, feh, y), isochrone) =
           let feh'  = MkFeH . packLog $ feh
               y'    = MkHeliumFraction . MkPercentage . closedUnitInterval' $ y
