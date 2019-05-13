@@ -4,10 +4,10 @@ import Test.Hspec
 import Test.QuickCheck hiding (Positive(..))
 
 import Models.Input
+import Models.Sample (dsed)
 import Interpolate
 import Types
 
-import TestHelpers (dsed)
 
 main :: IO ()
 main = hspec spec

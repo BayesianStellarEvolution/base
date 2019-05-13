@@ -9,9 +9,9 @@ import Test.Hspec
 
 import MainSequenceModel (Age(..))
 import Models.Input
+import Models.Sample
 import Types
 
-import TestHelpers
 
 main :: IO ()
 main = hspec spec
