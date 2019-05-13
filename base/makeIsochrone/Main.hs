@@ -1,5 +1,6 @@
 module Main where
 
+import qualified Data.Map as M
 import qualified Data.Set as S
 import Data.Function
 
@@ -40,11 +41,11 @@ makeIsochroneOptionParser = MakeIsochroneOptions <$> clusterParser
 
 main :: IO ()
 main = do options <- execParser opts
-          models  <- convertModels <$> loadModels OldDSED
+          models  <- convertModels_Maps <$> loadModels OldDSED
           if length models /= 0
              then do
-               print $ head $ map snd models
-               print $ map fst models
+               print . head . M.toList . M.map M.elems $ models
+               print . M.map M.keys $ models
              else return ()
           print $ interpolateIsochrone (cluster options & feh, cluster options & y, cluster options & age) models
   where
