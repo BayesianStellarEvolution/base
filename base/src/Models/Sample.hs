@@ -1,13 +1,10 @@
 {-# LANGUAGE OverloadedLists, OverloadedStrings #-}
 module Models.Sample where
 
-import Data.ByteString (ByteString)
-import qualified Data.Set as S
-
 import MainSequenceModel (Age(..))
 
+import Models.Input
 
-type RawModel = [(([ByteString], Double, Double), S.Set Age)]
 
 dsed :: RawModel
 dsed = [ ((["U", "B", "V"], -2.5, 0.2451)

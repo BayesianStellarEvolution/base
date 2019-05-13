@@ -4,7 +4,6 @@ import Conduit
 
 import Data.Conduit.Lzma
 import Data.ByteString   (ByteString)
-import Data.Ord          (comparing)
 import qualified Data.Map as M
 import qualified Data.Set as S
 import qualified Data.Vector.Unboxed as V
@@ -14,12 +13,15 @@ import Paths
 import Types
 
 
-loadModels :: (MonadThrow m, HasModelPath p, MonadUnliftIO m) => p -> m [(([ByteString], Double, Double), S.Set Age)]
+type RawModel = [(([ByteString], Double, Double), S.Set Age)]
+type Model    = M.Map FeH (M.Map HeliumFraction (S.Set Isochrone))
+
+loadModels :: (MonadThrow m, HasModelPath p, MonadUnliftIO m) => p -> m RawModel
 loadModels model = runConduitRes $ loadModel .| sinkList
   where loadModel = sourceFile (modelPath model "models/") .| decompress Nothing .| lexModel .| parseModel
 
 
-convertModels :: [(([ByteString], Double, Double), S.Set Age)] -> M.Map FeH (M.Map HeliumFraction (S.Set Isochrone))
+convertModels :: RawModel -> Model
 convertModels = M.fromListWith (M.union) . map go
   where go ((fs, feh, y), isochrone) =
           let feh'  = MkFeH . packLog $ feh
