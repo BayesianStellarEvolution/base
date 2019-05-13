@@ -22,6 +22,9 @@ spec = describe "Models.Input" $ do
   describe "convertModels" $ do
     it "Converts between formats in the expected manner" $
        convertModels dsed `shouldBe` convertedDsed
+  describe "convertModels_Maps" $ do
+    it "Converts between formats in the expected manner" $
+       convertModels_Maps dsed `shouldBe` convertedDsed_Maps
 
 convertedDsed :: [((FeH, HeliumFraction), S.Set Isochrone)]
 convertedDsed =
