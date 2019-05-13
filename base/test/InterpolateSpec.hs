@@ -28,7 +28,7 @@ spec = do
 
   describe "isochrone interpolation" $ do
     it "should function"
-       (interpolateIsochrone (0, 0, 0) (convertModels_Maps dsed) `shouldBe` [0, 0, 0])
+       (interpolateIsochrone (0, 0, 0) (convertModels dsed) `shouldBe` [0, 0, 0])
 
 
 logInterpolateSpec :: SpecWith ()

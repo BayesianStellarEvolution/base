@@ -41,7 +41,7 @@ makeIsochroneOptionParser = MakeIsochroneOptions <$> clusterParser
 
 main :: IO ()
 main = do options <- execParser opts
-          models  <- convertModels_Maps <$> loadModels OldDSED
+          models  <- convertModels <$> loadModels OldDSED
           if length models /= 0
              then do
                print . head . M.toList . M.map M.elems $ models

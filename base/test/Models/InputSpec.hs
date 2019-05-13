@@ -19,13 +19,13 @@ main = hspec spec
 
 spec :: SpecWith ()
 spec = describe "Models.Input" $ do
-  describe "convertModels_Maps" $ do
+  describe "convertModels" $ do
     it "Converts between formats in the expected manner" $
-       convertModels_Maps dsed `shouldBe` convertedDsed_Maps
+       convertModels dsed `shouldBe` convertedDsed
 
 
-convertedDsed_Maps :: M.Map FeH (M.Map HeliumFraction (S.Set Isochrone))
-convertedDsed_Maps =
+convertedDsed :: M.Map FeH (M.Map HeliumFraction (S.Set Isochrone))
+convertedDsed =
   [ (packFeH (-2.5),
     [ (packHeliumFraction 0.2451
         , [ Isochrone (packAge 8.39794)

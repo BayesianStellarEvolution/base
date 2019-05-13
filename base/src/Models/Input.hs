@@ -19,8 +19,8 @@ loadModels model = runConduitRes $ loadModel .| sinkList
   where loadModel = sourceFile (modelPath model "models/") .| decompress Nothing .| lexModel .| parseModel
 
 
-convertModels_Maps :: [(([ByteString], Double, Double), S.Set Age)] -> M.Map FeH (M.Map HeliumFraction (S.Set Isochrone))
-convertModels_Maps = M.fromListWith (M.union) . map go
+convertModels :: [(([ByteString], Double, Double), S.Set Age)] -> M.Map FeH (M.Map HeliumFraction (S.Set Isochrone))
+convertModels = M.fromListWith (M.union) . map go
   where go ((fs, feh, y), isochrone) =
           let feh'  = MkFeH . packLog $ feh
               y'    = MkHeliumFraction . MkPercentage . closedUnitInterval' $ y
