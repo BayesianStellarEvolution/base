@@ -54,3 +54,6 @@ dist/
 
 # liquidHaskell
 *.liquid
+
+# Flycheck
+flycheck_*
