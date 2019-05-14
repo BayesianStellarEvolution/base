@@ -24,6 +24,13 @@ spec = describe "Models.Input" $ do
        convertModels dsed `shouldBe` convertedDsed
 
 
+packHeliumFraction = MkHeliumFraction . MkPercentage . closedUnitInterval'
+packFeH  = MkFeH . packLog
+packAge  = MkLogAge . packLog
+packMass = MkMass . nonNegative'
+packMag  = MkMagnitude . packLog
+
+
 convertedDsed :: M.Map FeH (M.Map HeliumFraction (S.Set Isochrone))
 convertedDsed =
   [ (packFeH (-2.5),
@@ -54,8 +61,3 @@ convertedDsed =
                      [ ("U", V.map packMag [12.6621, 11.9778, 11.8076, 11.7862])
                      , ("B", V.map packMag [11.6918, 11.0959, 10.9477, 10.9296])
                      , ("V", V.map packMag [10.3548, 9.8205,  9.6866,  9.6705])]])])]
-  where packHeliumFraction = MkHeliumFraction . MkPercentage . closedUnitInterval'
-        packFeH  = MkFeH . packLog
-        packAge  = MkLogAge . packLog
-        packMass = MkMass . nonNegative'
-        packMag  = MkMagnitude . packLog
