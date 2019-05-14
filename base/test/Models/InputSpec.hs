@@ -31,7 +31,7 @@ packMass = MkMass . nonNegative'
 packMag  = MkMagnitude . packLog
 
 
-convertedDsed :: M.Map FeH (M.Map HeliumFraction (S.Set Isochrone))
+convertedDsed :: Model
 convertedDsed =
   [ (packFeH (-2.5),
     [ (packHeliumFraction 0.2451
