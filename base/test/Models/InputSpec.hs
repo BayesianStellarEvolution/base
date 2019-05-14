@@ -22,6 +22,8 @@ spec = describe "Models.Input" $ do
   describe "convertModels" $ do
     it "Converts single-y RawModels in the expected manner" $
        convertModels dsed `shouldBe` convertedDsed
+    it "Converts multi-y RawModels in the expected manner" $
+       convertModels dsed `shouldBe` convertedDsed
 
 
 packHeliumFraction = MkHeliumFraction . MkPercentage . closedUnitInterval'
