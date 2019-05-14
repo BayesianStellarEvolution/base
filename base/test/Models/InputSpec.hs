@@ -20,7 +20,7 @@ main = hspec spec
 spec :: SpecWith ()
 spec = describe "Models.Input" $ do
   describe "convertModels" $ do
-    it "Converts between formats in the expected manner" $
+    it "Converts single-y RawModels in the expected manner" $
        convertModels dsed `shouldBe` convertedDsed
 
 
