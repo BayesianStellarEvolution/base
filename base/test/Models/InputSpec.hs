@@ -1,14 +1,10 @@
 {-# LANGUAGE OverloadedLists, OverloadedStrings #-}
 module Models.InputSpec (main, spec) where
 
-import Data.ByteString (ByteString)
-import qualified Data.Map as M
-import qualified Data.Set as S
 import qualified Data.Vector.Unboxed as V
 
 import Test.Hspec
 
-import MainSequenceModel (Age(..))
 import Models.Input
 import Models.Sample
 import Types
