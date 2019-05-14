@@ -29,26 +29,26 @@ packFeH  = MkFeH . packLog
 packAge  = MkLogAge . packLog
 packMass = MkMass . nonNegative'
 packMag  = MkMagnitude . packLog
-
+packMags = V.map packMag
 
 convertedDsed :: Model
 convertedDsed =
-  [ (packFeH (-2.5),
-    [ (packHeliumFraction 0.2451
-        , [ Isochrone (packAge 8.39794)
-                      [2, 3, 4, 5]
-                      (V.map packMass [0.278163, 0.318852, 0.335466, 0.351598])
-                      [ ("U", V.map packMag [11.7478, 11.3514, 11.2028, 11.0572])
-                      , ("B", V.map packMag [11.0484, 10.7092, 10.5813, 10.4578])
-                      , ("V", V.map packMag [9.8499,  9.5412,  9.4241,  9.3119])]
-          , Isochrone (packAge 8.477121)
-                      [2, 3, 4, 5]
-                      (V.map packMass [0.212681, 0.290489, 0.320389, 0.335518])
-                      [ ("U", V.map packMag [12.5728, 11.6188, 11.3348, 11.2034])
-                      , ("B", V.map packMag [11.7446, 10.9382, 10.6947, 10.5822])
-                      , ("V", V.map packMag [10.4768, 9.7498,  9.5277,  9.4251])]])])
-  , (packFeH (-2.0),
-    [(packHeliumFraction 0.2453
+  [ ( packFeH (-2.5)
+    , [( packHeliumFraction 0.2451
+       , [ Isochrone (packAge 8.39794)
+                     [2, 3, 4, 5]
+                     (V.map packMass [0.278163, 0.318852, 0.335466, 0.351598])
+                     [ ("U", V.map packMag [11.7478, 11.3514, 11.2028, 11.0572])
+                     , ("B", V.map packMag [11.0484, 10.7092, 10.5813, 10.4578])
+                     , ("V", V.map packMag [9.8499,  9.5412,  9.4241,  9.3119])]
+         , Isochrone (packAge 8.477121)
+                     [2, 3, 4, 5]
+                     (V.map packMass [0.212681, 0.290489, 0.320389, 0.335518])
+                     [ ("U", V.map packMag [12.5728, 11.6188, 11.3348, 11.2034])
+                     , ("B", V.map packMag [11.7446, 10.9382, 10.6947, 10.5822])
+                     , ("V", V.map packMag [10.4768, 9.7498,  9.5277,  9.4251])]])])
+  , ( packFeH (-2.0)
+    , [( packHeliumFraction 0.2453
        , [ Isochrone (packAge 8.397940)
                      [2, 3, 4, 5]
                      (V.map packMass [0.297801, 0.335484, 0.338823, 0.355097])
@@ -64,4 +64,10 @@ convertedDsed =
 
 
 convertedNewDsed :: Model
-convertedNewDsed = undefined
+convertedNewDsed =
+  [ ( packFeH (-1.0)
+    , [( packHeliumFraction 0.247800
+       , [ Isochrone (packAge 9.0)
+                     [2, 3, 4, 5]
+                     (V.map packMass [0.113315, 0.124680, 0.140813, 0.173692])
+                     [ ("U", packMags [17.03370, 16.62740, 16.12280, 15.25250])]])])]
