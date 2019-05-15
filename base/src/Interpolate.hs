@@ -1,14 +1,41 @@
 {-# LANGUAGE FlexibleContexts, StandaloneDeriving, GeneralizedNewtypeDeriving #-}
 module Interpolate where
 
+import Control.Exception (Exception, throw)
 import qualified Data.Map as M
 import qualified Data.Set as S
 
+import Models.Input (Model)
 import Types
 
-interpolateIsochrone :: (Double, Double, Double) -> M.Map FeH (M.Map HeliumFraction (S.Set Isochrone)) -> [Double]
+
+data EmptyModelException = EmptyModelException
+     deriving (Show)
+
+instance Exception EmptyModelException
+
+
+interpolateIsochrone :: (Double, Double, Double) -> Model -> [Double]
 interpolateIsochrone (feh, y, age) model = [feh, y, age]
 
+
+interpolateFeH :: FeH -> Model -> S.Set Isochrone
+interpolateFeH feh m = go $ M.splitLookup feh m
+  where go (_, (Just m), _) = interpolateY m
+        go (l,        _, r) = case (null l, null r) of
+                                ( True,  True) -> throw EmptyModelException
+                                ( True, False) -> interp . M.findMax $ r
+                                (False,  True) -> interp . M.findMin $ l
+                                (False, False) -> let li = interp . M.findMax $ l
+                                                      ri = interp . M.findMin $ r
+                                                  in interpolateIsochrones li ri
+        interp = interpolateY . snd
+
+interpolateY :: M.Map HeliumFraction (S.Set Isochrone) -> S.Set Isochrone
+interpolateY _ = undefined
+
+interpolateIsochrones :: S.Set Isochrone -> S.Set Isochrone -> S.Set Isochrone
+interpolateIsochrones _ _ = undefined
 
 {-@ assume linearInterpolate :: (Fractional a) => f:a -> s:a -> ClosedUnitInterval -> {v:a | f <= v && v <= s} @-}
 linearInterpolate :: Fractional a => a -> a -> ClosedUnitInterval -> a
