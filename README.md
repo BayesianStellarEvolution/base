@@ -23,24 +23,24 @@ On Ubuntu (or other apt-based platforms):
 sudo apt install liblzma-dev
 ```
 
-#### Cairo development files
+#### zlib development files
 
 On Fedora (or other RPM-based platforms)
 
 ```
-sudo yum install cairo-devel
+sudo yum install zlib-devel
 ```
 
 On Mac OS X with Homebrew:
 
 ```
-brew install cairo
+brew install zlib
 ```
 
 On Ubuntu (or other apt-based platforms):
 
 ```
-sudo apt install libcairo2-dev
+sudo apt install zlib1g-dev
 ```
 
 ### Recommended
