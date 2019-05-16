@@ -81,13 +81,9 @@ logInterpolateSpec = parallel $ do
 
 linearInterpolateSpec :: SpecWith ()
 linearInterpolateSpec = describe "linear interpolation" $ do
-    let zero = closedUnitInterval' 0.0
-        one  = closedUnitInterval' 1.0
-        half = closedUnitInterval' 0.5
-
     it "returns x1 when f = 0.0" $ property $
-       \x y -> (linearInterpolate zero x y `shouldBe` (x :: Double))
+       \x y -> (linearInterpolate (closedUnitInterval' 0.0) x y `shouldBe` (x :: Double))
     it "returns x2 when f = 1.0" $ property $
-       \x y -> (linearInterpolate one x y `shouldBe` (y :: Double))
+       \x y -> (linearInterpolate (closedUnitInterval' 1.0) x y `shouldBe` (y :: Double))
     it "returns halfway between x1 and x2 when f = 0.5" $ property $
-       \x y -> (linearInterpolate half x y `shouldBe` (0.5 * x + 0.5 * (y :: Double)))
+       \x y -> (linearInterpolate (closedUnitInterval' 0.5) x y `shouldBe` (0.5 * x + 0.5 * (y :: Double)))
