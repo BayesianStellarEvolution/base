@@ -33,11 +33,14 @@ interpolateFeH feh m = go $ M.splitLookup feh m
                                                   in undefined li ri
         interp = interpolateY . snd
 
+
 interpolateY :: M.Map HeliumFraction (M.Map LogAge Isochrone) -> S.Set Isochrone
 interpolateY _ = undefined
 
+
 interpolateAges :: S.Set Isochrone -> Isochrone
 interpolateAges _ = undefined
+
 
 interpolateIsochrones :: Isochrone -> Isochrone -> Isochrone
 interpolateIsochrones (Isochrone eeps1 masses1 mags1)
