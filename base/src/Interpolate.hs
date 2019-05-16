@@ -48,6 +48,7 @@ interpolateIsochrones (Isochrone eeps1 masses1 mags1)
       drop2  = toDrop eeps2
   in undefined
 
+
 {-@ assume linearInterpolate :: (Fractional a) => f:a -> s:a -> ClosedUnitInterval -> {v:a | f <= v && v <= s} @-}
 linearInterpolate :: Fractional a => a -> a -> ClosedUnitInterval -> a
 linearInterpolate x1 x2 f' = let f = realToFrac . unClosedUnitInterval $ f' in f * x2 + (1 - f) * x1
