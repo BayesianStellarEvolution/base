@@ -7,6 +7,8 @@ import qualified Data.Vector.Unboxed as V
 import Test.Hspec
 import Test.QuickCheck hiding (Positive(..))
 
+import Debug.Trace
+
 import Models.Input
 import Models.Sample
 import Interpolate
@@ -77,26 +79,9 @@ linearInterpolateSpec = describe "linear interpolation" $ do
         one  = closedUnitInterval' 1.0
         half = closedUnitInterval' 0.5
 
-    describe "when delta x = 0" $ do
-      it "returns x1 when f = 0"
-         (linearInterpolate zero 0.0 0.0 `shouldBe` 0.0)
-      it "returns x2 when f = 1"
-         (linearInterpolate one 0.0 0.0 `shouldBe` 0.0)
-      it "returns x1 or x2"
-         (linearInterpolate half 0.0 0.0 `shouldBe` 0.0)
-
-    describe "when delta x = 5" $ do
-      it "returns x1 when f = 0"
-         (linearInterpolate zero 0.0 5.0 `shouldBe` 0.0)
-      it "returns x2 when f = 1"
-         (linearInterpolate one 0.0 5.0 `shouldBe` 5.0)
-      it "returns halfway between x1 and x2 when f = 0.5"
-         (linearInterpolate half 0.0 5.0 `shouldBe` 2.5)
-
-    describe "when delta x = 4 and x1 is 1" $ do
-      it "returns x1 when f = 0"
-         (linearInterpolate zero 1.0 5.0 `shouldBe` 1.0)
-      it "returns x2 when f = 1"
-         (linearInterpolate one 1.0 5.0 `shouldBe` 5.0)
-      it "returns halfway between x1 and x2 when f = 0.5"
-         (linearInterpolate half 1.0 5.0 `shouldBe` 3.0)
+    it "returns x1 when f = 0.0" $ property $
+       \x y -> (linearInterpolate zero x y `shouldBe` (x :: Double))
+    it "returns x2 when f = 1.0" $ property $
+       \x y -> (linearInterpolate one x y `shouldBe` (y :: Double))
+    it "returns halfway between x1 and x2 when f = 0.5" $ property $
+       \x y -> (linearInterpolate half x y `shouldBe` (0.5 * x + 0.5 * (y :: Double)))
