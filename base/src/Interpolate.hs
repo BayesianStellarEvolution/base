@@ -38,7 +38,9 @@ interpolateAges :: S.Set Isochrone -> Isochrone
 interpolateAges _ = undefined
 
 interpolateIsochrones :: Isochrone -> Isochrone -> Isochrone
-interpolateIsochrones _ _ = undefined
+interpolateIsochrones (Isochrone age1 eeps1 masses1 mags1)
+                      (Isochrone age2 eeps2 masses2 mags2) =
+  undefined
 
 {-@ assume linearInterpolate :: (Fractional a) => f:a -> s:a -> ClosedUnitInterval -> {v:a | f <= v && v <= s} @-}
 linearInterpolate :: Fractional a => a -> a -> ClosedUnitInterval -> a
