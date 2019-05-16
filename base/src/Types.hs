@@ -6,7 +6,6 @@ import Control.Exception (Exception, throw)
 
 import Data.Coerce (coerce)
 import Data.ByteString   (ByteString)
-import Data.Ord          (comparing)
 import qualified Data.Map as M
 import qualified Data.Set as S
 import qualified Data.Vector.Unboxed as V
@@ -273,8 +272,5 @@ newtype Likelihood = MkLikelihood { unLikelihood :: ClosedUnitInterval }
 type EEP = Word
 type Filter = ByteString
 
-data Isochrone = Isochrone LogAge (V.Vector EEP) (V.Vector Mass) (M.Map Filter (V.Vector Magnitude))
+data Isochrone = Isochrone (V.Vector EEP) (V.Vector Mass) (M.Map Filter (V.Vector Magnitude))
           deriving (Eq, Show)
-
-instance Ord Isochrone where
-  compare = comparing (\(Isochrone a _ _ _) -> a)
