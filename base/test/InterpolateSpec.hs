@@ -31,14 +31,14 @@ spec = do
   logInterpolateSpec
 
   describe "isochrone interpolation" $ do
-    it "should return the first when the scaling parameter is 0" $
+    it "should return the first when the scaling parameter is 0.0" $
        (interpolateIsochrones (MkClosedUnitInterval 0.0) i1 i2)
          `shouldBe` (let len = V.length . eeps $ i1
                          trunc = V.drop (len - 1)
                      in (Isochrone (trunc . eeps $ i1)
                                    (trunc . mass $ i1)
                                    (M.map trunc . mags $ i1)))
-    it "should return the second when the scaling parameter is 1" $
+    it "should return the second when the scaling parameter is 1.0" $
        (interpolateIsochrones (MkClosedUnitInterval 1.0) i1 i2)
          `shouldBe` (let trunc = V.take 1
                      in (Isochrone (trunc . eeps $ i2)
