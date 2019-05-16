@@ -28,13 +28,16 @@ interpolateFeH feh m = go $ M.splitLookup feh m
                                 (False,  True) -> interp . M.findMin $ l
                                 (False, False) -> let li = interp . M.findMax $ l
                                                       ri = interp . M.findMin $ r
-                                                  in interpolateIsochrones li ri
+                                                  in undefined li ri
         interp = interpolateY . snd
 
 interpolateY :: M.Map HeliumFraction (S.Set Isochrone) -> S.Set Isochrone
 interpolateY _ = undefined
 
-interpolateIsochrones :: S.Set Isochrone -> S.Set Isochrone -> S.Set Isochrone
+interpolateAges :: S.Set Isochrone -> Isochrone
+interpolateAges _ = undefined
+
+interpolateIsochrones :: Isochrone -> Isochrone -> Isochrone
 interpolateIsochrones _ _ = undefined
 
 {-@ assume linearInterpolate :: (Fractional a) => f:a -> s:a -> ClosedUnitInterval -> {v:a | f <= v && v <= s} @-}
