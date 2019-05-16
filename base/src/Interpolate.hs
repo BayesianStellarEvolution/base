@@ -43,6 +43,9 @@ interpolateIsochrones :: Isochrone -> Isochrone -> Isochrone
 interpolateIsochrones (Isochrone eeps1 masses1 mags1)
                       (Isochrone eeps2 masses2 mags2) =
   let minEep = min (V.minimum eeps1) (V.minimum eeps2)
+      toDrop = V.length . V.takeWhile (< minEep) -- number of records to drop to match EEPs
+      drop1  = toDrop eeps1
+      drop2  = toDrop eeps2
   in undefined
 
 {-@ assume linearInterpolate :: (Fractional a) => f:a -> s:a -> ClosedUnitInterval -> {v:a | f <= v && v <= s} @-}
