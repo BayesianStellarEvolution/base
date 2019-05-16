@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, StandaloneDeriving, GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE FlexibleContexts, StandaloneDeriving, GeneralizedNewtypeDeriving, NoMonomorphismRestriction #-}
 module Interpolate where
 
 import Control.Exception (Exception, throw)
@@ -42,19 +42,29 @@ interpolateAges :: S.Set Isochrone -> Isochrone
 interpolateAges _ = undefined
 
 
-interpolateIsochrones :: Isochrone -> Isochrone -> Isochrone
-interpolateIsochrones (Isochrone eeps1 masses1 mags1)
-                      (Isochrone eeps2 masses2 mags2) =
-  let minEep = min (V.minimum eeps1) (V.minimum eeps2)
+interpolateIsochrones :: ClosedUnitInterval -> Isochrone -> Isochrone -> Isochrone
+interpolateIsochrones f (Isochrone eeps1 masses1 mags1)
+                        (Isochrone eeps2 masses2 mags2) =
+  let minEep = max (V.minimum eeps1) (V.minimum eeps2)
       toDrop = V.length . V.takeWhile (< minEep) -- number of records to drop to match EEPs
       drop1  = toDrop eeps1
       drop2  = toDrop eeps2
-  in undefined
+      dropThenZipWith func v1 v2 =
+        let v1' = V.drop drop1 v1
+            v2' = V.drop drop2 v2
+        in V.zipWith func v1' v2'
+      ensureEeps = V.and $ dropThenZipWith (==) eeps1 eeps2
+      interp = interpolate f
+  in if not ensureEeps
+        then throw UnmatchedEEPException
+        else Isochrone (V.drop drop1 eeps1)
+                       (dropThenZipWith interp masses1 masses2)
+                       (M.unionWith (dropThenZipWith interp) mags1 mags2)
 
 
-{-@ assume linearInterpolate :: (Fractional a) => f:a -> s:a -> ClosedUnitInterval -> {v:a | f <= v && v <= s} @-}
-linearInterpolate :: Fractional a => a -> a -> ClosedUnitInterval -> a
-linearInterpolate x1 x2 f' = let f = realToFrac . unClosedUnitInterval $ f' in f * x2 + (1 - f) * x1
+{-@ assume linearInterpolate :: (Fractional a) => ClosedUnitInterval -> f:a -> s:a -> {v:a | f <= v && v <= s} @-}
+linearInterpolate :: Fractional a => ClosedUnitInterval -> a -> a -> a
+linearInterpolate f' x1 x2 = let f = realToFrac . unClosedUnitInterval $ f' in f * x2 + (1 - f) * x1
 {-
 Ref:
   published_other/interpolation/log_interpol.pdf
@@ -62,8 +72,10 @@ Ref:
 -}
 
 
-logInterpolate :: LogSpace a => a -> a -> ClosedUnitInterval -> a
-logInterpolate x1 x2 f = toLogSpace $ nonNegative' $ linearInterpolate (unpack x1) (unpack x2) f -- Note [Log Interpolation]
+logInterpolate :: LogSpace a => ClosedUnitInterval -> a -> a -> a
+logInterpolate (MkClosedUnitInterval 0.0) x1  _ = x1
+logInterpolate (MkClosedUnitInterval 1.0)  _ x2 = x2
+logInterpolate f x1 x2 = toLogSpace $ nonNegative' $ linearInterpolate f (unpack x1) (unpack x2) -- Note [Log Interpolation]
   where unpack = unNonNegative . fromLogSpace
 
 {- Note [Log interpolation]
@@ -83,7 +95,7 @@ Ref:
 -}
 
 class Interpolate a where
-  interpolate :: a -> a -> ClosedUnitInterval -> a
+  interpolate :: ClosedUnitInterval -> a -> a -> a
 
 instance Interpolate Double where
   interpolate = linearInterpolate
@@ -100,3 +112,6 @@ instance Interpolate Log2 where
 deriving instance Interpolate FeH
 deriving instance Interpolate LogAge
 deriving instance Interpolate Magnitude
+
+deriving instance Interpolate NonNegative
+deriving instance Interpolate Mass

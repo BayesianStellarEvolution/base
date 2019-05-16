@@ -1,10 +1,14 @@
+{-# LANGUAGE NoMonomorphismRestriction #-}
 module InterpolateSpec (main, spec) where
+
+import qualified Data.Map as M
+import qualified Data.Vector.Unboxed as V
 
 import Test.Hspec
 import Test.QuickCheck hiding (Positive(..))
 
 import Models.Input
-import Models.Sample (dsed)
+import Models.Sample
 import Interpolate
 import Types
 
@@ -27,8 +31,24 @@ spec = do
   logInterpolateSpec
 
   describe "isochrone interpolation" $ do
-    it "should function"
-       (interpolateIsochrone (0, 0, 0) (convertModels dsed) `shouldBe` [0, 0, 0])
+    it "should return the first when the scaling parameter is 0" $
+       (interpolateIsochrones (MkClosedUnitInterval 0.0) i1 i2)
+         `shouldBe` (let len = V.length . eeps $ i1
+                         trunc = V.drop (len - 1)
+                     in (Isochrone (trunc . eeps $ i1)
+                                   (trunc . mass $ i1)
+                                   (M.map trunc . mags $ i1)))
+    it "should return the second when the scaling parameter is 1" $
+       (interpolateIsochrones (MkClosedUnitInterval 1.0) i1 i2)
+         `shouldBe` (let trunc = V.take 1
+                     in (Isochrone (trunc . eeps $ i2)
+                                   (trunc . mass $ i2)
+                                   (M.map trunc . mags $ i2)))
+  where i1 = snd . M.findMin . snd . M.findMin . snd . M.findMin . convertModels $ newDsed
+        i2 = snd . M.findMax . snd . M.findMax . snd . M.findMin . convertModels $ newDsed
+        eeps (Isochrone v _ _) = v
+        mass (Isochrone _ v _) = v
+        mags (Isochrone _ _ v) = v
 
 
 logInterpolateSpec :: SpecWith ()
@@ -36,16 +56,16 @@ logInterpolateSpec = parallel $ do
   describe "log interpolation (per paper)" $ do
     describe "hard-coded" $ do
       it "two average stellar ages" $
-         unpack (logInterpolate ((toLogSpace 0) :: Log10) (toLogSpace 5) (closedUnitInterval' 0.5))
+         unpack (logInterpolate (closedUnitInterval' 0.5) ((toLogSpace 0) :: Log10) (toLogSpace 5))
            `shouldBeCloseTo` 2.5
 
     it "is a linear interpolation in log space" $ property $
-       \x y f ->
+       \f x y ->
          let x_unpacked = unpack x
              y_unpacked = unpack y
-         in unpack (logInterpolate x y f)
+         in unpack (logInterpolate f x y)
               `shouldBeCloseTo`
-              linearInterpolate x_unpacked y_unpacked f
+              linearInterpolate f x_unpacked y_unpacked
 
   where unpack :: Log10 -> Double
         unpack = unNonNegative . fromLogSpace
@@ -59,24 +79,24 @@ linearInterpolateSpec = describe "linear interpolation" $ do
 
     describe "when delta x = 0" $ do
       it "returns x1 when f = 0"
-         (linearInterpolate 0.0 0.0 zero `shouldBe` 0.0)
+         (linearInterpolate zero 0.0 0.0 `shouldBe` 0.0)
       it "returns x2 when f = 1"
-         (linearInterpolate 0.0 0.0 one `shouldBe` 0.0)
+         (linearInterpolate one 0.0 0.0 `shouldBe` 0.0)
       it "returns x1 or x2"
-         (linearInterpolate 0.0 0.0 half `shouldBe` 0.0)
+         (linearInterpolate half 0.0 0.0 `shouldBe` 0.0)
 
     describe "when delta x = 5" $ do
       it "returns x1 when f = 0"
-         (linearInterpolate 0.0 5.0 zero `shouldBe` 0.0)
+         (linearInterpolate zero 0.0 5.0 `shouldBe` 0.0)
       it "returns x2 when f = 1"
-         (linearInterpolate 0.0 5.0 one `shouldBe` 5.0)
+         (linearInterpolate one 0.0 5.0 `shouldBe` 5.0)
       it "returns halfway between x1 and x2 when f = 0.5"
-         (linearInterpolate 0.0 5.0 half `shouldBe` 2.5)
+         (linearInterpolate half 0.0 5.0 `shouldBe` 2.5)
 
     describe "when delta x = 4 and x1 is 1" $ do
       it "returns x1 when f = 0"
-         (linearInterpolate 1.0 5.0 zero `shouldBe` 1.0)
+         (linearInterpolate zero 1.0 5.0 `shouldBe` 1.0)
       it "returns x2 when f = 1"
-         (linearInterpolate 1.0 5.0 one `shouldBe` 5.0)
+         (linearInterpolate one 1.0 5.0 `shouldBe` 5.0)
       it "returns halfway between x1 and x2 when f = 0.5"
-         (linearInterpolate 1.0 5.0 half `shouldBe` 3.0)
+         (linearInterpolate half 1.0 5.0 `shouldBe` 3.0)
