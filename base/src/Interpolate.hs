@@ -4,15 +4,17 @@ module Interpolate where
 import Control.Exception (Exception, throw)
 import qualified Data.Map as M
 import qualified Data.Set as S
+import qualified Data.Vector.Unboxed as V
 
 import Models.Input (Model)
 import Types
 
 
-data EmptyModelException = EmptyModelException
+data InterpolationException = EmptyModelException
+                            | UnmatchedEEPException
      deriving (Show)
 
-instance Exception EmptyModelException
+instance Exception InterpolationException
 
 
 interpolateIsochrone :: (Double, Double, Double) -> Model -> [Double]
@@ -40,7 +42,8 @@ interpolateAges _ = undefined
 interpolateIsochrones :: Isochrone -> Isochrone -> Isochrone
 interpolateIsochrones (Isochrone eeps1 masses1 mags1)
                       (Isochrone eeps2 masses2 mags2) =
-  undefined
+  let minEep = min (V.minimum eeps1) (V.minimum eeps2)
+  in undefined
 
 {-@ assume linearInterpolate :: (Fractional a) => f:a -> s:a -> ClosedUnitInterval -> {v:a | f <= v && v <= s} @-}
 linearInterpolate :: Fractional a => a -> a -> ClosedUnitInterval -> a
