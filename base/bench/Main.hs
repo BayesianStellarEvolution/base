@@ -1,18 +1,18 @@
 import Criterion.Main
 
--- The function we're benchmarking.
-fib m | m < 0     = error "negative!"
-      | otherwise = go m
-  where
-    go 0 = 0
-    go 1 = 1
-    go n = go (n-1) + go (n-2)
+import qualified Data.Map.Strict as M
+
+import Interpolate
+import Models.Input
+import Types
 
 -- Our benchmark harness.
-main = defaultMain [
-  bgroup "fib" [ bench "1"  $ whnf fib 1
-               , bench "5"  $ whnf fib 5
-               , bench "9"  $ whnf fib 9
-               , bench "11" $ whnf fib 11
-               ]
-  ]
+main = do
+  model <- loadModels NewDsed
+  let i1 = snd . M.findMin . snd . M.findMin . snd . M.findMin . convertModels $ model
+      i2 = snd . M.findMax . snd . M.findMax . snd . M.findMin . convertModels $ model
+
+  defaultMain [
+    bench "convertModels" $ whnf convertModels model,
+    bench "interpolateIsochrones" $ whnf (interpolateIsochrones (MkClosedUnitInterval 0.5) i1) i2,
+    bgroup "convertModels" []]

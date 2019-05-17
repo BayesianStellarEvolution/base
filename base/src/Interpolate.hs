@@ -2,7 +2,7 @@
 module Interpolate where
 
 import Control.Exception (Exception, throw)
-import qualified Data.Map as M
+import qualified Data.Map.Strict as M
 import qualified Data.Set as S
 import qualified Data.Vector.Unboxed as V
 

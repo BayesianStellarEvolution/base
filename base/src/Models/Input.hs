@@ -1,4 +1,4 @@
-module Models.Input where
+module Models.Input (loadModels, convertModels, Model, RawModel, module Paths) where
 
 import Conduit
 
@@ -6,7 +6,7 @@ import Data.Conduit.Lzma
 import Data.ByteString   (ByteString)
 import Data.Set          (Set)
 
-import qualified Data.Map as M
+import qualified Data.Map.Strict as M
 import qualified Data.Set as S (toList)
 import qualified Data.Vector.Unboxed as V
 
