@@ -233,10 +233,6 @@ newtype FeH = MkFeH { unFeH :: Log10 }
         deriving (Show, Eq, Ord)
 
 
-newtype LogAge = MkLogAge { unLogAge :: Log10 }
-        deriving (Show, Eq, Ord)
-
-
 newtype Magnitude = MkMagnitude { unMagnitude :: Log10 }
         deriving (Show, Eq, Ord)
 
@@ -274,3 +270,11 @@ type Filter = ByteString
 
 data Isochrone = Isochrone (V.Vector EEP) (V.Vector Mass) (M.Map Filter (V.Vector Magnitude))
           deriving (Eq, Show)
+
+
+newtype LogAge = MkLogAge { unLogAge :: Log10 }
+        deriving (Show, Eq, Ord)
+
+
+newtype TotalAge   = MkTotalAge   {   unTotalAge :: LogAge }
+newtype CoolingAge = MkCoolingAge { unCoolingAge :: LogAge }
