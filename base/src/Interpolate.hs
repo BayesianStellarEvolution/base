@@ -18,13 +18,13 @@ instance Exception InterpolationException
 
 
 interpolateIsochrone :: Cluster -> Model -> [Double]
-interpolateIsochrone c model = [feh c, y c, age c]
+interpolateIsochrone c model = []
 
 type HeliumFractionMap = M.Map HeliumFraction LogAgeMap
 type LogAgeMap = M.Map LogAge Isochrone
 
-interpolateFeH :: FeH -> Model -> Isochrone
-interpolateFeH feh m = go $ M.splitLookup feh m
+interpolateFeH :: Cluster -> Model -> Isochrone
+interpolateFeH c m = go $ M.splitLookup (feh c) m
   where go :: (Model, Maybe HeliumFractionMap, Model)
            -> Isochrone
         go (_, (Just v), _) = interpolateHeliumFraction undefined v

@@ -36,7 +36,7 @@ import Numeric.MathFunctions.Comparison (addUlps)
 {-@ type ClosedUnitIntervalR = Btwn 0 1 @-}
 {-@ newtype ClosedUnitInterval = MkClosedUnitInterval { unClosedUnitInterval :: ClosedUnitIntervalR} @-}
 newtype ClosedUnitInterval = MkClosedUnitInterval { unClosedUnitInterval :: Double }
-        deriving (Show, Eq, Ord)
+        deriving (Read, Show, Eq, Ord)
 
 instance Arbitrary ClosedUnitInterval where
   arbitrary = choose (0, 1) >>= return . MkClosedUnitInterval
@@ -159,7 +159,7 @@ class LogSpace a where
 
 
 newtype NaturalLog = MkNaturalLog { unNaturalLog :: Double }
-        deriving (Show, Eq, Ord)
+        deriving (Read, Show, Eq, Ord)
 
 toNaturalLogSpace :: NonNegative -> NaturalLog
 toNaturalLogSpace = MkNaturalLog . log . coerce
@@ -180,7 +180,7 @@ instance Arbitrary NaturalLog where
 
 
 newtype Log10 = MkLog10 { unLog10 :: Double }
-        deriving (Show, Eq, Ord)
+        deriving (Read, Show, Eq, Ord)
 
 toLog10Space :: NonNegative -> Log10
 toLog10Space = MkLog10 . logBase 10 . coerce
@@ -205,7 +205,7 @@ derivingUnbox "Log10"
 
 
 newtype Log2 = MkLog2 { unLog2 :: Double }
-        deriving (Show , Eq, Ord)
+        deriving (Read, Show , Eq, Ord)
 
 toLog2Space :: NonNegative -> Log2
 toLog2Space = MkLog2 . logBase 2 . coerce
@@ -226,11 +226,11 @@ instance Arbitrary Log2 where
 
 
 newtype Percentage = MkPercentage { unPercentage :: ClosedUnitInterval }
-        deriving (Show, Eq, Ord)
+        deriving (Read, Show, Eq, Ord)
 
 
 newtype FeH = MkFeH { unFeH :: Log10 }
-        deriving (Show, Eq, Ord)
+        deriving (Read, Show, Eq, Ord)
 
 
 newtype Magnitude = MkMagnitude { unMagnitude :: Log10 }
@@ -243,7 +243,7 @@ derivingUnbox "Magnitude"
 
 
 newtype HeliumFraction = MkHeliumFraction { unHeliumFraction :: Percentage }
-        deriving (Show, Eq, Ord)
+        deriving (Read, Show, Eq, Ord)
 
 
 newtype Parallax = MkParallax { unParallax :: NonNegative }
@@ -273,7 +273,7 @@ data Isochrone = Isochrone (V.Vector EEP) (V.Vector Mass) (M.Map Filter (V.Vecto
 
 
 newtype LogAge = MkLogAge { unLogAge :: Log10 }
-        deriving (Show, Eq, Ord)
+        deriving (Read, Show, Eq, Ord)
 
 
 newtype TotalAge   = MkTotalAge   {   unTotalAge :: LogAge }
@@ -281,4 +281,5 @@ newtype CoolingAge = MkCoolingAge { unCoolingAge :: LogAge }
 
 
 -- This should probably move?
-data Cluster = Cluster { feh :: Double, y :: Double, age :: Double }
+data Cluster = Cluster { feh :: FeH, heliumFraction :: HeliumFraction, age :: LogAge }
+     deriving (Read, Show)
