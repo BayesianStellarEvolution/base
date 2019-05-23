@@ -27,7 +27,7 @@ interpolateFeH :: Cluster -> Model -> Isochrone
 interpolateFeH c m = go $ M.splitLookup (feh c) m
   where go :: (Model, Maybe HeliumFractionMap, Model)
            -> Isochrone
-        go (_, (Just v), _) = interpolateHeliumFraction undefined v
+        go (_, (Just v), _) = interpolateHeliumFraction c v
         go (l,        _, r) = case (null l, null r) of
                                 ( True,  True) -> throw EmptyModelException
                                 ( True, False) -> interp . M.findMax $ r   -- Note [Extrapolation]
@@ -35,7 +35,7 @@ interpolateFeH c m = go $ M.splitLookup (feh c) m
                                 (False, False) -> let li = interp . M.findMax $ l
                                                       ri = interp . M.findMin $ r
                                                   in undefined li ri
-        interp = interpolateHeliumFraction undefined . snd
+        interp = interpolateHeliumFraction c . snd
 
 {-
 Note [Extrapolation]
@@ -49,8 +49,8 @@ interpolateHeliumFraction :: Cluster -> HeliumFractionMap -> Isochrone
 interpolateHeliumFraction c m = undefined
 
 
-interpolateAge :: LogAge -> LogAgeMap -> Isochrone
-interpolateAge _ = undefined
+interpolateAge :: Cluster -> LogAgeMap -> Isochrone
+interpolateAge c m = undefined
 
 
 interpolateIsochrones :: ClosedUnitInterval -> Isochrone -> Isochrone -> Isochrone
