@@ -1,17 +1,13 @@
 module Main where
 
 import qualified Data.Map as M
-import qualified Data.Set as S
-import Data.Function
 
 import Options.Applicative
 import Data.Semigroup ((<>))
 
 import Models.Input
-import Paths
 import Types
 
-import MainSequenceModel
 import Interpolate
 
 clusterParser :: Parser Cluster
