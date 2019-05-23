@@ -45,7 +45,7 @@ main = do options <- execParser opts
                print . head . M.toList . M.map M.elems $ models
                print . M.map M.keys $ models
              else return ()
-          print $ interpolateIsochrone (cluster options & feh, cluster options & y, cluster options & age) models
+          print $ interpolateIsochrone (cluster options) models
   where
     opts = info (makeIsochroneOptionParser <**> helper)
       ( fullDesc

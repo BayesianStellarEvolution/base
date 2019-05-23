@@ -17,8 +17,8 @@ data InterpolationException = EmptyModelException
 instance Exception InterpolationException
 
 
-interpolateIsochrone :: (Double, Double, Double) -> Model -> [Double]
-interpolateIsochrone (feh, y, age) model = [feh, y, age]
+interpolateIsochrone :: Cluster -> Model -> [Double]
+interpolateIsochrone c model = [feh c, y c, age c]
 
 type HeliumFractionMap = M.Map HeliumFraction LogAgeMap
 type LogAgeMap = M.Map LogAge Isochrone
