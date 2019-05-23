@@ -45,8 +45,8 @@ Extrapolation is not allowed by this code, in that, if an interpolation target f
 -}
 
 
-interpolateHeliumFraction :: HeliumFraction -> HeliumFractionMap -> Isochrone
-interpolateHeliumFraction heliumFraction m = undefined
+interpolateHeliumFraction :: Cluster -> HeliumFractionMap -> Isochrone
+interpolateHeliumFraction c m = undefined
 
 
 interpolateAge :: LogAge -> LogAgeMap -> Isochrone
