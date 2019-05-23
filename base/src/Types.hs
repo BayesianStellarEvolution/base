@@ -278,3 +278,7 @@ newtype LogAge = MkLogAge { unLogAge :: Log10 }
 
 newtype TotalAge   = MkTotalAge   {   unTotalAge :: LogAge }
 newtype CoolingAge = MkCoolingAge { unCoolingAge :: LogAge }
+
+
+-- This should probably move?
+data Cluster = Cluster { feh :: Double, y :: Double, age :: Double }

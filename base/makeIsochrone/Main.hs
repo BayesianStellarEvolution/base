@@ -9,11 +9,10 @@ import Data.Semigroup ((<>))
 
 import Models.Input
 import Paths
+import Types
 
 import MainSequenceModel
 import Interpolate
-
-data Cluster = Cluster { feh :: Double, y :: Double, age :: Double }
 
 clusterParser :: Parser Cluster
 clusterParser = Cluster
@@ -29,7 +28,6 @@ clusterParser = Cluster
                       (long "cluster-age"
                        <> metavar "AGE"
                        <> help "Specify cluster age in log years")
-
 
 data MakeIsochroneOptions = MakeIsochroneOptions
   { cluster :: Cluster }

@@ -20,26 +20,48 @@ instance Exception InterpolationException
 interpolateIsochrone :: (Double, Double, Double) -> Model -> [Double]
 interpolateIsochrone (feh, y, age) model = [feh, y, age]
 
+type HeliumFractionMap = M.Map HeliumFraction LogAgeMap
+type LogAgeMap = M.Map LogAge Isochrone
 
-interpolateFeH :: FeH -> Model -> S.Set Isochrone
+interpolateFeH :: FeH -> Model -> Isochrone
 interpolateFeH feh m = go $ M.splitLookup feh m
-  where go (_, (Just m), _) = interpolateY m
+  where go :: (Model, Maybe HeliumFractionMap, Model)
+           -> Isochrone
+        go (_, (Just v), _) = interpolateHeliumFraction undefined v
         go (l,        _, r) = case (null l, null r) of
                                 ( True,  True) -> throw EmptyModelException
-                                ( True, False) -> interp . M.findMax $ r
+                                ( True, False) -> interp . M.findMax $ r   -- Note [Extrapolation]
                                 (False,  True) -> interp . M.findMin $ l
                                 (False, False) -> let li = interp . M.findMax $ l
                                                       ri = interp . M.findMin $ r
                                                   in undefined li ri
-        interp = interpolateY . snd
+        interp = interpolateHeliumFraction undefined . snd
+
+{-
+Note [Extrapolation]
+~~~~~~~~~~~~~~~~~~~~
+
+Extrapolation is not allowed by this code, in that, if an interpolation target falls between the left or right boundary (null == True conditions for the either list) and a non-null list,
+-}
+
+data Repeatedly a b = Next (a -> b)
+                    | Finally b
 
 
-interpolateY :: M.Map HeliumFraction (M.Map LogAge Isochrone) -> S.Set Isochrone
-interpolateY _ = undefined
+doRepeated i = if i == 0
+                  then Left 0
+                  else Right $ \n -> (i - n)
 
 
-interpolateAges :: S.Set Isochrone -> Isochrone
-interpolateAges _ = undefined
+again n (Right r) = fmap ($n) r
+again _ ( Left l) = l
+
+interpolateHeliumFraction :: HeliumFraction -> HeliumFractionMap -> Isochrone
+interpolateHeliumFraction heliumFraction m = undefined
+
+
+interpolateAge :: LogAge -> LogAgeMap -> Isochrone
+interpolateAge _ = undefined
 
 
 interpolateIsochrones :: ClosedUnitInterval -> Isochrone -> Isochrone -> Isochrone
@@ -78,8 +100,9 @@ logInterpolate (MkClosedUnitInterval 1.0)  _ x2 = x2
 logInterpolate f x1 x2 = toLogSpace $ nonNegative' $ linearInterpolate f (unpack x1) (unpack x2) -- Note [Log Interpolation]
   where unpack = unNonNegative . fromLogSpace
 
-{- Note [Log interpolation]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+{-
+Note [Log interpolation]
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 Log interpolation using the ((x2 ** f) * (x1 ** (1 - f))), despite the proof, is
 broken. The result of raising a negative Fractional (e.g., a non-log value
