@@ -34,7 +34,7 @@ interpolateFeH c m = go $ M.splitLookup (feh c) m
                                 (False,  True) -> interp . M.findMin $ l
                                 (False, False) -> let li = interp . M.findMax $ l
                                                       ri = interp . M.findMin $ r
-                                                  in undefined li ri
+                                                  in interpolateIsochrones undefined li ri
         interp = interpolateHeliumFraction c . snd
 
 {-
