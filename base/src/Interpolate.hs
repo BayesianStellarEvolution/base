@@ -44,17 +44,6 @@ Note [Extrapolation]
 Extrapolation is not allowed by this code, in that, if an interpolation target falls between the left or right boundary (null == True conditions for the either list) and a non-null list,
 -}
 
-data Repeatedly a b = Next (a -> b)
-                    | Finally b
-
-
-doRepeated i = if i == 0
-                  then Left 0
-                  else Right $ \n -> (i - n)
-
-
-again n (Right r) = fmap ($n) r
-again _ ( Left l) = l
 
 interpolateHeliumFraction :: HeliumFraction -> HeliumFractionMap -> Isochrone
 interpolateHeliumFraction heliumFraction m = undefined
