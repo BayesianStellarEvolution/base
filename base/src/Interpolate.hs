@@ -30,11 +30,14 @@ interpolateFeH c m = go $ M.splitLookup (feh c) m
         go (_, (Just v), _) = interpolateHeliumFraction c v
         go (l,        _, r) = case (null l, null r) of
                                 ( True,  True) -> throw EmptyModelException
-                                ( True, False) -> interp . M.findMax $ r   -- Note [Extrapolation]
-                                (False,  True) -> interp . M.findMin $ l
-                                (False, False) -> let li = interp . M.findMax $ l
-                                                      ri = interp . M.findMin $ r
-                                                  in interpolateIsochrones undefined li ri
+                                ( True, False) -> interp . M.findMin $ r   -- Note [Extrapolation]
+                                (False,  True) -> interp . M.findMax $ l
+                                (False, False) -> let l' = M.findMax l
+                                                      r' = M.findMin r
+                                                      li = interp l'
+                                                      ri = interp r'
+                                                      f  = interpolationFraction (fst l') (fst r') (feh c)
+                                                  in interpolateIsochrones f li ri
         interp = interpolateHeliumFraction c . snd
 
 {-
@@ -46,11 +49,25 @@ Extrapolation is not allowed by this code, in that, if an interpolation target f
 
 
 interpolateHeliumFraction :: Cluster -> HeliumFractionMap -> Isochrone
-interpolateHeliumFraction c m = undefined
+interpolateHeliumFraction c m = go $ M.splitLookup (heliumFraction c) m
+  where go :: (HeliumFractionMap, Maybe LogAgeMap, HeliumFractionMap)
+           -> Isochrone
+        go (_, (Just v), _) = interpolateLogAge c v
+        go (l,        _, r) = case (null l, null r) of
+                                ( True,  True) -> throw EmptyModelException
+                                ( True, False) -> interp . M.findMin $ r   -- Note [Extrapolation]
+                                (False,  True) -> interp . M.findMax $ l
+                                (False, False) -> let l' = M.findMax l
+                                                      r' = M.findMin r
+                                                      li = interp l'
+                                                      ri = interp r'
+                                                      f  = interpolationFraction (fst l') (fst r') (heliumFraction c)
+                                                  in interpolateIsochrones f li ri
+        interp = interpolateLogAge c . snd
 
 
-interpolateAge :: Cluster -> LogAgeMap -> Isochrone
-interpolateAge c m = undefined
+interpolateLogAge :: Cluster -> LogAgeMap -> Isochrone
+interpolateLogAge c m = undefined
 
 
 interpolateIsochrones :: ClosedUnitInterval -> Isochrone -> Isochrone -> Isochrone
@@ -76,11 +93,27 @@ interpolateIsochrones f (Isochrone eeps1 masses1 mags1)
 {-@ assume linearInterpolate :: (Fractional a) => ClosedUnitInterval -> f:a -> s:a -> {v:a | f <= v && v <= s} @-}
 linearInterpolate :: Fractional a => ClosedUnitInterval -> a -> a -> a
 linearInterpolate f' x1 x2 = let f = realToFrac . unClosedUnitInterval $ f' in f * x2 + (1 - f) * x1
+
 {-
-Ref:
-  published_other/interpolation/log_interpol.pdf
+Note [References]
+~~~~~~~~~~~~~~~~~
+  eq. 3, published_other/interpolation/log_interpol.pdf
   unpublished/robinson/interpolation/linear_proof.txt
 -}
+
+
+linearInterpolationFraction :: Double -> Double -> Double -> ClosedUnitInterval
+linearInterpolationFraction l h m =
+  let a = m - l
+      span = h - l
+  in closedUnitInterval_unsafe $ a / span
+
+{-
+Note [References]
+~~~~~~~~~~~~~~~~~
+  eq. 2, published_other/interpolation/log_interpol.pdf
+-}
+
 
 
 logInterpolate :: LogSpace a => ClosedUnitInterval -> a -> a -> a
@@ -93,33 +126,48 @@ logInterpolate f x1 x2 = toLogSpace $ nonNegative' $ linearInterpolate f (unpack
 Note [Log interpolation]
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Log interpolation using the ((x2 ** f) * (x1 ** (1 - f))), despite the proof, is
-broken. The result of raising a negative Fractional (e.g., a non-log value
-greater than 0 but less than 1) to a non-integer power is Complex, which results
-in NaN in many cases.
+Log interpolation using the ((x2 ** f) * (x1 ** (1 - f))) equation, despite the
+proof (Note [References]), is broken. The result of raising a negative
+Fractional (e.g., a non-log value greater than 0 but less than 1) to a
+non-integer power is Complex, which results in NaN in many cases.
 
 We may want to look back at this eventually for performance purposes, but it's
-possible that the (**) is going through exp/log anyway (i.e., no benefit).
+possible that the (**) is going through exp/log anyway (i.e., no benefit). One potential fix would be to double memory residency by carrying both log- and non-log-space
 
-Ref:
-  published_other/interpolation/log_interpol.pdf
+Note [References]
+~~~~~~~~~~~~~~~~~
+  eq. 5, published_other/interpolation/log_interpol.pdf
   unpublished/robinson/interpolation/log_proof.txt
 -}
 
+
+logInterpolationFraction :: LogSpace a => a -> a -> a -> ClosedUnitInterval
+logInterpolationFraction l' h' m' = let l = unpack l'
+                                        h = unpack h'
+                                        m = unpack m'
+                                    in linearInterpolationFraction l h m
+  where unpack = unNonNegative . fromLogSpace
+
+
 class Interpolate a where
   interpolate :: ClosedUnitInterval -> a -> a -> a
+  interpolationFraction :: a -> a -> a -> ClosedUnitInterval
 
 instance Interpolate Double where
   interpolate = linearInterpolate
+  interpolationFraction = linearInterpolationFraction
 
 instance Interpolate NaturalLog where
   interpolate = logInterpolate
+  interpolationFraction = logInterpolationFraction
 
 instance Interpolate Log10 where
   interpolate = logInterpolate
+  interpolationFraction = logInterpolationFraction
 
 instance Interpolate Log2 where
   interpolate = logInterpolate
+  interpolationFraction = logInterpolationFraction
 
 deriving instance Interpolate FeH
 deriving instance Interpolate LogAge
@@ -127,3 +175,7 @@ deriving instance Interpolate Magnitude
 
 deriving instance Interpolate NonNegative
 deriving instance Interpolate Mass
+
+deriving instance Interpolate ClosedUnitInterval
+deriving instance Interpolate Percentage
+deriving instance Interpolate HeliumFraction
