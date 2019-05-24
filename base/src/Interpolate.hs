@@ -113,11 +113,14 @@ Note [References]
 -}
 
 
+{-@ linearInterpolationFraction :: l:Double -> h:(GTE l) -> Btwn l h -> ClosedUnitInterval @-}
 linearInterpolationFraction :: Double -> Double -> Double -> ClosedUnitInterval
 linearInterpolationFraction l h m =
   let a = m - l
       span = h - l
-  in closedUnitInterval_unsafe $ a / span
+  in if l == h
+        then closedUnitInterval_unsafe 0
+        else closedUnitInterval' $ a / span
 
 {-
 Note [References]
