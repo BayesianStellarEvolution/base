@@ -281,5 +281,5 @@ newtype CoolingAge = MkCoolingAge { unCoolingAge :: LogAge }
 
 
 -- This should probably move?
-data Cluster = Cluster { feh :: FeH, heliumFraction :: HeliumFraction, age :: LogAge }
+data Cluster = Cluster { feh :: FeH, heliumFraction :: HeliumFraction, logAge :: LogAge }
      deriving (Read, Show)

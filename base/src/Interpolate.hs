@@ -67,7 +67,18 @@ interpolateHeliumFraction c m = go $ M.splitLookup (heliumFraction c) m
 
 
 interpolateLogAge :: Cluster -> LogAgeMap -> Isochrone
-interpolateLogAge c m = undefined
+interpolateLogAge c m = go $ M.splitLookup (logAge c) m
+  where go :: (LogAgeMap, Maybe Isochrone, LogAgeMap)
+           -> Isochrone
+        go (_, (Just v), _) = v
+        go (l,        _, r) = case (null l, null r) of
+                                ( True,  True) -> throw EmptyModelException
+                                ( True, False) -> snd . M.findMin $ r   -- Note [Extrapolation]
+                                (False,  True) -> snd . M.findMax $ l
+                                (False, False) -> let l' = M.findMax l
+                                                      r' = M.findMin r
+                                                      f  = interpolationFraction (fst l') (fst r') (logAge c)
+                                                  in interpolateIsochrones f (snd l') (snd r')
 
 
 interpolateIsochrones :: ClosedUnitInterval -> Isochrone -> Isochrone -> Isochrone
