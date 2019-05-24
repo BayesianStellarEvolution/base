@@ -24,7 +24,7 @@ shouldBeCloseToD delta x1 x2 = abs (x2 - x1) `shouldSatisfy` (< delta)
 
 
 shouldBeCloseTo :: (Num a, Ord a, Fractional a, Show a) => a -> a -> Expectation
-shouldBeCloseTo = shouldBeCloseToD (realToFrac 0.0001)
+shouldBeCloseTo = shouldBeCloseToD (realToFrac 0.000001)
 
 
 spec :: SpecWith ()
@@ -32,25 +32,7 @@ spec = do
   linearInterpolateSpec
   logInterpolateSpec
 
-  describe "isochrone interpolation" $ do
-    it "should return the first when the scaling parameter is 0.0" $
-       (interpolateIsochrones (MkClosedUnitInterval 0.0) i1 i2)
-         `shouldBe` (let len = V.length . eeps $ i1
-                         trunc = V.drop (len - 1)
-                     in (Isochrone (trunc . eeps $ i1)
-                                   (trunc . mass $ i1)
-                                   (M.map trunc . mags $ i1)))
-    it "should return the second when the scaling parameter is 1.0" $
-       (interpolateIsochrones (MkClosedUnitInterval 1.0) i1 i2)
-         `shouldBe` (let trunc = V.take 1
-                     in (Isochrone (trunc . eeps $ i2)
-                                   (trunc . mass $ i2)
-                                   (M.map trunc . mags $ i2)))
-  where i1 = snd . M.findMin . snd . M.findMin . snd . M.findMin . convertModels $ newDsed
-        i2 = snd . M.findMax . snd . M.findMax . snd . M.findMin . convertModels $ newDsed
-        eeps (Isochrone v _ _) = v
-        mass (Isochrone _ v _) = v
-        mags (Isochrone _ _ v) = v
+  isochroneSpec
 
 
 logInterpolateSpec :: SpecWith ()
@@ -87,3 +69,25 @@ linearInterpolateSpec = describe "linear interpolation" $ do
        \x y -> (linearInterpolate (closedUnitInterval' 1.0) x y `shouldBe` (y :: Double))
     it "returns halfway between x1 and x2 when f = 0.5" $ property $
        \x y -> (linearInterpolate (closedUnitInterval' 0.5) x y `shouldBe` (0.5 * x + 0.5 * (y :: Double)))
+
+
+isochroneSpec :: SpecWith ()
+isochroneSpec = describe "isochrone interpolation" $ do
+    it "returns the first when the scaling parameter is 0.0" $
+       (interpolateIsochrones (MkClosedUnitInterval 0.0) i1 i2)
+         `shouldBe` (let len = V.length . eeps $ i1
+                         trunc = V.drop (len - 1)
+                     in (Isochrone (trunc . eeps $ i1)
+                                   (trunc . mass $ i1)
+                                   (M.map trunc . mags $ i1)))
+    it "returns the second when the scaling parameter is 1.0" $
+       (interpolateIsochrones (MkClosedUnitInterval 1.0) i1 i2)
+         `shouldBe` (let trunc = V.take 1
+                     in (Isochrone (trunc . eeps $ i2)
+                                   (trunc . mass $ i2)
+                                   (M.map trunc . mags $ i2)))
+                where i1 = snd . M.findMin . snd . M.findMin . snd . M.findMin . convertModels $ newDsed
+                      i2 = snd . M.findMax . snd . M.findMax . snd . M.findMin . convertModels $ newDsed
+                      eeps (Isochrone v _ _) = v
+                      mass (Isochrone _ v _) = v
+                      mags (Isochrone _ _ v) = v
