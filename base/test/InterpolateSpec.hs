@@ -49,8 +49,8 @@ spec = do
                          else closedUnitInterval' $ (m - l) / (h - l)
          in linearInterpolationFraction l h m `shouldBe` result
 
-  describe "linear interpolation fraction" $ do
-    it "linear interpolation fraction in log space" $ property $
+  describe "log interpolation fraction" $ do
+    it "is linear interpolation fraction in log space" $ property $
        \x y z ->
          let sorted = sort [x, y, z]
              l = sorted !! 0
