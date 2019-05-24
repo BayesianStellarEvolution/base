@@ -49,17 +49,17 @@ spec = do
                          else closedUnitInterval' $ (m - l) / (h - l)
          in linearInterpolationFraction l h m `shouldBe` result
 
-    describe "linear interpolation fraction" $ do
-      it "linear interpolation fraction in log space" $ property $
-         \x y z ->
-           let sorted = sort [x, y, z]
-               l = sorted !! 0
-               m = sorted !! 1
-               h = sorted !! 2
-               lu = unpack l
-               mu = unpack m
-               hu = unpack h
-           in logInterpolationFraction l h m `shouldBe` linearInterpolationFraction lu hu mu
+  describe "linear interpolation fraction" $ do
+    it "linear interpolation fraction in log space" $ property $
+       \x y z ->
+         let sorted = sort [x, y, z]
+             l = sorted !! 0
+             m = sorted !! 1
+             h = sorted !! 2
+             lu = unpack l
+             mu = unpack m
+             hu = unpack h
+         in logInterpolationFraction l h m `shouldBe` linearInterpolationFraction lu hu mu
   where unpack :: Log10 -> Double
         unpack = unNonNegative . fromLogSpace
 
