@@ -1,6 +1,8 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 module InterpolateSpec (main, spec) where
 
+import Data.List (sort)
+
 import qualified Data.Map as M
 import qualified Data.Vector.Unboxed as V
 
@@ -33,6 +35,19 @@ spec = do
   logInterpolateSpec
 
   isochroneSpec
+
+
+  describe "linear interpolation fraction" $ do
+    it "" $ property $
+       \x y z ->
+         let sorted = sort [x, y, z]
+             l = sorted !! 0
+             m = sorted !! 1
+             h = sorted !! 2
+             result = if l == h
+                         then closedUnitInterval_unsafe 0
+                         else closedUnitInterval' $ (m - l) / (h - l)
+         in linearInterpolationFraction l h m `shouldBe` result
 
 
 logInterpolateSpec :: SpecWith ()
