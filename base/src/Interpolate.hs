@@ -19,9 +19,12 @@ instance Exception InterpolationException
 interpolateIsochrone :: Cluster -> Model -> Isochrone
 interpolateIsochrone = (interpolateGeneric feh) `next` (interpolateGeneric heliumFraction) `next` interpolateLogAge
 
+
+next :: a -> a
 next = id
 
 infixr 1 `next`
+
 
 type HeliumFractionMap = M.Map HeliumFraction LogAgeMap
 type LogAgeMap = M.Map LogAge Isochrone
