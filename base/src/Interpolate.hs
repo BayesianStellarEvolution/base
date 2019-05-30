@@ -3,7 +3,6 @@ module Interpolate where
 
 import Control.Exception (Exception, throw)
 import qualified Data.Map.Strict as M
-import qualified Data.Set as S
 import qualified Data.Vector.Unboxed as V
 
 import Models.Input (Model)
@@ -17,8 +16,8 @@ data InterpolationException = EmptyModelException
 instance Exception InterpolationException
 
 
-interpolateIsochrone :: Cluster -> Model -> [Double]
-interpolateIsochrone c model = []
+interpolateIsochrone :: Cluster -> Model -> Isochrone
+interpolateIsochrone = interpolateFeH
 
 type HeliumFractionMap = M.Map HeliumFraction LogAgeMap
 type LogAgeMap = M.Map LogAge Isochrone
@@ -36,7 +35,7 @@ interpolateFeH c m = go $ M.splitLookup (feh c) m
                                                       r' = M.findMin r
                                                       li = interp l'
                                                       ri = interp r'
-                                                      f  = interpolationFraction (fst l') (fst r') (feh c)
+                                                      f  = undefined (fst l') (fst r') (feh c)
                                                   in interpolateIsochrones f li ri
         interp = interpolateHeliumFraction c . snd
 
@@ -55,13 +54,13 @@ interpolateHeliumFraction c m = go $ M.splitLookup (heliumFraction c) m
         go (_, (Just v), _) = interpolateLogAge c v
         go (l,        _, r) = case (null l, null r) of
                                 ( True,  True) -> throw EmptyModelException
-                                ( True, False) -> interp . M.findMin $ r   -- Note [Extrapolation]
+                                ( True, False) -> interp . M.findMin $ r
                                 (False,  True) -> interp . M.findMax $ l
                                 (False, False) -> let l' = M.findMax l
                                                       r' = M.findMin r
                                                       li = interp l'
                                                       ri = interp r'
-                                                      f  = interpolationFraction (fst l') (fst r') (heliumFraction c)
+                                                      f  = undefined (fst l') (fst r') (heliumFraction c)
                                                   in interpolateIsochrones f li ri
         interp = interpolateLogAge c . snd
 
@@ -73,11 +72,11 @@ interpolateLogAge c m = go $ M.splitLookup (logAge c) m
         go (_, (Just v), _) = v
         go (l,        _, r) = case (null l, null r) of
                                 ( True,  True) -> throw EmptyModelException
-                                ( True, False) -> snd . M.findMin $ r   -- Note [Extrapolation]
+                                ( True, False) -> snd . M.findMin $ r
                                 (False,  True) -> snd . M.findMax $ l
                                 (False, False) -> let l' = M.findMax l
                                                       r' = M.findMin r
-                                                      f  = interpolationFraction (fst l') (fst r') (logAge c)
+                                                      f  = undefined (fst l') (fst r') (logAge c)
                                                   in interpolateIsochrones f (snd l') (snd r')
 
 
@@ -101,7 +100,7 @@ interpolateIsochrones f (Isochrone eeps1 masses1 mags1)
                        (M.unionWith (dropThenZipWith interp) mags1 mags2)
 
 
-{-@ assume linearInterpolate :: (Fractional a) => ClosedUnitInterval -> f:a -> s:a -> {v:a | f <= v && v <= s} @-}
+{-@ assume linearInterpolate :: (Fractional a) => ClosedUnitInterval -> l:a -> {h:a | l <= h} -> {v:a | l <= v && v <= h} @-}
 linearInterpolate :: Fractional a => ClosedUnitInterval -> a -> a -> a
 linearInterpolate f' x1 x2 = let f = realToFrac . unClosedUnitInterval $ f' in f * x2 + (1 - f) * x1
 
@@ -113,7 +112,7 @@ Note [References]
 -}
 
 
-{-@ linearInterpolationFraction :: l:Double -> h:(GTE l) -> Btwn l h -> ClosedUnitInterval @-}
+--{-@ linearInterpolationFraction :: l:Double -> h:(GTE l) -> Btwn l h -> ClosedUnitInterval @-}
 linearInterpolationFraction :: Double -> Double -> Double -> ClosedUnitInterval
 linearInterpolationFraction l h m =
   let a = m - l
@@ -127,7 +126,6 @@ Note [References]
 ~~~~~~~~~~~~~~~~~
   eq. 2, published_other/interpolation/log_interpol.pdf
 -}
-
 
 
 logInterpolate :: LogSpace a => ClosedUnitInterval -> a -> a -> a
@@ -165,23 +163,23 @@ logInterpolationFraction l' h' m' = let l = unpack l'
 
 class Interpolate a where
   interpolate :: ClosedUnitInterval -> a -> a -> a
-  interpolationFraction :: a -> a -> a -> ClosedUnitInterval
+--  interpolationFraction :: a -> a -> a -> ClosedUnitInterval
 
 instance Interpolate Double where
   interpolate = linearInterpolate
-  interpolationFraction = linearInterpolationFraction
+--  interpolationFraction = linearInterpolationFraction
 
 instance Interpolate NaturalLog where
   interpolate = logInterpolate
-  interpolationFraction = logInterpolationFraction
+--  interpolationFraction = logInterpolationFraction
 
 instance Interpolate Log10 where
   interpolate = logInterpolate
-  interpolationFraction = logInterpolationFraction
+--  interpolationFraction = logInterpolationFraction
 
 instance Interpolate Log2 where
   interpolate = logInterpolate
-  interpolationFraction = logInterpolationFraction
+--  interpolationFraction = logInterpolationFraction
 
 deriving instance Interpolate FeH
 deriving instance Interpolate LogAge
