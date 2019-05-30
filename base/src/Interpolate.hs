@@ -100,7 +100,7 @@ interpolateIsochrones f (Isochrone eeps1 masses1 mags1)
                        (M.unionWith (dropThenZipWith interp) mags1 mags2)
 
 
-{-@ assume linearInterpolate :: (Fractional a) => ClosedUnitInterval -> l:a -> {h:a | l <= h} -> {v:a | l <= v && v <= h} @-}
+--{-@ assume linearInterpolate :: (Fractional a) => ClosedUnitInterval -> l:a -> {h:a | l <= h} -> {v:a | l <= v && v <= h} @-}
 linearInterpolate :: Fractional a => ClosedUnitInterval -> a -> a -> a
 linearInterpolate f' x1 x2 = let f = realToFrac . unClosedUnitInterval $ f' in f * x2 + (1 - f) * x1
 
@@ -116,10 +116,10 @@ Note [References]
 linearInterpolationFraction :: Double -> Double -> Double -> ClosedUnitInterval
 linearInterpolationFraction l h m =
   let a = m - l
-      span = h - l
+      range = h - l
   in if l == h
         then closedUnitInterval_unsafe 0
-        else closedUnitInterval' $ a / span
+        else closedUnitInterval' $ a / range
 
 {-
 Note [References]
@@ -128,6 +128,7 @@ Note [References]
 -}
 
 
+--{-@ logInterpolate :: LogSpace a => ClosedUnitInterval -> l:a -> {h:a | l <= h} -> {v:a | l <= v && v <= h} @-}
 logInterpolate :: LogSpace a => ClosedUnitInterval -> a -> a -> a
 logInterpolate (MkClosedUnitInterval 0.0) x1  _ = x1
 logInterpolate (MkClosedUnitInterval 1.0)  _ x2 = x2
@@ -163,23 +164,23 @@ logInterpolationFraction l' h' m' = let l = unpack l'
 
 class Interpolate a where
   interpolate :: ClosedUnitInterval -> a -> a -> a
---  interpolationFraction :: a -> a -> a -> ClosedUnitInterval
+  interpolationFraction :: a -> a -> a -> ClosedUnitInterval
 
 instance Interpolate Double where
   interpolate = linearInterpolate
---  interpolationFraction = linearInterpolationFraction
+  interpolationFraction = linearInterpolationFraction
 
 instance Interpolate NaturalLog where
   interpolate = logInterpolate
---  interpolationFraction = logInterpolationFraction
+  interpolationFraction = logInterpolationFraction
 
 instance Interpolate Log10 where
   interpolate = logInterpolate
---  interpolationFraction = logInterpolationFraction
+  interpolationFraction = logInterpolationFraction
 
 instance Interpolate Log2 where
   interpolate = logInterpolate
---  interpolationFraction = logInterpolationFraction
+  interpolationFraction = logInterpolationFraction
 
 deriving instance Interpolate FeH
 deriving instance Interpolate LogAge
