@@ -16,11 +16,11 @@ clusterParser = Cluster
                       (long "cluster-feh"
                        <> metavar "FEH"
                        <> help "Specify cluster FeH")
-                <*> option auto
+                <*> option (maybeReader (fmap (MkHeliumFraction . MkPercentage) . closedUnitInterval . read))
                       (long "cluster-y"
                        <> metavar "Y"
                        <> help "Specify cluster Y")
-                <*> option auto
+                <*> option (maybeReader (Just . MkLogAge . packLog . read))
                       (long "cluster-age"
                        <> metavar "AGE"
                        <> help "Specify cluster age in log years")
