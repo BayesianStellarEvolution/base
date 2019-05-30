@@ -16,6 +16,10 @@ data InterpolationException = EmptyModelException
 instance Exception InterpolationException
 
 
+type HeliumFractionMap = M.Map HeliumFraction LogAgeMap
+type LogAgeMap = M.Map LogAge Isochrone
+
+
 interpolateIsochrone :: Cluster -> Model -> Isochrone
 interpolateIsochrone = (interpolateGeneric feh) `next` (interpolateGeneric heliumFraction) `next` interpolateLogAge
 
@@ -25,9 +29,6 @@ next = id
 
 infixr 1 `next`
 
-
-type HeliumFractionMap = M.Map HeliumFraction LogAgeMap
-type LogAgeMap = M.Map LogAge Isochrone
 
 interpolateGeneric :: (Ord a, Interpolate a) => (t1 -> a) -> (t1 -> t2 -> Isochrone) -> t1 -> M.Map a t2 -> Isochrone
 interpolateGeneric unpack nextLayer c m = go $ M.splitLookup (unpack c) m
