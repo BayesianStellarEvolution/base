@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, StandaloneDeriving, GeneralizedNewtypeDeriving, NoMonomorphismRestriction, ScopedTypeVariables #-}
+{-# LANGUAGE FlexibleContexts, StandaloneDeriving, GeneralizedNewtypeDeriving, NoMonomorphismRestriction #-}
 module Interpolate where
 
 import Control.Exception (Exception, throw)
@@ -17,7 +17,11 @@ instance Exception InterpolationException
 
 
 interpolateIsochrone :: Cluster -> Model -> Isochrone
-interpolateIsochrone = interpolateGeneric feh (interpolateGeneric heliumFraction interpolateLogAge)
+interpolateIsochrone = (interpolateGeneric feh) `next` (interpolateGeneric heliumFraction) `next` interpolateLogAge
+
+next = id
+
+infixr 1 `next`
 
 type HeliumFractionMap = M.Map HeliumFraction LogAgeMap
 type LogAgeMap = M.Map LogAge Isochrone
