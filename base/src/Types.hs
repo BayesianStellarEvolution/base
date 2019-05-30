@@ -280,6 +280,6 @@ newtype TotalAge   = MkTotalAge   {   unTotalAge :: LogAge }
 newtype CoolingAge = MkCoolingAge { unCoolingAge :: LogAge }
 
 
--- This should probably move?
+-- TODO: This should probably move?
 data Cluster = Cluster { feh :: FeH, heliumFraction :: HeliumFraction, logAge :: LogAge }
      deriving (Read, Show)
