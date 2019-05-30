@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, StandaloneDeriving, GeneralizedNewtypeDeriving, NoMonomorphismRestriction #-}
+{-# LANGUAGE FlexibleContexts, StandaloneDeriving, GeneralizedNewtypeDeriving, NoMonomorphismRestriction, ScopedTypeVariables #-}
 module Interpolate where
 
 import Control.Exception (Exception, throw)
@@ -17,16 +17,14 @@ instance Exception InterpolationException
 
 
 interpolateIsochrone :: Cluster -> Model -> Isochrone
-interpolateIsochrone = interpolateFeH
+interpolateIsochrone = interpolateGeneric feh (interpolateGeneric heliumFraction interpolateLogAge)
 
 type HeliumFractionMap = M.Map HeliumFraction LogAgeMap
 type LogAgeMap = M.Map LogAge Isochrone
 
-interpolateFeH :: Cluster -> Model -> Isochrone
-interpolateFeH c m = go $ M.splitLookup (feh c) m
-  where go :: (Model, Maybe HeliumFractionMap, Model)
-           -> Isochrone
-        go (_, (Just v), _) = interpolateHeliumFraction c v
+interpolateGeneric :: (Ord a, Interpolate a) => (t1 -> a) -> (t1 -> t2 -> Isochrone) -> t1 -> M.Map a t2 -> Isochrone
+interpolateGeneric unpack nextLayer c m = go $ M.splitLookup (unpack c) m
+  where go (_, (Just v), _) = nextLayer c v
         go (l,        _, r) = case (null l, null r) of
                                 ( True,  True) -> throw EmptyModelException
                                 ( True, False) -> interp . M.findMin $ r   -- Note [Extrapolation]
@@ -35,9 +33,9 @@ interpolateFeH c m = go $ M.splitLookup (feh c) m
                                                       r' = M.findMin r
                                                       li = interp l'
                                                       ri = interp r'
-                                                      f  = undefined (fst l') (fst r') (feh c)
+                                                      f  = interpolationFraction (fst l') (fst r') (unpack c)
                                                   in interpolateIsochrones f li ri
-        interp = interpolateHeliumFraction c . snd
+        interp = nextLayer c . snd
 
 {-
 Note [Extrapolation]
@@ -45,24 +43,6 @@ Note [Extrapolation]
 
 Extrapolation is not allowed by this code, in that, if an interpolation target falls between the left or right boundary (null == True conditions for the either list) and a non-null list,
 -}
-
-
-interpolateHeliumFraction :: Cluster -> HeliumFractionMap -> Isochrone
-interpolateHeliumFraction c m = go $ M.splitLookup (heliumFraction c) m
-  where go :: (HeliumFractionMap, Maybe LogAgeMap, HeliumFractionMap)
-           -> Isochrone
-        go (_, (Just v), _) = interpolateLogAge c v
-        go (l,        _, r) = case (null l, null r) of
-                                ( True,  True) -> throw EmptyModelException
-                                ( True, False) -> interp . M.findMin $ r
-                                (False,  True) -> interp . M.findMax $ l
-                                (False, False) -> let l' = M.findMax l
-                                                      r' = M.findMin r
-                                                      li = interp l'
-                                                      ri = interp r'
-                                                      f  = undefined (fst l') (fst r') (heliumFraction c)
-                                                  in interpolateIsochrones f li ri
-        interp = interpolateLogAge c . snd
 
 
 interpolateLogAge :: Cluster -> LogAgeMap -> Isochrone
@@ -76,7 +56,7 @@ interpolateLogAge c m = go $ M.splitLookup (logAge c) m
                                 (False,  True) -> snd . M.findMax $ l
                                 (False, False) -> let l' = M.findMax l
                                                       r' = M.findMin r
-                                                      f  = undefined (fst l') (fst r') (logAge c)
+                                                      f  = interpolationFraction (fst l') (fst r') (logAge c)
                                                   in interpolateIsochrones f (snd l') (snd r')
 
 
