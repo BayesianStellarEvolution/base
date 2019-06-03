@@ -5,9 +5,8 @@ module Types where
 import Control.Exception (Exception, throw)
 
 import Data.Coerce (coerce)
-import Data.ByteString   (ByteString)
 import qualified Data.Map.Strict as M
-import qualified Data.Set as S
+import Data.Text
 import qualified Data.Vector.Unboxed as V
 import Data.Vector.Unboxed.Deriving
 
@@ -266,7 +265,7 @@ newtype Likelihood = MkLikelihood { unLikelihood :: ClosedUnitInterval }
 
 
 type EEP = Word
-type Filter = ByteString
+type Filter = Text
 
 data Isochrone = Isochrone (V.Vector EEP) (V.Vector Mass) (M.Map Filter (V.Vector Magnitude))
           deriving (Eq, Show)

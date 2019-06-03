@@ -9,6 +9,8 @@ import Control.Monad (liftM2, when)
 import Data.Attoparsec.ByteString
 import Data.Attoparsec.ByteString.Char8 (isHorizontalSpace, isEndOfLine, double, decimal, char)
 import Data.ByteString (ByteString)
+import Data.Text (Text)
+import Data.Text.Encoding (decodeUtf8)
 import Data.Conduit.Attoparsec
 import Data.Ord (comparing)
 import Data.Set (Set)
@@ -39,11 +41,11 @@ instance Show MSModelException where
     showString $ printf "Incorrect number of filters on line %d. Expected %d, found %d." line nFilters eepFilters
 
 
-data MSModelFormat = Filters [ByteString]
+data MSModelFormat = Filters [Text]
                    | SectionHeader Double Double Double Double
                    | AgeHeader Double
                    | EEP Int Double [Double]
-                   | Comment ByteString
+                   | Comment Text
                    deriving (Show, Eq)
 
 
@@ -62,12 +64,12 @@ endOfLine = AP.endOfLine <?> "end of line"
 
 parseFilters =
   let parser = many1 (satisfy isHorizontalSpace *> takeWhile1 (not . liftM2 (||) isHorizontalSpace isEndOfLine)) <* endOfLine
-  in Filters <$> parser <?> "Filters"
+  in Filters . map decodeUtf8 <$> parser <?> "Filters"
 
 
 parseComment =
   let parser = skipWhile isHorizontalSpace *> takeTill isEndOfLine <* endOfLine
-  in Comment <$> parser <?> "Comment"
+  in Comment . decodeUtf8 <$> parser <?> "Comment"
 
 
 parseEmptyLine :: Parser MSModelFormat
@@ -146,7 +148,7 @@ instance Show PrettyAge where
 parseModel ::
   Monad m => ConduitT
     (Either ParseError (PositionRange, MSModelFormat))
-    (([ByteString], Double, Double), Set Age)
+    (([Text], Double, Double), Set Age)
     m
     ()
 parseModel =

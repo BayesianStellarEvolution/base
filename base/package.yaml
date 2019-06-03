@@ -32,6 +32,7 @@ dependencies:
     - math-functions
     - optparse-applicative
     - QuickCheck
+    - text
     - vector
     - vector-th-unbox
 

@@ -3,8 +3,8 @@ module Models.Input (loadModels, convertModels, Model, RawModel, module Paths) w
 import Conduit
 
 import Data.Conduit.Lzma
-import Data.ByteString   (ByteString)
 import Data.Set          (Set)
+import Data.Text         (Text)
 
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S (toList)
@@ -15,7 +15,7 @@ import Paths
 import Types
 
 
-type RawModel = [(([ByteString], Double, Double), Set Age)]
+type RawModel = [(([Text], Double, Double), Set Age)]
 type Model    = M.Map FeH (M.Map HeliumFraction (M.Map LogAge Isochrone))
 
 loadModels :: (MonadThrow m, HasModelPath p, MonadUnliftIO m) => p -> m RawModel
@@ -25,11 +25,11 @@ loadModels model = runConduitRes $ loadModel .| sinkList
 
 convertModels :: RawModel -> Model
 convertModels = M.fromListWith (M.union) . map go
-  where go ((filters, feh, y), isochrone) =
-          let feh'  = MkFeH . packLog $ feh
+  where go ((filters, f, y), isochrone) =
+          let f'  = MkFeH . packLog $ f
               y'    = MkHeliumFraction . MkPercentage . closedUnitInterval' $ y
               iso'  = M.fromList . map (repackAge filters) . S.toList $ isochrone
-          in (feh', M.insert y' iso' mempty)
+          in (f', M.insert y' iso' mempty)
         repackAge filters (Age age eeps masses magnitudes) =
           let age'    = MkLogAge . packLog $ age
               eeps'   = V.map toEnum eeps
