@@ -1,4 +1,4 @@
-{-# LANGUAGE NoMonomorphismRestriction #-}
+{-# LANGUAGE NoMonomorphismRestriction, TypeApplications #-}
 module InterpolateSpec (main, spec) where
 
 import Data.List (sort)
@@ -8,8 +8,6 @@ import qualified Data.Vector.Unboxed as V
 
 import Test.Hspec
 import Test.QuickCheck hiding (Positive(..))
-
-import Debug.Trace
 
 import Models.Input
 import Models.Sample
@@ -26,42 +24,17 @@ shouldBeCloseToD delta x1 x2 = abs (x2 - x1) `shouldSatisfy` (< delta)
 
 
 shouldBeCloseTo :: (Num a, Ord a, Fractional a, Show a) => a -> a -> Expectation
-shouldBeCloseTo = shouldBeCloseToD (realToFrac 0.000001)
+shouldBeCloseTo = shouldBeCloseToD (realToFrac @Double 0.000001)
 
 
 spec :: SpecWith ()
 spec = do
-  linearInterpolateSpec
   logInterpolateSpec
+  linearInterpolateSpec
 
   isochroneSpec
-
-
-  describe "linear interpolation fraction" $ do
-    it "is in closed unit interval" $ property $
-       \x y z ->
-         let sorted = sort [x, y, z]
-             l = sorted !! 0
-             m = sorted !! 1
-             h = sorted !! 2
-             result = if l == h
-                         then closedUnitInterval_unsafe 0
-                         else closedUnitInterval' $ (m - l) / (h - l)
-         in linearInterpolationFraction l h m `shouldBe` result
-
-  describe "log interpolation fraction" $ do
-    it "is linear interpolation fraction in log space" $ property $
-       \x y z ->
-         let sorted = sort [x, y, z]
-             l = sorted !! 0
-             m = sorted !! 1
-             h = sorted !! 2
-             lu = unpack l
-             mu = unpack m
-             hu = unpack h
-         in logInterpolationFraction l h m `shouldBe` linearInterpolationFraction lu hu mu
-  where unpack :: Log10 -> Double
-        unpack = unNonNegative . fromLogSpace
+{-
+  interpolationFractionSpec -}
 
 
 logInterpolateSpec :: SpecWith ()
@@ -69,7 +42,9 @@ logInterpolateSpec = parallel $ do
   describe "log interpolation (per paper)" $ do
     describe "hard-coded" $ do
       it "two average stellar ages" $
-         unpack (logInterpolate (closedUnitInterval' 0.5) ((toLogSpace 0) :: Log10) (toLogSpace 5))
+         unpack (logInterpolate (closedUnitInterval' 0.5)
+                                (toLogSpace $ nonNegative_unsafe 0)
+                                (toLogSpace $ nonNegative_unsafe 5))
            `shouldBeCloseTo` 2.5
 
     it "is a linear interpolation in log space" $ property $
@@ -120,3 +95,33 @@ isochroneSpec = describe "isochrone interpolation" $ do
                       eeps (Isochrone v _ _) = v
                       mass (Isochrone _ v _) = v
                       mags (Isochrone _ _ v) = v
+
+{-
+interpolationFractionSpec :: SpecWith ()
+interpolationFractionSpec = describe "interpolation fractions" $ do
+  describe "linear" $ do
+    it "is in closed unit interval" $ property $
+       \x y z ->
+         let sorted = sort [x, y, z]
+             l = sorted !! 0
+             m = sorted !! 1
+             h = sorted !! 2
+             result = if l == h
+                         then closedUnitInterval_unsafe 0
+                         else closedUnitInterval' $ (m - l) / (h - l)
+         in (linearInterpolationFraction l h m) `shouldBe` result
+
+  describe "log" $ do
+    it "is linear interpolation fraction in log space" $ property $
+       \x y z ->
+         let sorted = sort [x, y, z]
+             l = sorted !! 0
+             m = sorted !! 1
+             h = sorted !! 2
+             lu = unpack l
+             mu = unpack m
+             hu = unpack h
+         in logInterpolationFraction l h m `shouldBe` linearInterpolationFraction lu hu mu
+  where unpack :: Log10 -> Double
+        unpack = unNonNegative . fromLogSpace
+-}
