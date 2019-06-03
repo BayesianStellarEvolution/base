@@ -109,7 +109,7 @@ newtype NonNegative = MkNonNegative { unNonNegative :: Double }
 instance Arbitrary NonNegative where
   arbitrary = MkNonNegative <$> (fmap abs arbitrary `suchThat` (> 0))
 
-{-
+
 instance Num NonNegative where
   (+) (MkNonNegative a) (MkNonNegative b) = MkNonNegative $ a + b
   (-) (MkNonNegative a) (MkNonNegative b) = nonNegative'  $ a - b
@@ -118,7 +118,7 @@ instance Num NonNegative where
   signum = const 0
   fromInteger = nonNegative' . realToFrac
   negate _ = throw NonNegativeBoundsException
--}
+
 
 data NonNegativeBoundsException = NonNegativeBoundsException
      deriving (Show)
