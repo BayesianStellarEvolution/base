@@ -26,11 +26,12 @@ clusterParser = Cluster
                        <> help "Specify cluster age in log years")
 
 data MakeIsochroneOptions = MakeIsochroneOptions
-  { cluster :: Cluster }
+  { cluster   :: Cluster
+  , modelName :: String }
 
 
 makeIsochroneOptionParser :: Parser MakeIsochroneOptions
-makeIsochroneOptionParser = MakeIsochroneOptions <$> clusterParser
+makeIsochroneOptionParser = MakeIsochroneOptions <$> clusterParser <*> option auto (long "model" <> metavar "MODEL" <> help "Specify model. One of:Old_Dsed\nNew_Dsed")
 
 
 main :: IO ()

@@ -43,7 +43,7 @@ logInterpolateSpec = parallel $ do
     describe "hard-coded" $ do
       it "two average stellar ages" $
          unpack (logInterpolate (closedUnitInterval' 0.5)
-                                (toLogSpace $ nonNegative_unsafe 0)
+                                (toLogSpace 0)
                                 (toLogSpace $ nonNegative_unsafe 5))
            `shouldBeCloseTo` 2.5
 
@@ -97,6 +97,12 @@ isochroneSpec = describe "isochrone interpolation" $ do
                       mags (Isochrone _ _ v) = v
 
 {-
+TODO [LiquidHaskell Breakage]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+These seem to break liquid haskell (potentially non-terminating, certainly
+slow). My guess is the sorting causes them to have a spasm, but I really don't
+know.
+
 interpolationFractionSpec :: SpecWith ()
 interpolationFractionSpec = describe "interpolation fractions" $ do
   describe "linear" $ do
