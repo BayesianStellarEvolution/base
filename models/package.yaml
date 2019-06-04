@@ -25,6 +25,13 @@ dependencies:
     - text
     - vector
 
+executables:
+  testModelArchive:                                                                                   
+    main: Main.hs
+    source-dirs: testModelArchive
+    dependencies:
+      - base
+
 tests:
   model-tests:
     main: Spec.hs
