@@ -1,4 +1,12 @@
-module Models.Input (loadModels, convertModels, Model, RawModel, module Paths) where
+module Models.Input ( loadModels
+                    , convertModels
+                    , fetchCompactModel
+                    , Model
+                    , RawModel
+                    , module Paths) where
+
+-- Replace this with the `compact` library?
+import GHC.Compact
 
 import Conduit
 
@@ -40,3 +48,7 @@ convertModels = M.fromListWith (M.union) . map go
         repackMags filters v =
           let filterSets = map (V.map (MkMagnitude . packLog)) v
           in M.fromList $ zip filters filterSets
+
+
+fetchCompactModel :: HasModelPath p => p -> IO (Model)
+fetchCompactModel = fmap convertModels . loadModels

@@ -28,6 +28,7 @@ dependencies:
     - conduit
     - conduit-extra
     - containers
+    - ghc-compact
     - lzma-conduit
     - math-functions
     - optparse-applicative
