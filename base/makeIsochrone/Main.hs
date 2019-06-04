@@ -27,16 +27,20 @@ clusterParser = Cluster
 
 data MakeIsochroneOptions = MakeIsochroneOptions
   { cluster   :: Cluster
-  , modelName :: String }
+  , modelName :: MSModel }
 
 
 makeIsochroneOptionParser :: Parser MakeIsochroneOptions
-makeIsochroneOptionParser = MakeIsochroneOptions <$> clusterParser <*> option auto (long "model" <> metavar "MODEL" <> help "Specify model. One of:Old_Dsed\nNew_Dsed")
+makeIsochroneOptionParser = MakeIsochroneOptions <$> clusterParser
+                                                 <*> option auto
+                                                            (long "model"
+                                                             <> metavar "MODEL"
+                                                             <> help "Specify model. One of: {OldDsed, NewDsed}")
 
 
 main :: IO ()
 main = do options <- execParser opts
-          models  <- convertModels <$> loadModels OldDsed
+          models  <- convertModels <$> loadModels (modelName $ options)
           print $ interpolateIsochrone (cluster options) models
   where
     opts = info (makeIsochroneOptionParser <**> helper)
