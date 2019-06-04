@@ -50,5 +50,5 @@ convertModels = M.fromListWith (M.union) . map go
           in M.fromList $ zip filters filterSets
 
 
-fetchCompactModel :: HasModelPath p => p -> IO (Model)
-fetchCompactModel = fmap convertModels . loadModels
+fetchCompactModel :: HasModelPath p => p -> IO (Compact Model)
+fetchCompactModel = (compact =<<) . fmap convertModels . loadModels
