@@ -7,6 +7,7 @@ import Options.Applicative
 import Data.Semigroup ((<>))
 import Data.Vector (Vector)
 import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as U
 
 import Text.Printf
 
@@ -47,8 +48,8 @@ main :: IO ()
 main = do options <- execParser opts
           models  <- convertModels <$> loadModels (modelName $ options)
           let (Isochrone eeps masses magnitudes) = interpolateIsochrone (cluster options) models
-              filters = V.fromList . concatMap undefined $ M.elems magnitudes
-          V.mapM_ (\(a, b, c) -> printf "%d %0.6f %s\n" a b c) $
+              filters = V.fromList $ map (\i -> concatMap (\v -> printf " %0.6f" (unpackLog . unMagnitude $ v U.! i)) $ M.elems magnitudes) [0.. ((subtract 1) . U.length . head $ M.elems magnitudes)]
+          V.mapM_ (\(a, b, c) -> printf "%d %0.6f%s\n" a b c) $
             V.zip3 (V.convert eeps)
                    (V.map (unNonNegative . unMass) . V.convert $ masses)
                    (filters :: Vector String)
