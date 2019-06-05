@@ -56,9 +56,9 @@ ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/
 
 ## Building the executables
 
-Download the project, then simply run `stack build`.
+Download the project, open a terminal in the base directory (the one containing `stack.yaml`), then simply run `stack build`.
 
-You can install the applications in a local user directory with `stack install`, or run them from inside the project directory using `stack exec <executable name>`.
+You can install the applications in a user-local directory with `stack install`, or run them from anywhere inside the project directory using `stack exec <executable name>`.
 
 ## Executables
 
