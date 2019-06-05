@@ -45,7 +45,7 @@ main :: IO ()
 main = do options <- execParser opts
           models  <- convertModels <$> loadModels (modelName $ options)
           let (Isochrone eeps masses magnitudes) = interpolateIsochrone (cluster options) models
-          V.mapM_ (printf "%d%d") eeps
+          V.zipWithM_ (printf "%d%d") eeps (V.map (unNonNegative . unMass) masses)
   where
     opts = info (makeIsochroneOptionParser <**> helper)
       ( fullDesc
