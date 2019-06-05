@@ -1,10 +1,12 @@
+{-# LANGUAGE TypeApplications #-}
 module Main where
 
 import qualified Data.Map as M
 
 import Options.Applicative
 import Data.Semigroup ((<>))
-import qualified Data.Vector.Unboxed as V
+import Data.Vector (Vector)
+import qualified Data.Vector as V
 
 import Text.Printf
 
@@ -45,7 +47,12 @@ main :: IO ()
 main = do options <- execParser opts
           models  <- convertModels <$> loadModels (modelName $ options)
           let (Isochrone eeps masses magnitudes) = interpolateIsochrone (cluster options) models
-          V.zipWithM_ (printf "%d %0.6f\n") eeps (V.map (unNonNegative . unMass) masses)
+              filters = V.fromList . concatMap undefined $ M.elems magnitudes
+          V.mapM_ (\(a, b, c) -> printf "%d %0.6f %s\n" a b c) $
+            V.zip3 (V.convert eeps)
+                   (V.map (unNonNegative . unMass) . V.convert $ masses)
+                   (filters :: Vector String)
+
   where
     opts = info (makeIsochroneOptionParser <**> helper)
       ( fullDesc

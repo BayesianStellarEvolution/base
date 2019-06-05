@@ -1,6 +1,31 @@
 {-# LANGUAGE MultiParamTypeClasses, TypeFamilies, TemplateHaskell #-}
 {-# LANGUAGE OverloadedStrings, BangPatterns #-}
-module Types where
+module Types (ClosedUnitInterval (..)
+             ,closedUnitInterval
+             ,closedUnitInterval'
+             ,closedUnitInterval_unsafe
+             ,Positive (..)
+             ,positive
+             ,positive'
+             ,positive_unsafe
+             ,NonNegative (..)
+             ,nonNegative
+             ,nonNegative'
+             ,nonNegative_unsafe
+             ,NaturalLog (..)
+             ,Log2 (..)
+             ,Log10 (..)
+             ,Percentage (..)
+             ,TotalAge (..)
+             ,CoolingAge (..)
+             ,FeH (..)
+             ,HeliumFraction (..)
+             ,LogAge (..)
+             ,Mass (..)
+             ,Magnitude (..)
+             ,Isochrone (..)
+             ,Cluster (..)
+             ,LogSpace (..)) where
 
 import Control.Exception (Exception, throw)
 
