@@ -31,6 +31,8 @@ executables:
     source-dirs: testModelArchive
     dependencies:
       - base
+      - BayesianStellarEvolution-Models
+      - optparse-applicative
 
 tests:
   model-tests:
