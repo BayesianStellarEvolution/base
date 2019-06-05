@@ -26,9 +26,9 @@ dependencies:
     - vector
 
 executables:
-  testModelArchive:                                                                                   
+  testModelFile:
     main: Main.hs
-    source-dirs: testModelArchive
+    source-dirs: testModelFile
     dependencies:
       - base
       - BayesianStellarEvolution-Models

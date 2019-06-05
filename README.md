@@ -1,7 +1,11 @@
 # Bayesian Analysis of Stellar Evolution
+## Building the executables
+
 
 ## Prerequisites
 ### Required
+#### Stack
+Installation instructions at [stack's README](https://docs.haskellstack.org/en/stable/README/).
 
 #### XZ Utils (aka liblzma) development files
 

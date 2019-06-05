@@ -3,7 +3,6 @@ module Main where
 import Conduit
 
 import Control.Monad (void)
-import Data.Conduit.Lzma
 import Data.Set  (Set)
 import Data.Text (Text)
 
@@ -16,17 +15,17 @@ type RawModel = [(([Text], Double, Double), Set Age)]
 
 loadModels :: (HasModelPath p) => p -> IO RawModel
 loadModels model = runConduitRes $ loadModel .| sinkList
-  where loadModel = sourceFile (modelPath model "") .| decompress Nothing .| lexModel .| parseModel
+  where loadModel = sourceFile (modelPath model "") .| lexModel .| parseModel
 
-newtype ModelArchive = MkModelArchive { unModelArchive :: String }
+newtype ModelFile = MkModelFile { unModelFile :: String }
 
-instance HasModelPath ModelArchive where
-  modelPath a _ = unModelArchive a
+instance HasModelPath ModelFile where
+  modelPath a _ = unModelFile a
 
 main :: IO ()
 main = do options <- execParser opts
           void $ loadModels options >> putStrLn "Loaded model successfully"
   where
-    opts = info (option (maybeReader (Just . MkModelArchive)) (long "modelFile" <> help "Specify model archive") <**> helper)
+    opts = info (option (maybeReader (Just . MkModelFile)) (long "modelFile" <> help "Specify model archive") <**> helper)
       ( fullDesc
      <> progDesc "Generate an isochrone from the models based on cluster parameters")
