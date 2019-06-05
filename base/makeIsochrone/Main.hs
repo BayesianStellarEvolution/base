@@ -4,6 +4,9 @@ import qualified Data.Map as M
 
 import Options.Applicative
 import Data.Semigroup ((<>))
+import qualified Data.Vector.Unboxed as V
+
+import Text.Printf
 
 import Models.Input
 import Types
@@ -41,7 +44,8 @@ makeIsochroneOptionParser = MakeIsochroneOptions <$> clusterParser
 main :: IO ()
 main = do options <- execParser opts
           models  <- convertModels <$> loadModels (modelName $ options)
-          print $ interpolateIsochrone (cluster options) models
+          let (Isochrone eeps masses magnitudes) = interpolateIsochrone (cluster options) models
+          V.mapM_ (printf "%d%d") eeps
   where
     opts = info (makeIsochroneOptionParser <**> helper)
       ( fullDesc
