@@ -9,7 +9,6 @@ You can install the applications in a local user directory with `stack install`,
 
 Help is available for each executable by running it with the `--help` flag.
 
-|-|-|
 |Name|Description|
 |-|-|
 |makeIsochrone|Given cluster parameters, generates an isochrone corresponding to those parameters|
