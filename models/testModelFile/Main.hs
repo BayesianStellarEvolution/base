@@ -24,7 +24,7 @@ instance HasModelPath ModelFile where
 
 main :: IO ()
 main = do options <- execParser opts
-          void $ loadModels options >> putStrLn "Loaded model successfully"
+          void $ loadModels options >> putStrLn "Parsed model successfully"
   where
     opts = info (option (maybeReader (Just . MkModelFile)) (long "modelFile" <> help "Specify model archive") <**> helper)
       ( fullDesc
