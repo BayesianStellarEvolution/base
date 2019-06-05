@@ -94,9 +94,9 @@ parseSectionHeader =
                              <*  endOfLine
 
   in parser <?> "Section header"
-     where feh = taggedDouble "[Fe/H]=" <?> "FeH"
-           alphaFe = taggedDouble "[alpha/Fe]="  <?> "alphaFe"
-           lHp = taggedDouble "l/Hp=" <?> "lHp"
+     where feh = taggedDouble "[Fe/H]=" <?> "[Fe/H]"
+           alphaFe = taggedDouble "[alpha/Fe]="  <?> "[alpha/Fe]"
+           lHp = taggedDouble "l/Hp=" <?> "l/Hp"
            y = taggedDouble "Y=" <?> "Y"
 
 
