@@ -26,7 +26,7 @@ packHeliumFraction = MkHeliumFraction . MkPercentage . closedUnitInterval'
 packFeH  = MkFeH . packLog
 packAge  = MkLogAge . packLog
 packMasses = V.map (MkMass . nonNegative')
-packMags = V.map (MkMagnitude . packLog)
+packMags = V.map (MkAbsoluteMagnitude . packLog)
 
 convertedDsed :: Model
 convertedDsed =

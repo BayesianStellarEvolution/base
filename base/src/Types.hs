@@ -22,7 +22,7 @@ module Types (ClosedUnitInterval (..)
              ,HeliumFraction (..)
              ,LogAge (..)
              ,Mass (..)
-             ,Magnitude (..)
+             ,AbsoluteMagnitude (..)
              ,Isochrone (..)
              ,Cluster (..)
              ,LogSpace (..)) where
@@ -258,13 +258,13 @@ newtype FeH = MkFeH { unFeH :: Log10 }
         deriving (Read, Show, Eq, Ord)
 
 
-newtype Magnitude = MkMagnitude { unMagnitude :: Log10 }
+newtype AbsoluteMagnitude = MkAbsoluteMagnitude { unAbsoluteMagnitude :: Log10 }
         deriving (Show, Eq, Ord)
 
-derivingUnbox "Magnitude"
-  [t| Magnitude -> Log10 |]
-  [| unMagnitude |]
-  [| MkMagnitude |]
+derivingUnbox "AbsoluteMagnitude"
+  [t| AbsoluteMagnitude -> Log10 |]
+  [| unAbsoluteMagnitude |]
+  [| MkAbsoluteMagnitude |]
 
 
 newtype HeliumFraction = MkHeliumFraction { unHeliumFraction :: Percentage }
@@ -293,7 +293,7 @@ newtype Likelihood = MkLikelihood { unLikelihood :: ClosedUnitInterval }
 type EEP = Word
 type Filter = Text
 
-data Isochrone = Isochrone (V.Vector EEP) (V.Vector Mass) (M.Map Filter (V.Vector Magnitude))
+data Isochrone = Isochrone (V.Vector EEP) (V.Vector Mass) (M.Map Filter (V.Vector AbsoluteMagnitude))
           deriving (Eq, Show)
 
 

@@ -46,7 +46,7 @@ convertModels = M.fromListWith (M.union) . map go
           in (age', Isochrone eeps' masses' mags')
         repackMass v = V.map (MkMass . nonNegative') v
         repackMags filters v =
-          let filterSets = map (V.map (MkMagnitude . packLog)) v
+          let filterSets = map (V.map (MkAbsoluteMagnitude . packLog)) v
           in M.fromList $ zip filters filterSets
 
 

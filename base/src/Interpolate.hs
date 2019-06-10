@@ -172,7 +172,7 @@ instance Interpolate Log2 where
 
 deriving instance Interpolate FeH
 deriving instance Interpolate LogAge
-deriving instance Interpolate Magnitude
+deriving instance Interpolate AbsoluteMagnitude
 
 deriving instance Interpolate NonNegative
 deriving instance Interpolate Mass
