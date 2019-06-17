@@ -21,6 +21,7 @@ library:
     - Models.Sample
     - Interpolate
     - Types
+    - Types.Internal
 dependencies:
     - base >=4.10 && <5
     - BayesianStellarEvolution-Models
