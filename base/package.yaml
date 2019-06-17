@@ -63,6 +63,7 @@ tests:
       - attoparsec
       - bytestring
       - conduit
+      - containers
       - hspec
       - QuickCheck
       - raw-strings-qq
