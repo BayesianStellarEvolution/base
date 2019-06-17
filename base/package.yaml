@@ -82,6 +82,7 @@ benchmarks:
     dependencies:
       - base
       - BayesianStellarEvolution
+      - containers
       - criterion
       - vector
  
