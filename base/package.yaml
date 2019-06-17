@@ -45,6 +45,9 @@ executables:
     dependencies:
       - base
       - BayesianStellarEvolution
+      - containers
+      - optparse-applicative
+      - vector
 
 tests:
   library-tests:
@@ -78,4 +81,5 @@ benchmarks:
       - base
       - BayesianStellarEvolution
       - criterion
+      - vector
  
