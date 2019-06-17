@@ -22,7 +22,7 @@ library:
     - Interpolate
     - Types
     - Types.Internal
-dependencies:
+  dependencies:
     - base >=4.10 && <5
     - BayesianStellarEvolution-Models
     - attoparsec
