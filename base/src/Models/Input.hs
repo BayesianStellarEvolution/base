@@ -21,6 +21,8 @@ import qualified Data.Vector.Unboxed as V
 import MainSequenceModel
 import Paths
 import Types
+import Types.Internal
+
 
 
 type RawModel = [(([Text], Double, Double), Set Age)]

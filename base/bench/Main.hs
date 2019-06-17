@@ -5,6 +5,7 @@ import qualified Data.Map.Strict as M
 import Interpolate
 import Models.Input
 import Types
+import Types.Internal
 
 -- Our benchmark harness.
 main = do
@@ -14,5 +15,5 @@ main = do
 
   defaultMain [
     bench "convertModels" $ whnf convertModels model,
-    bench "interpolateIsochrones" $ whnf (interpolateIsochrones (MkClosedUnitInterval 0.5) i1) i2,
+    bench "interpolateIsochrones" $ whnf (interpolateIsochrones (closedUnitInterval' 0.5) i1) i2,
     bgroup "convertModels" []]

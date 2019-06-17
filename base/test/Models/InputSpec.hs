@@ -8,6 +8,7 @@ import Test.Hspec
 import Models.Input
 import Models.Sample
 import Types
+import Types.Internal
 
 
 main :: IO ()

@@ -13,7 +13,7 @@ import Models.Input
 import Models.Sample
 import Interpolate
 import Types
-
+import Types.Internal
 
 main :: IO ()
 main = hspec spec

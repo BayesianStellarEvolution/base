@@ -7,6 +7,7 @@ import qualified Data.Vector.Unboxed as V
 
 import Models.Input (Model)
 import Types
+import Types.Internal
 
 
 data InterpolationException = EmptyModelException

@@ -13,6 +13,7 @@ import Text.Printf
 
 import Models.Input
 import Types
+import Types.Internal
 
 import Interpolate
 
