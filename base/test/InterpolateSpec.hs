@@ -64,7 +64,7 @@ logInterpolateSpec = parallel $ do
 
   where unpack :: Log10 -> Double
         unpack = unNonNegative . fromLogSpace
-
+-}
 
 linearInterpolateSpec :: SpecWith ()
 linearInterpolateSpec = describe "linear interpolation" $ do
@@ -75,7 +75,7 @@ linearInterpolateSpec = describe "linear interpolation" $ do
     it "returns halfway between x1 and x2 when f = 0.5" $ property $
        \x y -> (linearInterpolate (closedUnitInterval' 0.5) x y `shouldBe` (0.5 * x + 0.5 * (y :: Double)))
 
-
+{-
 isochroneSpec :: SpecWith ()
 isochroneSpec = describe "isochrone interpolation" $ do
     it "returns the first when the scaling parameter is 0.0" $
