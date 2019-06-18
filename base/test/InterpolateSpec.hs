@@ -30,12 +30,12 @@ shouldBeCloseTo = shouldBeCloseToD (realToFrac @Double 0.000001)
 
 
 spec :: SpecWith ()
-spec = do return ()
+spec = do
   -- logInterpolateSpec
-  -- linearInterpolateSpec
+  linearInterpolateSpec
 
   -- isochroneSpec
-  -- interpolationFractionSpec
+  interpolationFractionSpec
 
 {-
 logInterpolateSpec :: SpecWith ()
