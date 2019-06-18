@@ -44,7 +44,7 @@ logInterpolateSpec = parallel $ do
     describe "hard-coded" $ do
       it "two average stellar ages" $
          unpack (logInterpolate (closedUnitInterval' 0.5)
-                                (toLogSpace 0)
+                                (toLogSpace $ nonNegative_unsafe 0.0)
                                 (toLogSpace $ nonNegative_unsafe 5.0))
            `shouldBeCloseTo` 2.5
 {-
