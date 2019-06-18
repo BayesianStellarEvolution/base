@@ -31,13 +31,13 @@ shouldBeCloseTo = shouldBeCloseToD (realToFrac @Double 0.000001)
 
 spec :: SpecWith ()
 spec = do
-  -- logInterpolateSpec
+  logInterpolateSpec
   linearInterpolateSpec
 
   -- isochroneSpec
   interpolationFractionSpec
 
-{-
+
 logInterpolateSpec :: SpecWith ()
 logInterpolateSpec = parallel $ do
   describe "log interpolation (per paper)" $ do
@@ -47,7 +47,7 @@ logInterpolateSpec = parallel $ do
                                 (toLogSpace 0)
                                 (toLogSpace $ nonNegative_unsafe 5.0))
            `shouldBeCloseTo` 2.5
-
+{-
     it "is a linear interpolation in log space" $ property $
        \f x y ->
          let x_unpacked = unpack x
@@ -61,10 +61,10 @@ logInterpolateSpec = parallel $ do
 
     it "returns x2 when f = 1.0" $ property $
        \x y -> logInterpolate (closedUnitInterval' 1.0) x y `shouldBe` (y :: Log10)
-
+-}
   where unpack :: Log10 -> Double
         unpack = unNonNegative . fromLogSpace
--}
+
 
 linearInterpolateSpec :: SpecWith ()
 linearInterpolateSpec = describe "linear interpolation" $ do

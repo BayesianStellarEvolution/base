@@ -119,7 +119,7 @@ newtype NonNegative = MkNonNegative { unNonNegative :: Double }
         deriving (Show, Eq, Ord)
 
 instance Arbitrary NonNegative where
-  arbitrary = MkNonNegative <$> (fmap abs arbitrary `suchThat` (> 0))
+  arbitrary = MkNonNegative <$> fmap abs arbitrary
 
 
 instance Num NonNegative where
@@ -144,7 +144,7 @@ nonNegative f | f >= 0    = Just $ MkNonNegative f
 
 
 nonNegative' :: Double -> NonNegative
-nonNegative' f = if f >= 0
+nonNegative' f = if f >= 0.0
                     then MkNonNegative f
                     else throw NonNegativeBoundsException
 
