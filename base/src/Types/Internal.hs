@@ -119,7 +119,7 @@ newtype NonNegative = MkNonNegative { unNonNegative :: Double }
         deriving (Show, Eq, Ord)
 
 instance Arbitrary NonNegative where
-  arbitrary = MkNonNegative <$> fmap abs arbitrary
+  arbitrary = MkNonNegative . abs <$> chooseAny
 
 
 instance Num NonNegative where
