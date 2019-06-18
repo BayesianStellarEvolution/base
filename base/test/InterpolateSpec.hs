@@ -47,7 +47,7 @@ logInterpolateSpec = parallel $ do
                                 (toLogSpace $ nonNegative_unsafe 0.0)
                                 (toLogSpace $ nonNegative_unsafe 5.0))
            `shouldBeCloseTo` 2.5
-{-
+
     it "is a linear interpolation in log space" $ property $
        \f x y ->
          let x_unpacked = unpack x
@@ -61,7 +61,6 @@ logInterpolateSpec = parallel $ do
 
     it "returns x2 when f = 1.0" $ property $
        \x y -> logInterpolate (closedUnitInterval' 1.0) x y `shouldBe` (y :: Log10)
--}
   where unpack :: Log10 -> Double
         unpack = unNonNegative . fromLogSpace
 
