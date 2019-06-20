@@ -15,18 +15,9 @@ import Interpolate
 import Types
 import Types.Internal
 
-import Data.Void (absurd)
 
 main :: IO ()
 main = hspec spec
-
-
-shouldBeCloseToD :: (Num a, Ord a, Show a) => a -> a -> a -> Expectation
-shouldBeCloseToD delta x1 x2 = abs (x2 - x1) `shouldSatisfy` (< delta)
-
-
-shouldBeCloseTo :: (Num a, Ord a, Fractional a, Show a) => a -> a -> Expectation
-shouldBeCloseTo = shouldBeCloseToD (realToFrac @Double 0.000001)
 
 
 spec :: SpecWith ()
@@ -36,6 +27,13 @@ spec = do
 
   isochroneSpec
   interpolationFractionSpec
+
+shouldBeCloseToD :: (Num a, Ord a, Show a) => a -> a -> a -> Expectation
+shouldBeCloseToD delta x1 x2 = abs (x2 - x1) `shouldSatisfy` (< delta)
+
+
+shouldBeCloseTo :: (Num a, Ord a, Fractional a, Show a) => a -> a -> Expectation
+shouldBeCloseTo = shouldBeCloseToD (realToFrac @Double 0.000001)
 
 
 logInterpolateSpec :: SpecWith ()
@@ -110,8 +108,7 @@ isochroneSpec :: SpecWith ()
 isochroneSpec = describe "isochrone interpolation" $ do
     it "returns the first when the scaling parameter is 0.0" $
        (interpolateIsochrones (MkClosedUnitInterval 0.0) i1 i2)
-         `shouldBe` (let len = V.length $ eeps i1
-                         trunc = V.drop (len - 1)
+         `shouldBe` (let trunc = V.singleton . V.last
                      in (Isochrone (trunc $ eeps i1)
                                    (trunc $ mass i1)
                                    (M.map trunc $ mags i1)))
@@ -121,8 +118,8 @@ isochroneSpec = describe "isochrone interpolation" $ do
                      in (Isochrone (trunc $ eeps i2)
                                    (trunc $ mass i2)
                                    (M.map trunc $ mags i2)))
-               where i1 = snd . M.findMin . snd . M.findMin . snd . M.findMin $ convertModels newDsed
-                     i2 = snd . M.findMax . snd . M.findMax . snd . M.findMin $ convertModels newDsed
-                     eeps (Isochrone v _ _) = v
-                     mass (Isochrone _ v _) = v
-                     mags (Isochrone _ _ v) = v
+  where i1 = snd . M.findMin . snd . M.findMin . snd . M.findMin $ convertModels newDsed
+        i2 = snd . M.findMax . snd . M.findMax . snd . M.findMin $ convertModels newDsed
+        eeps (Isochrone v _ _) = v
+        mass (Isochrone _ v _) = v
+        mags (Isochrone _ _ v) = v
