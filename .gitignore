@@ -57,3 +57,6 @@ dist/
 
 # Flycheck
 flycheck_*
+
+# Limbo default file, symlinked to one of the others
+.limbo
