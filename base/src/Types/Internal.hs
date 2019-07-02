@@ -35,7 +35,7 @@ import Numeric.MathFunctions.Comparison (addUlps)
 {-@ type Btwn LO HI = {v:Double | (LO <= v) && (v <= HI)} @-}
 
 
-{-@ assume abs :: __-> {v:_ | 0 <= v} @-}
+{-@ assume abs :: _ -> {v:_ | 0 <= v} @-}
 {-@ assume choose :: System.Random.Random a => t:(a, a) -> Test.QuickCheck.Gen {v:a | (v >= fst t) && (v <= snd t)} @-}
 {-@ assume addUlps :: {u:Int | u > 0} -> v:Double -> {r:Double | r > v} @-}
 {-@ assume log :: Floating a => {v:a | v >= 0} -> a @-}
