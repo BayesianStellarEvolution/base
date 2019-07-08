@@ -16,12 +16,12 @@ ghc-options:
 library:
   source-dirs: src
   exposed-modules:
-    - Magnitude
     - Models.Input
     - Models.Sample
     - Interpolate
     - Types
     - Types.Internal
+    - Types.Magnitude
   dependencies:
     - base >=4.10 && <5
     - BayesianStellarEvolution-Models

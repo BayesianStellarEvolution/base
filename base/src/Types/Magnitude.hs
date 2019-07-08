@@ -1,5 +1,5 @@
 {-# LANGUAGE TemplateHaskell, TypeFamilies, MultiParamTypeClasses #-}
-module Magnitude (AbsoluteMagnitude(..)) where
+module Types.Magnitude (AbsoluteMagnitude(..)) where
 
 import Types.Internal
 import Data.Vector.Unboxed (Vector)

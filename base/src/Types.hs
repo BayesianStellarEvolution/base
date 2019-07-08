@@ -1,5 +1,5 @@
 {-# LANGUAGE MultiParamTypeClasses, TypeFamilies, TemplateHaskell #-}
-module Types (module Magnitude
+module Types (module Types.Magnitude
              ,TotalAge (..)
              ,CoolingAge (..)
              ,FeH (..)
@@ -10,7 +10,7 @@ module Types (module Magnitude
              ,Cluster (..)) where
 
 import Types.Internal
-import Magnitude
+import Types.Magnitude
 
 import qualified Data.Map.Strict as M
 import Data.Text
