@@ -20,8 +20,9 @@ library:
     - Models.Sample
     - Interpolate
     - Types
-    - Types.Internal
+    - Types.DistanceMeasures
     - Types.Magnitude
+    - Types.Internal
   dependencies:
     - base >=4.10 && <5
     - BayesianStellarEvolution-Models
