@@ -28,12 +28,9 @@ newtype HeliumFraction = MkHeliumFraction { unHeliumFraction :: Percentage }
         deriving (Read, Show, Eq, Ord)
 
 
-newtype Parallax = MkParallax { unParallax :: NonNegative }
-        deriving (Show, Eq, Ord)
-
-
 newtype CarbonFraction = MkCarbonFraction { unCarbonFraction :: Percentage }
         deriving (Show, Eq, Ord)
+
 
 newtype Mass = MkMass { unMass :: NonNegative }
         deriving (Show, Eq, Ord)
@@ -43,12 +40,14 @@ derivingUnbox "Mass"
   [| unMass |]
   [| MkMass |]
 
+
 newtype Likelihood = MkLikelihood { unLikelihood :: ClosedUnitInterval }
         deriving (Show, Eq, Ord)
 
 
 type EEP = Word
 type Filter = Text
+
 
 data Isochrone = Isochrone (V.Vector EEP) (V.Vector Mass) (M.Map Filter (V.Vector AbsoluteMagnitude))
           deriving (Eq, Show)
