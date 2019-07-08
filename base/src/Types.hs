@@ -1,15 +1,16 @@
 {-# LANGUAGE MultiParamTypeClasses, TypeFamilies, TemplateHaskell #-}
-module Types (TotalAge (..)
+module Types (module Magnitude
+             ,TotalAge (..)
              ,CoolingAge (..)
              ,FeH (..)
              ,HeliumFraction (..)
              ,LogAge (..)
              ,Mass (..)
-             ,AbsoluteMagnitude (..)
              ,Isochrone (..)
              ,Cluster (..)) where
 
 import Types.Internal
+import Magnitude
 
 import qualified Data.Map.Strict as M
 import Data.Text
@@ -19,15 +20,6 @@ import Data.Vector.Unboxed.Deriving
 
 newtype FeH = MkFeH { unFeH :: Log10 }
         deriving (Read, Show, Eq, Ord)
-
-
-newtype AbsoluteMagnitude = MkAbsoluteMagnitude { unAbsoluteMagnitude :: Log10 }
-        deriving (Show, Eq, Ord)
-
-derivingUnbox "AbsoluteMagnitude"
-  [t| AbsoluteMagnitude -> Log10 |]
-  [| unAbsoluteMagnitude |]
-  [| MkAbsoluteMagnitude |]
 
 
 newtype HeliumFraction = MkHeliumFraction { unHeliumFraction :: Percentage }
