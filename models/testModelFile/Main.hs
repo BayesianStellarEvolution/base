@@ -2,7 +2,8 @@ module Main where
 
 import Conduit
 
-import Control.Monad (void)
+import Control.Monad (void, when)
+import Data.Either (lefts, rights)
 import Data.Set  (Set)
 import Data.Text (Text)
 
@@ -24,8 +25,15 @@ instance HasModelPath ModelFile where
 
 main :: IO ()
 main = do options <- execParser opts
-          void $ loadModels options >> putStrLn "Parsed model successfully"
+          model <- loadModels options
+          putStrLn "Parsed model successfully"
+
+          let eepCheck = map checkEeps model
+              leftEeps = lefts eepCheck
+
+          when (not $ null leftEeps) (printLeftEeps leftEeps)
   where
     opts = info (option (maybeReader (Just . MkModelFile)) (long "modelFile" <> help "Specify model archive") <**> helper)
       ( fullDesc
      <> progDesc "Generate an isochrone from the models based on cluster parameters")
+    printLeftEeps ls = print ls
