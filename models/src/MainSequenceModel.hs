@@ -9,6 +9,7 @@ import Control.Monad (liftM2, when)
 import Data.Attoparsec.ByteString
 import Data.Attoparsec.ByteString.Char8 (isHorizontalSpace, isEndOfLine, double, decimal, char)
 import Data.ByteString (ByteString)
+import Data.Either (isLeft, lefts)
 import Data.Text (Text)
 import Data.Text.Encoding (decodeUtf8)
 import Data.Conduit.Attoparsec
@@ -144,6 +145,25 @@ newtype PrettyAge = PrettyAge Age
 
 instance Show PrettyAge where
   showsPrec _ (PrettyAge (Age a _ _ _)) = shows a
+
+
+checkEeps :: (([Text], Double, Double), Set Age) -> Either (Double, Double, [(Double, Int)]) (([Text], Double, Double), Set Age)
+checkEeps a@((_, feh, y), ages) =
+  let leftEeps = S.filter isLeft $ S.map eepsAreConsecutive ages
+  in if S.null leftEeps
+        then Right a
+        else Left (feh, y, lefts . S.toList $ leftEeps)
+
+
+eepsAreConsecutive (Age age eeps _ _) = go
+  where go | V.null eeps = Right (-1)
+           | otherwise   = V.foldl (\b a -> case b of (Left _)  -> b
+                                                      (Right v) -> if (v == a)
+                                                                     then Right (succ v)
+                                                                     else Left (age, v))
+                                   (Right $ V.head eeps)
+                                   eeps
+
 
 parseModel ::
   Monad m => ConduitT
