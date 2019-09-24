@@ -9,6 +9,8 @@ import Data.Text (Text)
 
 import Options.Applicative
 
+import Text.Printf
+
 import Paths
 import MainSequenceModel
 
@@ -26,14 +28,21 @@ instance HasModelPath ModelFile where
 main :: IO ()
 main = do options <- execParser opts
           model <- loadModels options
-          putStrLn "Parsed model successfully"
+          putStr "Parsed model successfully"
 
           let eepCheck = map checkEeps model
               leftEeps = lefts eepCheck
 
-          when (not $ null leftEeps) (printLeftEeps leftEeps)
+          if null leftEeps
+             then putStrLn ""
+             else printLeftEeps leftEeps
   where
     opts = info (option (maybeReader (Just . MkModelFile)) (long "modelFile" <> help "Specify model archive") <**> helper)
       ( fullDesc
      <> progDesc "Generate an isochrone from the models based on cluster parameters")
-    printLeftEeps ls = print ls
+    printLeftEeps eeps = do
+        putStr . unlines . ("; however, at least the following EEPS are missing:" :) $ concatMap go eeps
+        putStrLn "\nNote that only the first missing EEP for each age is printed."
+      where go (feh, y, as) = let header = printf "\n  [Fe/H] = %.2f, Y = %.2f" feh y
+                                  ages   = map (uncurry (printf "    Age = %.2f, EEP = %d")) as
+                              in header : ages
