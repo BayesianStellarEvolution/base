@@ -39,7 +39,7 @@ main = do options <- execParser opts
      <> progDesc "Generate an isochrone from the models based on cluster parameters")
     printLeftEeps eeps = do
         putStr . unlines . ("; however, at least the following EEPS are missing:" :) $ concatMap go eeps
-        putStrLn "\nNote that only the first missing EEP for each age is printed."
+        putStrLn "\nOnly the first missing EEP for each age is printed."
       where go (feh, y, as) = let header = printf "\n  [Fe/H] = %.2f, Y = %.2f" feh y
                                   ages   = map (uncurry (printf "    Age = %.2f, EEP = %d")) as
                               in header : ages
