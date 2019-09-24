@@ -2,8 +2,7 @@ module Main where
 
 import Conduit
 
-import Control.Monad (void, when)
-import Data.Either (lefts, rights)
+import Data.Either (lefts)
 import Data.Set  (Set)
 import Data.Text (Text)
 
@@ -14,11 +13,10 @@ import Text.Printf
 import Paths
 import MainSequenceModel
 
-type RawModel = [(([Text], Double, Double), Set Age)]
 
-loadModels :: (HasModelPath p) => p -> IO RawModel
+loadModels :: (HasModelPath p) => p -> IO [Either (Double, Double, [(Double, Int)]) (([Text], Double, Double), Set Age)]
 loadModels model = runConduitRes $ loadModel .| sinkList
-  where loadModel = sourceFile (modelPath model "") .| lexModel .| parseModel
+  where loadModel = sourceFile (modelPath model "") .| lexModel .| parseModel .| mapC checkEeps
 
 newtype ModelFile = MkModelFile { unModelFile :: String }
 
@@ -30,8 +28,7 @@ main = do options <- execParser opts
           model <- loadModels options
           putStr "Parsed model successfully"
 
-          let eepCheck = map checkEeps model
-              leftEeps = lefts eepCheck
+          let leftEeps = lefts model
 
           if null leftEeps
              then putStrLn ""
