@@ -49,7 +49,9 @@ main :: IO ()
 main = do options <- execParser opts
           models  <- convertModels <$> loadModels (modelName $ options)
           let (Isochrone eeps masses magnitudes) = interpolateIsochrone (cluster options) models
-              filters = V.fromList $ map (\i -> concatMap (\v -> printf " %0.6f" (unpackLog . unAbsoluteMagnitude $ v U.! i)) $ M.elems magnitudes) [0.. ((subtract 1) . U.length . head $ M.elems magnitudes)]
+              filters = case M.elems magnitudes of
+                     (ms:_) -> V.fromList $ map (\i -> concatMap (\v -> printf " %0.6f" (unpackLog . unAbsoluteMagnitude $ v U.! i)) $ M.elems magnitudes) [0.. (U.length ms - 1)]
+                     _      -> mempty
 
           mapM_ (printf "%s ") $ M.keys magnitudes
           putStrLn ""
