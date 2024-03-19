@@ -9,47 +9,52 @@ github: BayesianStellarEvolution/BayesianStellarEvolution
 default-extensions:
   - OverloadedStrings
 
+dependencies:
+  - conduit
+  - conduit-extra
+  - text
+  - vector
+
 library:
   source-dirs: src
+
   exposed-modules:
     - MainSequenceModel
     - Paths
-dependencies:
+
+  dependencies:
     - base >=4.10 && <5
     - attoparsec
     - bytestring
-    - conduit
-    - conduit-extra
     - containers
     - lzma-conduit
-    - text
-    - vector
 
 executables:
   testModelFile:
     main: Main.hs
     source-dirs: testModelFile
+
     dependencies:
       - base
       - BayesianStellarEvolution-Models
       - optparse-applicative
+      - containers
 
 tests:
   model-tests:
     main: Spec.hs
     source-dirs: test
+
     ghc-options:
       - -rtsopts
+
     dependencies:
       - base
       - BayesianStellarEvolution-Models
 
       - attoparsec
       - bytestring
-      - conduit
-      - conduit-extra
       - hspec
       - lzma-conduit
       - QuickCheck
       - raw-strings-qq
-      - vector
