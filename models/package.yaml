@@ -57,4 +57,4 @@ tests:
       - hspec
       - lzma-conduit
       - QuickCheck
-      - raw-strings-qq
+      - string-qq

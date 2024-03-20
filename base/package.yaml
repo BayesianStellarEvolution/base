@@ -18,6 +18,7 @@ library:
 
   exposed-modules:
     - Models.Input
+    - Models.Sample
     - Interpolate
     - Types
     - Types.DistanceMeasures

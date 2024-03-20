@@ -141,7 +141,6 @@ spec :: SpecWith ()
 spec = pure ()
 #+END_SRC
 
-
 *** Internal
 #+BEGIN_SRC haskell :tangle base/src/Types/Internal.hs
 {-# LANGUAGE TemplateHaskell, TypeFamilies, MultiParamTypeClasses #-}
@@ -385,96 +384,14 @@ newtype Percentage = MkPercentage { unPercentage :: ClosedUnitInterval }
         deriving (Read, Show, Eq, Ord)
 #+END_SRC
 
-** Load compressed models
-#+BEGIN_SRC haskell :tangle base/src/Models/Input.hs
-module Models.Input ( loadModels
-                    , convertModels
-                    , fetchCompactModel
-                    , Model
-                    , RawModel
-                    , module Paths) where
-
--- Replace this with the `compact` library?
-import GHC.Compact
-
-import Conduit
-
-import Data.Conduit.Lzma
-import Data.Set          (Set)
-import Data.Text         (Text)
-
-import qualified Data.Map.Strict as M
-import qualified Data.Set as S (toList)
-import qualified Data.Vector.Unboxed as V
-
-import MainSequenceModel
-import Paths
-import Types
-import Types.Internal
-
-
-
-type RawModel = [(([Text], Double, Double), Set Age)]
-type Model    = M.Map FeH (M.Map HeliumFraction (M.Map LogAge Isochrone))
-
-loadModels :: (MonadThrow m, HasModelPath p, MonadUnliftIO m) => p -> m RawModel
-loadModels model = runConduitRes $ loadModel .| sinkList
-  where loadModel = sourceFile (modelPath model "models/") .| decompress Nothing .| lexModel .| parseModel
-
-
-convertModels :: RawModel -> Model
-convertModels = M.fromListWith (M.union) . map go
-  where go ((filters, f, y), isochrone) =
-          let f'  = MkFeH . packLog $ f
-              y'    = MkHeliumFraction . MkPercentage . closedUnitInterval' $ y
-              iso'  = M.fromList . map (repackAge filters) . S.toList $ isochrone
-          in (f', M.insert y' iso' mempty)
-        repackAge filters (Age age eeps masses magnitudes) =
-          let age'    = MkLogAge . packLog $ age
-              eeps'   = V.map toEnum eeps
-              masses' = repackMass masses
-              mags'   = repackMags filters magnitudes
-          in (age', Isochrone eeps' masses' mags')
-        repackMass v = V.map (MkMass . nonNegative') v
-        repackMags filters v =
-          let filterSets = map (V.map (MkAbsoluteMagnitude . packLog)) v
-          in M.fromList $ zip filters filterSets
-
-
-fetchCompactModel :: HasModelPath p => p -> IO (Compact Model)
-fetchCompactModel = (compact =<<) . fmap convertModels . loadModels
-#+END_SRC
-
-#+BEGIN_SRC haskell :tangle base/test/Models/InputSpec.hs
+*** Examples
+#+BEGIN_SRC haskell :tangle base/src/Models/Sample.hs
 {-# LANGUAGE OverloadedLists, OverloadedStrings #-}
-module Models.InputSpec (main, spec) where
+module Models.Sample where
 
-import qualified Data.Vector.Unboxed as V
-
-import Test.Hspec
+import MainSequenceModel (Age(..))
 
 import Models.Input
-import Types
-import Types.Internal
-
-
-main :: IO ()
-main = hspec spec
-
-spec :: SpecWith ()
-spec = describe "Models.Input" $ do
-  describe "convertModels" $ do
-    it "Converts single-y RawModels in the expected manner" $
-       convertModels dsed `shouldBe` convertedDsed
-    it "Converts multi-y RawModels in the expected manner" $
-       convertModels newDsed `shouldBe` convertedNewDsed
-
-
-packHeliumFraction = MkHeliumFraction . MkPercentage . closedUnitInterval'
-packFeH  = MkFeH . packLog
-packAge  = MkLogAge . packLog
-packMasses = V.map (MkMass . nonNegative')
-packMags = V.map (MkAbsoluteMagnitude . packLog)
 
 
 dsed :: RawModel
@@ -546,6 +463,100 @@ newDsed = [ ((["U", "B", "V"], -1.0, 0.247800)
                     [ [17.276200, 16.919900, 16.544800, 16.038100]
                     , [15.436600, 15.126700, 14.798700, 14.355800]
                     , [13.705400, 13.411400, 13.100200, 12.682000]]])]
+
+#+END_SRC
+
+** Load compressed models
+#+BEGIN_SRC haskell :tangle base/src/Models/Input.hs
+module Models.Input ( loadModels
+                    , convertModels
+                    , fetchCompactModel
+                    , Model
+                    , RawModel
+                    , module Paths) where
+
+-- Replace this with the `compact` library?
+import GHC.Compact
+
+import Conduit
+
+import Data.Conduit.Lzma
+import Data.Set          (Set)
+import Data.Text         (Text)
+
+import qualified Data.Map.Strict as M
+import qualified Data.Set as S (toList)
+import qualified Data.Vector.Unboxed as V
+
+import MainSequenceModel
+import Paths
+import Types
+import Types.Internal
+
+
+
+type RawModel = [(([Text], Double, Double), Set Age)]
+type Model    = M.Map FeH (M.Map HeliumFraction (M.Map LogAge Isochrone))
+
+loadModels :: (MonadThrow m, HasModelPath p, MonadUnliftIO m) => p -> m RawModel
+loadModels model = runConduitRes $ loadModel .| sinkList
+  where loadModel = sourceFile (modelPath model "models/") .| decompress Nothing .| lexModel .| parseModel
+
+
+convertModels :: RawModel -> Model
+convertModels = M.fromListWith (M.union) . map go
+  where go ((filters, f, y), isochrone) =
+          let f'  = MkFeH . packLog $ f
+              y'    = MkHeliumFraction . MkPercentage . closedUnitInterval' $ y
+              iso'  = M.fromList . map (repackAge filters) . S.toList $ isochrone
+          in (f', M.insert y' iso' mempty)
+        repackAge filters (Age age eeps masses magnitudes) =
+          let age'    = MkLogAge . packLog $ age
+              eeps'   = V.map toEnum eeps
+              masses' = repackMass masses
+              mags'   = repackMags filters magnitudes
+          in (age', Isochrone eeps' masses' mags')
+        repackMass v = V.map (MkMass . nonNegative') v
+        repackMags filters v =
+          let filterSets = map (V.map (MkAbsoluteMagnitude . packLog)) v
+          in M.fromList $ zip filters filterSets
+
+
+fetchCompactModel :: HasModelPath p => p -> IO (Compact Model)
+fetchCompactModel = (compact =<<) . fmap convertModels . loadModels
+#+END_SRC
+
+#+BEGIN_SRC haskell :tangle base/test/Models/InputSpec.hs
+{-# LANGUAGE OverloadedLists, OverloadedStrings #-}
+module Models.InputSpec (main, spec) where
+
+import qualified Data.Vector.Unboxed as V
+
+import Test.Hspec
+
+import Models.Input
+import Models.Sample
+import Types
+import Types.Internal
+
+
+main :: IO ()
+main = hspec spec
+
+spec :: SpecWith ()
+spec = describe "Models.Input" $ do
+  describe "convertModels" $ do
+    it "Converts single-y RawModels in the expected manner" $
+       convertModels dsed `shouldBe` convertedDsed
+    it "Converts multi-y RawModels in the expected manner" $
+       convertModels newDsed `shouldBe` convertedNewDsed
+
+
+packHeliumFraction = MkHeliumFraction . MkPercentage . closedUnitInterval'
+packFeH  = MkFeH . packLog
+packAge  = MkLogAge . packLog
+packMasses = V.map (MkMass . nonNegative')
+packMags = V.map (MkAbsoluteMagnitude . packLog)
 
 
 convertedDsed :: Model
@@ -815,6 +826,7 @@ import Test.Hspec
 import Test.QuickCheck hiding (Positive(..))
 
 import Models.Input
+import Models.Sample
 import Interpolate
 import Types
 import Types.Internal
@@ -1045,6 +1057,7 @@ library:
 
   exposed-modules:
     - Models.Input
+    - Models.Sample
     - Interpolate
     - Types
     - Types.DistanceMeasures
@@ -1126,7 +1139,470 @@ benchmarks:
 #+END_SRC
 
 * Photometric Model library
+** Main sequence models
+#+BEGIN_SRC haskell :tangle models/test/MainSequenceModelSpec.hs
+{-# LANGUAGE QuasiQuotes, OverloadedLists #-}
+module MainSequenceModelSpec (main, spec) where
+
+import Conduit
+
+import Data.Attoparsec.ByteString (parseOnly)
+import Data.Either (isLeft, isRight)
+
+import           Data.ByteString (ByteString)
+import qualified Data.ByteString.Char8 as B
+
+import Test.Hspec
+import Data.String.QQ
+
+import MainSequenceModel
+
+
+main :: IO ()
+main = hspec spec
+
+spec :: SpecWith ()
+spec = parallel $ do
+  describe "MS Model file format" $ do
+    describe "taggedDouble" $ do
+      let doParse = parseOnly $ taggedDouble "tag="
+
+      it "pulls a double given a tag" $
+        doParse " tag=1.00" `shouldBe` Right 1.00
+
+      it "requires at lease one space in the source string prior to the tag" $
+        doParse "tag=1.00" `shouldSatisfy` isLeft
+
+    describe "Filters" $ do
+      let doParse = parseOnly parseFilters
+
+      it "parses a single filter" $
+        doParse " U\n" `shouldBe` (Right $ Filters ["U"])
+
+      it "parses a list of filters" $
+        doParse " U B V R I J H K\n" `shouldBe` (Right $ Filters ["U", "B", "V", "R", "I", "J", "H", "K"])
+
+
+    describe "MS Model section header" $ do
+      let doParse = parseOnly parseSectionHeader
+
+      it "parses a section header" $
+        let result = doParse " [Fe/H]=-2.500000    [alpha/Fe]=0.000000    l/Hp=1.938000    Y=0.245100\n"
+        in result `shouldBe` (Right $ SectionHeader (-2.5) 0.0 1.938 0.2451)
+
+    describe "MS Model age header" $ do
+      let doParse = parseOnly parseAgeHeader
+
+      it "parses an age header" $
+        let result = doParse " logAge=8.397940\n"
+        in result `shouldBe` (Right $ AgeHeader 8.397940)
+
+
+    describe "MS Model EEP" $ do
+      let doParse = parseOnly parseEEP "    2 0.278163 11.747800 11.048400  9.849900\n"
+
+      it "parses an EEP line" $
+        doParse `shouldBe` (Right $ EEP 2 0.278163 [11.7478, 11.0484, 9.8499])
+
+
+    describe "Comments" $ do
+      let desired = Right $ Comment "any text here"
+          doParse = parseOnly parseComment
+
+      it "captures a comment with no space after #" $
+        doParse "any text here\n" `shouldBe` desired
+      it "skips space after #" $
+        doParse "\t any text here\n" `shouldBe` desired
+
+
+    describe "Model" $ do
+      it "lexes" $
+        let result = sequence $ map (fmap snd) $ runConduitPure $ yield dsed .| lexModel .| sinkList
+            expected = [ Comment "(abbreviated) DSED models"
+                       , Filters ["U", "B"]
+                       , Filters ["V"]
+                       , SectionHeader (-2.5) 0 1.938 0.2451
+                       , AgeHeader 8.39794
+                       , Comment "EEP     Mass         U         B         V"
+                       , EEP 2 0.278163 [11.7478, 11.0484, 9.8499]
+                       , EEP 3 0.318852 [11.3514, 10.7092, 9.5412]
+                       , EEP 4 0.335466 [11.2028, 10.5813, 9.4241]
+                       , EEP 5 0.351598 [11.0572, 10.4578, 9.3119]
+                       , AgeHeader 8.477121
+                       , Comment "EEP     Mass         U         B         V"
+                       , EEP 2 0.212681 [12.5728, 11.7446, 10.4768]
+                       , EEP 3 0.290489 [11.6188, 10.9382,  9.7498]
+                       , EEP 4 0.320389 [11.3348, 10.6947,  9.5277]
+                       , EEP 5 0.335518 [11.2034, 10.5822,  9.4251]
+                       , Comment ""
+
+                       , SectionHeader (-2.0) 0.0 1.938 0.2453
+                       , AgeHeader 8.397940
+                       , Comment "EEP     Mass         U         B         V"
+                       , EEP 2 0.297801 [12.1589, 11.2562, 9.9655]
+                       , EEP 3 0.335484 [11.8031, 10.9432, 9.6821]
+                       , EEP 4 0.338823 [11.7674, 10.9126, 9.6546]
+                       , EEP 5 0.355097 [11.5974, 10.7646, 9.5203]
+                       , AgeHeader 8.477121
+                       , Comment ""
+                       , Comment "EEP     Mass         U         B         V"
+                       , EEP 2 0.251276 [12.6621, 11.6918, 10.3548]
+                       , EEP 3 0.317207 [11.9778, 11.0959,  9.8205]
+                       , EEP 4 0.335075 [11.8076, 10.9477,  9.6866]
+                       , EEP 5 0.337718 [11.7862, 10.9296,  9.6705]]
+        in (result `shouldSatisfy` isRight) >> ((\(Right r) -> r) result `shouldBe` expected)
+
+      it "parses" $
+        let result = runConduitPure $ yield dsed .| lexModel .| parseModel .| sinkList
+        in result `shouldBe` [ ((["U", "B", "V"], -2.5, 0.2451),
+                                 [ Age 8.39794
+                                       [2, 3, 4, 5]
+                                       [0.278163, 0.318852, 0.335466, 0.351598]
+                                       [ [11.7478, 11.3514, 11.2028, 11.0572]
+                                       , [11.0484, 10.7092, 10.5813, 10.4578]
+                                       , [9.8499,  9.5412,  9.4241,  9.3119]]
+                                 , Age 8.477121
+                                       [2, 3, 4, 5]
+                                       [0.212681, 0.290489, 0.320389, 0.335518]
+                                       [ [12.5728, 11.6188, 11.3348, 11.2034]
+                                       , [11.7446, 10.9382, 10.6947, 10.5822]
+                                       , [10.4768, 9.7498,  9.5277,  9.4251]] ])
+                             , ((["U", "B", "V"], -2.0, 0.2453),
+                                 [ Age 8.397940
+                                       [2, 3, 4, 5]
+                                       [0.297801, 0.335484, 0.338823, 0.355097]
+                                       [ [12.1589, 11.8031, 11.7674, 11.5974]
+                                       , [11.2562, 10.9432, 10.9126, 10.7646]
+                                       , [9.9655,  9.6821,  9.6546,  9.5203]]
+                                 , Age 8.477121
+                                       [2, 3, 4, 5]
+                                       [0.251276, 0.317207, 0.335075, 0.337718]
+                                       [ [12.6621, 11.9778, 11.8076, 11.7862]
+                                       , [11.6918, 11.0959, 10.9477, 10.9296]
+                                       , [10.3548, 9.8205,  9.6866,  9.6705]] ])]
+
+
+dsed :: ByteString
+dsed = [s|
+# (abbreviated) DSED models
+%f U B
+%f V
+%s [Fe/H]=-2.500000    [alpha/Fe]=0.000000    l/Hp=1.938000    Y=0.245100
+%a logAge=8.397940
+# EEP     Mass         U         B         V
+    2 0.278163 11.747800 11.048400  9.8499000
+    3 0.318852 11.351400 10.709200  9.5412000
+    4 0.335466 11.202800 10.581300  9.424100
+    5 0.351598 11.057200 10.457800  9.311900
+%a logAge=8.477121
+# EEP     Mass         U         B         V
+    2 0.212681 12.572800 11.744600 10.476800
+    3 0.290489 11.618800 10.938200  9.749800
+    4 0.320389 11.334800 10.694700  9.527700
+    5 0.335518 11.203400 10.582200  9.425100
+
+%s [Fe/H]=-2.000000    [alpha/Fe]=0.000000    l/Hp=1.938000    Y=0.245300
+%a logAge=8.397940
+# EEP     Mass         U         B         V
+    2 0.297801 12.158900 11.256200  9.965500
+    3 0.335484 11.803100 10.943200  9.682100
+    4 0.338823 11.767400 10.912600  9.654600
+    5 0.355097 11.597400 10.764600  9.520300
+%a logAge=8.477121
+
+# EEP     Mass         U         B         V
+    2 0.251276 12.662100 11.691800 10.354800
+    3 0.317207 11.977800 11.095900  9.820500
+    4 0.335075 11.807600 10.947700  9.686600
+    5 0.337718 11.786200 10.929600  9.670500
+  |]
+#+END_SRC
+
+#+BEGIN_SRC haskell :tangle models/src/MainSequenceModel.hs
+{-# LANGUAGE TypeApplications, OverloadedStrings #-}
+module MainSequenceModel where
+
+import Conduit
+
+import Control.Exception (Exception, throw)
+import Control.Monad (liftM2, when)
+
+import Data.Attoparsec.ByteString
+import Data.Attoparsec.ByteString.Char8 (isHorizontalSpace, isEndOfLine, double, decimal, char)
+import Data.ByteString (ByteString)
+import Data.Either (isLeft, lefts)
+import Data.Text (Text)
+import Data.Text.Encoding (decodeUtf8)
+import Data.Conduit.Attoparsec
+import Data.Ord (comparing)
+import Data.Set (Set)
+import Data.Vector.Unboxed (Vector)
+
+import qualified Data.Attoparsec.ByteString.Char8 as AP
+import qualified Data.Set as S
+import qualified Data.Vector.Unboxed as V
+
+import Text.Printf
+
+import Data.List (intersperse)
+
+
+data MSModelException = LexException         [String] Position
+                      | ParseException       PositionRange
+                      | FilterCountException PositionRange Int Int
+
+instance Exception MSModelException
+
+instance Show MSModelException where
+  showsPrec _ (LexException context (Position line col _)) =
+    showString $ printf "Failed to lex main sequence model at line %d, column %d\nContext: %s"
+                     line col $ concat $ intersperse " > " context
+  showsPrec _ (ParseException (PositionRange (Position line _ _) _)) =
+    showString $ printf "Illegal lexeme in main sequence model on line %d" line
+  showsPrec _ (FilterCountException (PositionRange (Position line _ _) _) nFilters eepFilters) =
+    showString $ printf "Incorrect number of filters on line %d. Expected %d, found %d." line nFilters eepFilters
+
+
+data MSModelFormat = Filters [Text]
+                   | SectionHeader Double Double Double Double
+                   | AgeHeader Double
+                   | EEP Int Double [Double]
+                   | Comment Text
+                   deriving (Show, Eq)
+
+
+isFilters (Filters _) = True
+isFilters _           = False
+
+isComment (Comment _) = True
+isComment _           = False
+
+
+separator = satisfy isHorizontalSpace *> skipWhile isHorizontalSpace <?> "required spacing"
+
+
+endOfLine = AP.endOfLine <?> "end of line"
+
+
+parseFilters =
+  let parser = many1 (satisfy isHorizontalSpace *> takeWhile1 (not . liftM2 (||) isHorizontalSpace isEndOfLine)) <* endOfLine
+  in Filters . map decodeUtf8 <$> parser <?> "Filters"
+
+
+parseComment =
+  let parser = skipWhile isHorizontalSpace *> takeTill isEndOfLine <* endOfLine
+  in Comment . decodeUtf8 <$> parser <?> "Comment"
+
+
+parseEmptyLine :: Parser MSModelFormat
+parseEmptyLine = pure (Comment "")
+
+
+taggedDouble t = separator *> string t *> double
+
+
+parseHeader = do
+  a <- eitherP "a" (eitherP "s" "f")
+  case a of
+    Left _ -> parseAgeHeader
+    Right (Left _) -> parseSectionHeader
+    Right (Right _) -> parseFilters
+
+parseSectionHeader =
+  let parser = SectionHeader <$> feh
+                             <*> alphaFe
+                             <*> lHp
+                             <*> y
+                             <*  endOfLine
+
+  in parser <?> "Section header"
+     where feh = taggedDouble "[Fe/H]=" <?> "[Fe/H]"
+           alphaFe = taggedDouble "[alpha/Fe]="  <?> "[alpha/Fe]"
+           lHp = taggedDouble "l/Hp=" <?> "l/Hp"
+           y = taggedDouble "Y=" <?> "Y"
+
+
+parseAgeHeader =
+  let parser = AgeHeader <$> logAge <* endOfLine
+  in parser <?> "Age header"
+     where logAge = taggedDouble "logAge=" <?> "logAge"
+
+
+parseEEP =
+  let parser = EEP <$> (skipWhile isHorizontalSpace *> decimal <?> "EEP")
+                   <*> (separator *> double <?> "Mass")
+                   <*> (many1 (separator *> double) <?> "Filters")
+                   <*  endOfLine
+  in parser <?> "EEP"
+
+
+-- | Lex a Main Sequence model
+--
+-- Strange goings-on with eitherP here are to force the parser to make choices early
+-- This is strictly necessary to get useful error messages, and has a slight performance boost (over choose) as a bonus
+lexModel ::
+  Monad m => ConduitT
+    ByteString
+    (Either ParseError (PositionRange, MSModelFormat))
+    m
+    ()
+lexModel = conduitParserEither $ do
+  c <- eitherP (char '%') (eitherP (eitherP (char '#') (char '\n')) (pure True))
+  case c of
+    Right (Right _) -> parseEEP
+    Left _ -> parseHeader
+    Right (Left (Left _)) -> parseComment
+    Right (Left (Right _)) -> parseEmptyLine
+
+
+
+data Age = Age !Double (Vector Int) (Vector Double) [Vector Double] deriving (Eq, Show)
+
+instance Ord Age where
+  compare = comparing (\(Age a _ _ _) -> a)
+
+newtype PrettyAge = PrettyAge Age
+  deriving (Eq, Ord)
+
+instance Show PrettyAge where
+  showsPrec _ (PrettyAge (Age a _ _ _)) = shows a
+
+
+checkEeps :: (([Text], Double, Double), Set Age) -> Either (Double, Double, [(Double, Int)]) (([Text], Double, Double), Set Age)
+checkEeps a@((_, feh, y), ages) =
+  let leftEeps = S.filter isLeft $ S.map eepsAreConsecutive ages
+  in if S.null leftEeps
+        then Right a
+        else Left (feh, y, lefts . S.toList $ leftEeps)
+
+
+eepsAreConsecutive (Age age eeps _ _) = go
+  where go | V.null eeps = Right (-1)
+           | otherwise   = V.foldl (\b a -> case b of (Left _)  -> b
+                                                      (Right v) -> if (v == a)
+                                                                     then Right (succ v)
+                                                                     else Left (age, v))
+                                   (Right $ V.head eeps)
+                                   eeps
+
+
+parseModel ::
+  Monad m => ConduitT
+    (Either ParseError (PositionRange, MSModelFormat))
+    (([Text], Double, Double), Set Age)
+    m
+    ()
+parseModel =
+  mapC handleError .| filterC (not . isComment . snd) .| unpack
+  where handleError (Left p@(ParseError context _ pos)) =
+          throw $ LexException context pos
+        handleError (Left DivergentParser) = error "Divergent Parser"
+        handleError (Right r) = r
+
+        unpack = do
+          filters <- concat <$> (header .| sinkList)
+
+          let nFilters = length filters
+              go = do
+                next <- await
+                case next of
+                  Nothing -> return ()
+                  Just (_, SectionHeader feh _ _ y) -> section nFilters (filters, feh, y) >> go
+                  _ -> go
+          go
+
+        header =
+          let go = do
+                next <- await
+                case next of
+                  Just (_, Filters fs) -> yield fs >> go
+                  Just l               -> leftover l
+                  Nothing              -> return ()
+          in go
+
+        section nFilters sectionHeader =
+          let go ages = do
+                next <- await
+                case next of
+                  Just (_, AgeHeader a) -> do
+                    na <- age nFilters a
+                    go $ na `S.insert` ages
+
+                  Just l@(_, SectionHeader _ _ _ _) -> doYield ages >> leftover l
+                  Just (pos, _)                     -> throw $ ParseException pos
+                  Nothing                           -> doYield ages
+          in go S.empty
+            where doYield ages = yield (sectionHeader, ages)
+
+
+        age nFilters a =
+          let go eeps masses fs = do
+                next <- await
+                case next of
+                  Just (pos, EEP eep mass filters)  -> do
+                    let eepFilters = length filters
+
+                    when (eepFilters /= nFilters) $ throw $ FilterCountException pos nFilters eepFilters
+
+                    go (eeps `V.snoc` eep) (masses `V.snoc` mass) $ zipWith V.snoc fs filters
+
+                  Just l@(_, AgeHeader _)           -> leftover l >> doReturn eeps masses fs
+                  Just l@(_, SectionHeader _ _ _ _) -> leftover l >> doReturn eeps masses fs
+                  Just (pos, _)                     -> throw $ ParseException pos
+                  Nothing                           -> doReturn eeps masses fs
+          in go V.empty V.empty $ replicate nFilters (V.empty @Double)
+            where doReturn eeps masses fs = return $ Age a eeps masses fs
+#+END_SRC
+
+#+BEGIN_SRC haskell :tangle models/test/MainSequenceSpec.hs
+module MainSequenceSpec where
+
+import Conduit
+
+import Data.Attoparsec.ByteString
+import Data.ByteString (ByteString)
+import Data.Conduit.Lzma
+import Data.Conduit.Attoparsec
+import Data.Either (isRight)
+
+import Test.Hspec
+
+import MainSequenceModel
+
+loadAndLex :: String -> IO ()
+loadAndLex p =
+  runConduitRes ( sourceFile p
+               .| decompress Nothing
+               .| lexModel
+               .| parseModel
+               .| sinkNull )
+
+
+main :: IO ()
+main = hspec spec
+
+
+spec = heavyTests
+
+
+heavyTests = describe "heavy" $ do
+  describe "Loading Tests" $ do
+    describe "Old DSED" $ do
+      it "loads successfully" $
+        loadAndLex "mainSequence/dsed_old.model.xz"
+    describe "New DSED" $ do
+      it "loads successfully" $
+        loadAndLex "mainSequence/dsed_new.model.xz"
+    describe "Yale 2018" $ do
+      it "loads successfully" $
+        loadAndLex "mainSequence/yale_2018.model.xz"
+    describe "PARSEC" $ do
+      it "loads successfully" $
+        loadAndLex "mainSequence/PARSEC.model.xz"
+#+END_SRC
+
 ** Artifacts
+*** Cabal config
 #+BEGIN_SRC yaml :tangle models/package.yaml
 name: BayesianStellarEvolution-Models
 category: application
@@ -1187,8 +1663,14 @@ tests:
       - hspec
       - lzma-conduit
       - QuickCheck
-      - raw-strings-qq
+      - string-qq
 #+END_SRC
+
+*** Test spec finder
+#+BEGIN_SRC haskell :tangle models/test/Spec.hs
+{-# OPTIONS_GHC -F -pgmF hspec-discover #-}
+#+END_SRC
+
 * Artifacts
 ** Stack config
 #+BEGIN_SRC yaml :tangle stack.yaml

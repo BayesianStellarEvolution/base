@@ -10,7 +10,7 @@ import           Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as B
 
 import Test.Hspec
-import Text.RawString.QQ
+import Data.String.QQ
 
 import MainSequenceModel
 
@@ -140,7 +140,8 @@ spec = parallel $ do
 
 
 dsed :: ByteString
-dsed = B.pack $ [r|# (abbreviated) DSED models
+dsed = [s|
+# (abbreviated) DSED models
 %f U B
 %f V
 %s [Fe/H]=-2.500000    [alpha/Fe]=0.000000    l/Hp=1.938000    Y=0.245100
@@ -171,4 +172,4 @@ dsed = B.pack $ [r|# (abbreviated) DSED models
     3 0.317207 11.977800 11.095900  9.820500
     4 0.335075 11.807600 10.947700  9.686600
     5 0.337718 11.786200 10.929600  9.670500
-|]
+  |]
