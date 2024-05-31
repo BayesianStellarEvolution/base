@@ -23,7 +23,7 @@ import Data.Coerce (coerce)
 import Data.Vector.Unboxed.Deriving
 
 import Test.QuickCheck     (Arbitrary (..))
-import Test.QuickCheck.Gen (choose, chooseAny, suchThat)
+import Test.QuickCheck.Gen (choose, chooseAny)
 
 import Numeric.MathFunctions.Comparison (addUlps)
 

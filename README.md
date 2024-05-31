@@ -68,4 +68,3 @@ Help is available for each executable by running it with the `--help` flag.
 |-|-|
 |makeIsochrone|Given cluster parameters, generates an isochrone corresponding to those parameters|
 |testModelFile|Given a path to an uncompressed model file, attempts to parse that file|
-

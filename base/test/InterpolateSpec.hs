@@ -11,6 +11,7 @@ import Test.QuickCheck hiding (Positive(..))
 
 import Models.Input
 import Models.Sample
+
 import Interpolate
 import Types
 import Types.Internal

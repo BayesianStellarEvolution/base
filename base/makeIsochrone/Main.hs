@@ -4,7 +4,6 @@ module Main where
 import qualified Data.Map as M
 
 import Options.Applicative
-import Data.Semigroup ((<>))
 import Data.Vector (Vector)
 import qualified Data.Vector as V
 import qualified Data.Vector.Unboxed as U
