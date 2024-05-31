@@ -1,0 +1,1967 @@
+#+TITLE: BASE-9 
+#+AUTHOR: Elliot Robinson
+
+* BASE library
+** Types of numbers
+Poor management of logarithms, particularly when combining logarithms of unlike base, has been the cause of many bugs in prior BASE-9 work. For this reason, we first build a strong system of mathematical types, starting from definition of intervals and working to definitions for each base of logarithm supported.
+
+Two characteristics are simultaneously desired for this utility: speed and correctness. 
+
+At runtime, this domain-specific language (DSL) must be as free as possible, making maximum utilization of type erasure and rewrite rules ( TODO ). From the developer perspective, non-free operations should be noted.
+
+At compile time, correctness should be provable in three ways:
+
+ 1. no improper conversions or operations between incompatible types must be present (or the code won't compile),
+ 2. the correct function of the conversions and operations between compatible types must be checked (via QuickCheck &c. tests)
+ 3. the mathematical validity of the conversions and operations between compatible types must be proven
+
+This last point bears some further explanation. LiquidHaskell (LH) is a refinement type engine for Haskell programs that converts its domain-specific markup language, rendered as regular Haskell comments, and any associated Haskell code into a set of logical propositions for output to Z3, a SMT/SAT solver. This allows checking at compile time that some invariables are true, e.g, that some function shall never have a non-positive value as its second argument. Where necessary (e.g, functions provided by a library, where the code cannot be inspected by LiquidHaskell), LiquidHaskell is told to ~assume~ certain axioms (the proofs for which are up to the specifier).
+
+*** Positive numbers
+We first define a set of LH types that simplify the syntax for constraining values. The first of these is ~GT~ (for "Greater Than"), which is a type with one variable ~N~. This is used as, ~GT 0~, to specify that any value of that type must be greater than zero. This is specified thusly:
+
+#+BEGIN_SRC haskell
+{-@ type GT N = {v:Double | v > N} @-}
+#+END_SRC
+
+This type states that, given some defined ~N~, the Haskell type being refined by ~GT~ is a ~Double~ iff. the value of the variable represented by that type is always $>0$ (otherwise, it is ~Void~ and the theorem doesn't hold, triggering a LH error). You can think of this as a type synonym in a dependently typed language, where this type not only defines the type of value it will contain (a ~Double~), but also the range of valid values which may be contained by a concrete example of that type (Footnote: Proving that the value will always be in the valid range is the difficult step here).
+
+See the "Artifacts" section for a complete listing of all the LH refinement helpers.
+
+As a motivating example, this can be used to create a type that must always be positive:
+
+#+HEADER: :noweb-ref number class
+#+BEGIN_SRC haskell
+{-@ type PositiveR = GT 0 @-}
+#+END_SRC
+
+Note that this is still a refinement type in the LH type space (hence the final 'R'), not a type in the Haskell type space. We can use that to define a refined Haskell type:
+
+#+HEADER: :noweb-ref number class
+#+BEGIN_SRC haskell
+{-@ newtype Positive = MkPositive ( unPositive :: PositiveR) @-}
+newtype Positive = MkPositive { unPositive :: Double }
+        deriving (Show, Eq, Ord)
+#+END_SRC
+
+The new newtype, ~Positive~, from Haskell's perspective, will store a single ~Double~; however, due to the type annotation, to LiquidHaskell, it stores a PositiveR. What remains is to prove that to LH.
+
+For this and each of the following classes of numbers, I will define three ways to create a value of the class. A non-annotated version that returns a ~Maybe~ to account for the possibility of failure, a "prime" version annotated with a single quote that throws an exception if the founds check fails, and an unsafe version that simply wraps the passed value (for performance) and relies on LH for verification of correctness.
+
+#+HEADER: :noweb-ref number class
+#+BEGIN_SRC haskell
+positive :: Double -> Maybe Positive
+positive f | f > 0     = Just $ MkPositive f
+           | otherwise = Nothing
+
+
+data PositiveBoundsException = PositiveBoundsException
+     deriving (Show)
+
+instance Exception PositiveBoundsException
+
+positive' :: Double -> Positive
+positive' f = if f > 0
+                 then MkPositive f
+                 else throw PositiveBoundsException
+
+
+{-@ positive_unsafe :: PositiveR -> Positive @-}
+positive_unsafe :: Double -> Positive
+positive_unsafe = MkPositive
+#+END_SRC
+
+The implementations are straight forward. Note that, other than the unsafe version (which adds a refinement to its first parameter), no additional LH annotation is needed. LH integrates the AST for the Haskell code into the proof, notes the check for ~f > 0~, and uses that to satisfy the ~GT 0~ refinement.
+
+In order to more easily run QuickCheck tests in which ~Positive~ values are used, an ~Arbitrary~ instance is provided. ~chooseAny~ provides any random value meeting the type constraint (~Double~, via ~MkPositive~), which we then constrain to meet our requirement. That $0$ will be chosen is a veritable guarantee; as it is not positive, we add the the minimum possible value allowed by the ~Double~ (a unit of least precision [ULP]).
+
+#+HEADER: :noweb-ref number class
+#+BEGIN_SRC haskell
+instance Arbitrary Positive where
+  arbitrary = do val <- abs <$> chooseAny
+                 return $ if val == 0
+                             then MkPositive (addUlps 1 val)
+                             else MkPositive val
+#+END_SRC
+
+Where relevant, future sections proceed as with this one, minus the explanatory prose.
+
+*** The closed unit interval
+The Closed Unit Interval is any number $0<=x<=1$.
+
+#+HEADER: :noweb-ref number class
+#+BEGIN_SRC haskell
+{-@ type ClosedUnitIntervalR = Btwn 0 1 @-}
+{-@ newtype ClosedUnitInterval = MkClosedUnitInterval { unClosedUnitInterval :: ClosedUnitIntervalR} @-}
+newtype ClosedUnitInterval = MkClosedUnitInterval { unClosedUnitInterval :: Double }
+        deriving (Read, Show, Eq, Ord)
+
+
+closedUnitInterval :: Double -> Maybe ClosedUnitInterval
+closedUnitInterval f | f >= 0 && f <= 1 = Just $ MkClosedUnitInterval f
+                     | otherwise        = Nothing
+
+
+data ClosedUnitIntervalBoundsException = ClosedUnitIntervalBoundsException
+     deriving (Show)
+
+instance Exception ClosedUnitIntervalBoundsException
+
+closedUnitInterval' :: Double -> ClosedUnitInterval
+closedUnitInterval' f = if 0 <= f && f <= 1
+                           then MkClosedUnitInterval f
+                           else throw ClosedUnitIntervalBoundsException
+
+
+{-@ closedUnitInterval_unsafe :: ClosedUnitIntervalR -> ClosedUnitInterval @-}
+closedUnitInterval_unsafe :: Double -> ClosedUnitInterval
+closedUnitInterval_unsafe = MkClosedUnitInterval
+
+
+instance Arbitrary ClosedUnitInterval where
+  arbitrary = choose (0, 1) >>= return . MkClosedUnitInterval
+#+END_SRC
+
+*** Percentages
+Percentages are closed unit intervals with additional meaning, namely that they represent a "real world" proportion (e.g., helium fraction) rather something that may only exist in code (interpolation fraction).
+
+#+HEADER: :noweb-ref number class
+#+BEGIN_SRC haskell
+newtype Percentage = MkPercentage { unPercentage :: ClosedUnitInterval }
+        deriving (Read, Show, Eq, Ord)
+#+END_SRC
+
+*** Non-negative numbers
+Non-negative numbers are those where $0<=x$.
+
+Non-negative numbers have the distinction of being the type of number for which a logarithm may be calculated without receiving =NaN=, or "not a number". Due to this, this is the only type of number that currently defines ~Num~ and ~Unbox~ (for performance).
+
+#+HEADER: :noweb-ref number class
+#+BEGIN_SRC haskell
+{-@ type NonNegativeR = GTE 0 @-}
+{-@ newtype NonNegative = MkNonNegative { unNonNegative :: NonNegativeR } @-}
+newtype NonNegative = MkNonNegative { unNonNegative :: Double }
+        deriving (Show, Eq, Ord)
+
+instance Num NonNegative where
+  (+) (MkNonNegative a) (MkNonNegative b) = MkNonNegative $ a + b
+  (-) (MkNonNegative a) (MkNonNegative b) = nonNegative'  $ a - b
+  (*) (MkNonNegative a) (MkNonNegative b) = MkNonNegative $ a * b
+  abs = id
+  signum = const 0
+  fromInteger = nonNegative' . realToFrac
+  negate _ = throw NonNegativeBoundsException
+
+
+nonNegative :: Double -> Maybe NonNegative
+nonNegative f | f >= 0    = Just $ MkNonNegative f
+              | otherwise = Nothing
+
+
+data NonNegativeBoundsException = NonNegativeBoundsException
+     deriving (Show)
+
+instance Exception NonNegativeBoundsException
+
+nonNegative' :: Double -> NonNegative
+nonNegative' f = if f >= 0.0
+                    then MkNonNegative f
+                    else throw NonNegativeBoundsException
+
+
+{-@ nonNegative_unsafe :: NonNegativeR -> NonNegative @-}
+nonNegative_unsafe :: Double -> NonNegative
+nonNegative_unsafe = MkNonNegative
+
+
+instance Arbitrary NonNegative where
+  arbitrary = MkNonNegative . abs <$> chooseAny
+
+
+derivingUnbox "NonNegative"
+  [t| NonNegative -> Double |]
+  [| unNonNegative |]
+  [| nonNegative'  |]
+#+END_SRC
+
+*** Logarithmic numbers
+Now, to the point of this exercise. First, we define some basic operations for working with any values in a logarithmic space (vs. linear). Each base (described later) will be an instance of this class.
+
+ #+HEADER: :noweb-ref number class
+#+BEGIN_SRC haskell
+class LogSpace a where
+  toLogSpace   :: NonNegative -> a -- ^ Take any non-negative number and express it as a value in log_N space
+  fromLogSpace :: a -> NonNegative -- ^ Return a number to non-log space
+  packLog   :: Double -> a -- ^ Encode a value already in log space as a LogSpace a
+  unpackLog :: a -> Double -- ^ Access the raw log value directly
+#+END_SRC
+
+For example, to convert the number 1 to its base-10 log equivalent, you would
+
+#+BEGIN_SRC haskell
+(toLogSpace $ nonNegative' 1) :: Log10
+#+END_SRC
+
+And to inject a NaN,
+
+#+BEGIN_SRC haskell
+(packLog $ log (-1)) :: Log10
+#+END_SRC
+
+Note here that the use of ~log~ to create a ~Log10~ value is not suspect because =NaN= is just a ~Double~; however, also note that this code will (quite properly) not pass the LH constraints that require the input to ~log~ to be $0<=x$.
+
+**** Natural
+We will model each logarithmic base in use (natural, 10, 2, solar mass?) as its own data type. This leads to some redundancy but maximizes type safety. As performance is of primary concern, effort is made to use newtypes and minimize use of checked conversions.
+
+#+HEADER: :noweb-ref number class
+#+BEGIN_SRC haskell
+newtype NaturalLog = MkNaturalLog { unNaturalLog :: Double }
+        deriving (Read, Show, Eq, Ord)
+
+toNaturalLogSpace :: NonNegative -> NaturalLog
+toNaturalLogSpace = MkNaturalLog . log . coerce
+
+fromNaturalLogSpace :: NaturalLog -> NonNegative
+fromNaturalLogSpace = nonNegative_unsafe . exp . coerce
+
+instance LogSpace NaturalLog where
+  toLogSpace   = toNaturalLogSpace
+  fromLogSpace = fromNaturalLogSpace
+  packLog = MkNaturalLog
+  unpackLog = unNaturalLog
+
+instance Arbitrary NaturalLog where
+  arbitrary = toLogSpace <$> arbitrary
+#+END_SRC
+
+**** Base 10
+#+HEADER: :noweb-ref number class
+#+BEGIN_SRC haskell
+newtype Log10 = MkLog10 { unLog10 :: Double }
+        deriving (Read, Show, Eq, Ord)
+
+toLog10Space :: NonNegative -> Log10
+toLog10Space = MkLog10 . logBase 10 . coerce
+
+fromLog10Space :: Log10 -> NonNegative
+fromLog10Space = nonNegative_unsafe . (10 **) . coerce
+
+instance LogSpace Log10 where
+  toLogSpace   = toLog10Space
+  fromLogSpace = fromLog10Space
+  packLog = MkLog10
+  unpackLog = unLog10
+
+instance Arbitrary Log10 where
+  arbitrary = toLogSpace <$> arbitrary
+
+derivingUnbox "Log10"
+  [t| Log10 -> Double |]
+  [| unLog10 |]
+  [| MkLog10 |]
+#+END_SRC
+
+**** Base 2
+#+HEADER: :noweb-ref number class
+#+BEGIN_SRC haskell
+newtype Log2 = MkLog2 { unLog2 :: Double }
+        deriving (Read, Show , Eq, Ord)
+
+toLog2Space :: NonNegative -> Log2
+toLog2Space = MkLog2 . logBase 2 . coerce
+
+fromLog2Space :: Log2 -> NonNegative
+fromLog2Space = nonNegative_unsafe . (2 **) . coerce
+
+instance LogSpace Log2 where
+  toLogSpace   = toLog2Space
+  fromLogSpace = fromLog2Space
+  packLog = MkLog2
+  unpackLog = unLog2
+
+instance Arbitrary Log2 where
+  arbitrary = toLogSpace <$> arbitrary
+#+END_SRC
+
+*** Artifacts
+#+BEGIN_SRC haskell :tangle base/src/Types/Internal.hs
+{-# LANGUAGE TemplateHaskell, TypeFamilies, MultiParamTypeClasses #-}
+module Types.Internal (ClosedUnitInterval (..)
+                      ,closedUnitInterval
+                      ,closedUnitInterval'
+                      ,closedUnitInterval_unsafe
+                      ,Positive (..)
+                      ,positive
+                      ,positive'
+                      ,positive_unsafe
+                      ,NonNegative (..)
+                      ,nonNegative
+                      ,nonNegative'
+                      ,nonNegative_unsafe
+                      ,LogSpace (..)
+                      ,NaturalLog (..)
+                      ,Log2 (..)
+                      ,Log10 (..)
+                      ,Percentage (..)) where
+
+import Control.Exception (Exception, throw)
+
+import Data.Coerce (coerce)
+import Data.Vector.Unboxed.Deriving
+
+import Test.QuickCheck     (Arbitrary (..))
+import Test.QuickCheck.Gen (choose, chooseAny)
+
+import Numeric.MathFunctions.Comparison (addUlps)
+
+
+{-@ type GT N = {v:Double | v > N} @-}
+{-@ type GTE N = {v:Double | v >= N} @-}
+{-@ type LT  N = {v:Double | v <  N} @-}
+{-@ type LTE N = {v:Double | v <= N} @-}
+{-@ type Btwn LO HI = {v:Double | (LO <= v) && (v <= HI)} @-}
+
+
+{-@ assume abs :: _ -> {v:_ | 0 <= v} @-}
+{-@ assume choose :: System.Random.Random a => t:(a, a) -> Test.QuickCheck.Gen {v:a | (v >= fst t) && (v <= snd t)} @-}
+{-@ assume addUlps :: {u:Int | u > 0} -> v:Double -> {r:Double | r > v} @-}
+{-@ assume log :: Floating a => {v:a | v >= 0} -> a @-}
+{-@ assume exp :: Floating a => a -> {v:a | v >= 0} @-}
+{-@ assume logBase :: Floating a => {base:a | base >= 0} -> {v:a | v >= 0} -> a @-}
+{-@ assume GHC.Float.** :: Floating a => {base:a | base >= 0} -> a -> {v:a | v >= 0} @-}
+{-@ assume GHC.Float.pi :: Floating a => {v:a | v > 3.141592 && v < 3.141593} @-}
+
+
+<<number class>>
+#+END_SRC
+
+** Astrophysical types
+#+HEADER: :noweb-ref astro type
+#+BEGIN_SRC haskell
+newtype FeH = MkFeH { unFeH :: Log10 }
+        deriving (Read, Show, Eq, Ord)
+
+
+newtype HeliumFraction = MkHeliumFraction { unHeliumFraction :: Percentage }
+        deriving (Read, Show, Eq, Ord)
+
+
+newtype CarbonFraction = MkCarbonFraction { unCarbonFraction :: Percentage }
+        deriving (Show, Eq, Ord)
+
+
+newtype Mass = MkMass { unMass :: NonNegative }
+        deriving (Show, Eq, Ord)
+
+derivingUnbox "Mass"
+  [t| Mass -> NonNegative |]
+  [| unMass |]
+  [| MkMass |]
+
+
+newtype LogAge = MkLogAge { unLogAge :: Log10 }
+        deriving (Read, Show, Eq, Ord)
+
+
+newtype TotalAge   = MkTotalAge   {   unTotalAge :: LogAge }
+newtype CoolingAge = MkCoolingAge { unCoolingAge :: LogAge }
+
+
+-- TODO: This should probably move?
+data Cluster = Cluster { feh :: FeH, heliumFraction :: HeliumFraction, logAge :: LogAge }
+     deriving (Read, Show)
+#+END_SRC
+
+#+HEADER: :noweb-ref astro type
+#+BEGIN_SRC haskell
+newtype Likelihood = MkLikelihood { unLikelihood :: ClosedUnitInterval }
+        deriving (Show, Eq, Ord)
+#+END_SRC
+
+#+HEADER: :noweb-ref astro type
+#+BEGIN_SRC haskell
+type EEP = Word
+type Filter = Text
+
+data Isochrone = Isochrone (V.Vector EEP) (V.Vector Mass) (M.Map Filter (V.Vector AbsoluteMagnitude))
+          deriving (Eq, Show)
+#+END_SRC
+
+
+#+HEADER: :noweb-ref distance measure
+#+BEGIN_SRC haskell
+{-
+Note [Distance Moduli]
+~~~~~~~~~~~~~~~~~~~~~~
+
+one other thing to remember is that parallax maps
+to the so-called *true distance modulus*, indicated as (m-M)o, which
+is not something we use in our code.  Instead BASE-9 uses the *observed
+distance modulus*, indicated by (m-M)V.  The difference in the two is
+due to the absorption and the transformation is
+    (m-M)V = (m-M)o + Av .
+-}
+
+newtype Parallax = MkParallax { unParallax :: NonNegative }
+        deriving (Show, Eq, Ord)
+#+END_SRC
+
+#+HEADER: :noweb-ref magnitude
+#+BEGIN_SRC haskell
+newtype AbsoluteMagnitude = MkAbsoluteMagnitude { unAbsoluteMagnitude :: Log10 }
+        deriving (Show, Eq, Ord)
+
+derivingUnbox "AbsoluteMagnitude"
+  [t| AbsoluteMagnitude -> Log10 |]
+  [| unAbsoluteMagnitude |]
+  [| MkAbsoluteMagnitude |]
+#+END_SRC
+
+#+HEADER: :noweb-ref magnitude
+#+BEGIN_SRC haskell
+newtype ApparentMagnitude = MkApparentMagniutude { unApparentMagnitude :: Log10 }
+        deriving (Show, Eq, Ord)
+#+END_SRC
+
+*** Tests
+#+BEGIN_SRC haskell :tangle base/test/Types/DistanceMeasuresSpec.hs
+module Types.DistanceMeasuresSpec (main, spec) where
+
+import Test.Hspec
+
+import Types.DistanceMeasures
+
+main :: IO ()
+main = hspec spec
+
+spec :: SpecWith ()
+spec = pure ()
+#+END_SRC
+
+#+BEGIN_SRC haskell :tangle base/test/Types/MagnitudeSpec.hs
+module Types.MagnitudeSpec (main, spec) where
+
+import Test.Hspec
+
+import Types.Magnitude
+
+main :: IO ()
+main = hspec spec
+
+spec :: SpecWith ()
+spec = pure ()
+#+END_SRC
+
+*** Artifacts
+#+BEGIN_SRC haskell :tangle base/src/Types/DistanceMeasures.hs
+module Types.DistanceMeasures (Parallax (..)) where
+
+import Types.Internal
+
+
+<<distance measure>>
+#+END_SRC
+
+#+BEGIN_SRC haskell :tangle base/src/Types/Magnitude.hs
+{-# LANGUAGE TemplateHaskell, TypeFamilies, MultiParamTypeClasses #-}
+module Types.Magnitude (AbsoluteMagnitude(..)) where
+
+import Types.Internal
+import Data.Vector.Unboxed.Deriving
+
+
+<<apparent magnitude>>
+#+END_SRC
+
+#+BEGIN_SRC haskell :tangle base/src/Types.hs
+{-# LANGUAGE MultiParamTypeClasses, TypeFamilies, TemplateHaskell #-}
+module Types (module Types.DistanceMeasures
+             ,module Types.Magnitude
+             ,TotalAge (..)
+             ,CoolingAge (..)
+             ,FeH (..)
+             ,HeliumFraction (..)
+             ,LogAge (..)
+             ,Mass (..)
+             ,Isochrone (..)
+             ,Cluster (..)) where
+
+import Types.DistanceMeasures
+import Types.Magnitude
+import Types.Internal
+
+import qualified Data.Map.Strict as M
+import Data.Text
+import qualified Data.Vector.Unboxed as V
+import Data.Vector.Unboxed.Deriving
+
+
+<<astro type>>
+#+END_SRC
+
+** Load compressed models
+#+BEGIN_SRC haskell :tangle base/src/Models/Input.hs
+module Models.Input ( loadModels
+                    , convertModels
+                    , fetchCompactModel
+                    , Model
+                    , RawModel
+                    , module Paths) where
+
+-- Replace this with the `compact` library?
+import GHC.Compact
+
+import Conduit
+
+import Data.Conduit.Lzma
+import Data.Set          (Set)
+import Data.Text         (Text)
+
+import qualified Data.Map.Strict as M
+import qualified Data.Set as S (toList)
+import qualified Data.Vector.Unboxed as V
+
+import MainSequenceModel
+import Paths
+import Types
+import Types.Internal
+
+
+
+type RawModel = [(([Text], Double, Double), Set Age)]
+type Model    = M.Map FeH (M.Map HeliumFraction (M.Map LogAge Isochrone))
+
+loadModels :: (MonadThrow m, HasModelPath p, MonadUnliftIO m) => p -> m RawModel
+loadModels model = runConduitRes $ loadModel .| sinkList
+  where loadModel = sourceFile (modelPath model "models/") .| decompress Nothing .| lexModel .| parseModel
+
+
+convertModels :: RawModel -> Model
+convertModels = M.fromListWith (M.union) . map go
+  where go ((filters, f, y), isochrone) =
+          let f'  = MkFeH . packLog $ f
+              y'    = MkHeliumFraction . MkPercentage . closedUnitInterval' $ y
+              iso'  = M.fromList . map (repackAge filters) . S.toList $ isochrone
+          in (f', M.insert y' iso' mempty)
+        repackAge filters (Age age eeps masses magnitudes) =
+          let age'    = MkLogAge . packLog $ age
+              eeps'   = V.map toEnum eeps
+              masses' = repackMass masses
+              mags'   = repackMags filters magnitudes
+          in (age', Isochrone eeps' masses' mags')
+        repackMass v = V.map (MkMass . nonNegative') v
+        repackMags filters v =
+          let filterSets = map (V.map (MkAbsoluteMagnitude . packLog)) v
+          in M.fromList $ zip filters filterSets
+
+
+fetchCompactModel :: HasModelPath p => p -> IO (Compact Model)
+fetchCompactModel = (compact =<<) . fmap convertModels . loadModels
+#+END_SRC
+
+#+BEGIN_SRC haskell :tangle base/test/Models/InputSpec.hs
+{-# LANGUAGE OverloadedLists, OverloadedStrings #-}
+module Models.InputSpec (main, spec) where
+
+import Test.Hspec
+
+import Models.Input
+import Models.Sample
+import Models.SampleConverted
+
+main :: IO ()
+main = hspec spec
+
+spec :: SpecWith ()
+spec = describe "Models.Input" $ do
+  describe "convertModels" $ do
+    it "Converts single-y RawModels in the expected manner" $
+       convertModels dsed `shouldBe` convertedDsed
+    it "Converts multi-y RawModels in the expected manner" $
+       convertModels newDsed `shouldBe` convertedNewDsed
+#+END_SRC
+
+** Model interpolation
+#+BEGIN_SRC haskell :tangle base/src/Interpolate.hs
+{-# LANGUAGE FlexibleContexts, StandaloneDeriving, GeneralizedNewtypeDeriving, NoMonomorphismRestriction #-}
+module Interpolate where
+
+import Control.Exception (Exception, throw)
+import qualified Data.Map.Strict as M
+import qualified Data.Vector.Unboxed as V
+
+import Models.Input (Model)
+import Types
+import Types.Internal
+
+
+data InterpolationException = EmptyModelException
+                            | UnmatchedEEPException
+     deriving (Show)
+
+instance Exception InterpolationException
+
+
+type HeliumFractionMap = M.Map HeliumFraction LogAgeMap
+type LogAgeMap = M.Map LogAge Isochrone
+
+
+interpolateIsochrone :: Cluster -> Model -> Isochrone
+interpolateIsochrone = (interpolateGeneric feh) `next` (interpolateGeneric heliumFraction) `next` interpolateLogAge
+
+
+next :: a -> a
+next = id
+
+infixr 1 `next`
+
+
+interpolateGeneric :: (Ord a, Interpolate a) => (t1 -> a) -> (t1 -> t2 -> Isochrone) -> t1 -> M.Map a t2 -> Isochrone
+interpolateGeneric unpack nextLayer c m = go $ M.splitLookup (unpack c) m
+  where go (_, (Just v), _) = nextLayer c v
+        go (l,        _, r) = case (null l, null r) of
+                                ( True,  True) -> throw EmptyModelException
+                                ( True, False) -> interp . M.findMin $ r   -- Note [Extrapolation]
+                                (False,  True) -> interp . M.findMax $ l
+                                (False, False) -> let l' = M.findMax l
+                                                      r' = M.findMin r
+                                                      li = interp l'
+                                                      ri = interp r'
+                                                      f  = interpolationFraction (fst l') (fst r') (unpack c)
+                                                  in interpolateIsochrones f li ri
+        interp = nextLayer c . snd
+
+{-
+Note [Extrapolation]
+~~~~~~~~~~~~~~~~~~~~
+
+Extrapolation is not allowed by this code, in that, if an interpolation target falls between the left or right boundary (null == True conditions for the either list) and a non-null list,
+-}
+
+
+interpolateLogAge :: Cluster -> LogAgeMap -> Isochrone
+interpolateLogAge c m = go $ M.splitLookup (logAge c) m
+  where go :: (LogAgeMap, Maybe Isochrone, LogAgeMap)
+           -> Isochrone
+        go (_, (Just v), _) = v
+        go (l,        _, r) = case (null l, null r) of
+                                ( True,  True) -> throw EmptyModelException
+                                ( True, False) -> snd . M.findMin $ r
+                                (False,  True) -> snd . M.findMax $ l
+                                (False, False) -> let l' = M.findMax l
+                                                      r' = M.findMin r
+                                                      f  = interpolationFraction (fst l') (fst r') (logAge c)
+                                                  in interpolateIsochrones f (snd l') (snd r')
+
+
+interpolateIsochrones :: ClosedUnitInterval -> Isochrone -> Isochrone -> Isochrone
+interpolateIsochrones f (Isochrone eeps1 masses1 mags1)
+                        (Isochrone eeps2 masses2 mags2) =
+  let minEep = max (V.minimum eeps1) (V.minimum eeps2)
+      toDrop = V.length . V.takeWhile (< minEep) -- number of records to drop to match EEPs
+      drop1  = toDrop eeps1
+      drop2  = toDrop eeps2
+      dropThenZipWith func v1 v2 =
+        let v1' = V.drop drop1 v1
+            v2' = V.drop drop2 v2
+        in V.zipWith func v1' v2'
+      ensureEeps = V.and $ dropThenZipWith (==) eeps1 eeps2
+      interp = interpolate f
+  in if not ensureEeps
+        then throw UnmatchedEEPException
+        else Isochrone (V.drop drop1 eeps1)
+                       (dropThenZipWith interp masses1 masses2)
+                       (M.unionWith (dropThenZipWith interp) mags1 mags2)
+
+
+--{-@ assume linearInterpolate :: (Fractional a) => ClosedUnitInterval -> l:a -> {h:a | l <= h} -> {v:a | l <= v && v <= h} @-}
+linearInterpolate :: Fractional a => ClosedUnitInterval -> a -> a -> a
+linearInterpolate f' x1 x2 = let f = realToFrac . unClosedUnitInterval $ f' in f * x2 + (1 - f) * x1
+
+{-
+Note [References]
+~~~~~~~~~~~~~~~~~
+  eq. 3, published_other/interpolation/log_interpol.pdf
+  unpublished/robinson/interpolation/linear_proof.txt
+-}
+
+
+--{-@ linearInterpolationFraction :: l:Double -> h:(GTE l) -> Btwn l h -> ClosedUnitInterval @-}
+linearInterpolationFraction :: Double -> Double -> Double -> ClosedUnitInterval
+linearInterpolationFraction l h m =
+  let a = m - l
+      range = h - l
+  in if l == h
+        then closedUnitInterval_unsafe 0
+        else closedUnitInterval' $ a / range
+
+{-
+Note [References]
+~~~~~~~~~~~~~~~~~
+  eq. 2, published_other/interpolation/log_interpol.pdf
+-}
+
+
+--{-@ logInterpolate :: LogSpace a => ClosedUnitInterval -> l:a -> {h:a | l <= h} -> {v:a | l <= v && v <= h} @-}
+logInterpolate :: LogSpace a => ClosedUnitInterval -> a -> a -> a
+logInterpolate (MkClosedUnitInterval 0.0) x1  _ = x1
+logInterpolate (MkClosedUnitInterval 1.0)  _ x2 = x2
+logInterpolate f x1 x2 = toLogSpace $ nonNegative' $ linearInterpolate f (unpack x1) (unpack x2) -- Note [Log Interpolation]
+  where unpack = unNonNegative . fromLogSpace
+
+{-
+Note [Log interpolation]
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Log interpolation using the ((x2 ** f) * (x1 ** (1 - f))) equation, despite the
+proof (Note [References]), is broken. The result of raising a negative
+Fractional (e.g., a non-log value greater than 0 but less than 1) to a
+non-integer power is Complex, which results in NaN in many cases.
+
+We may want to look back at this eventually for performance purposes, but it's
+possible that the (**) is going through exp/log anyway (i.e., no benefit). One potential fix would be to double memory residency by carrying both log- and non-log-space values.
+
+Note [References]
+~~~~~~~~~~~~~~~~~
+  eq. 5, published_other/interpolation/log_interpol.pdf
+  unpublished/robinson/interpolation/log_proof.txt
+-}
+
+
+logInterpolationFraction :: LogSpace a => a -> a -> a -> ClosedUnitInterval
+logInterpolationFraction l' h' m' = let l = unpack l'
+                                        h = unpack h'
+                                        m = unpack m'
+                                    in linearInterpolationFraction l h m
+  where unpack = unNonNegative . fromLogSpace
+
+
+class Interpolate a where
+  interpolate :: ClosedUnitInterval -> a -> a -> a
+  interpolationFraction :: a -> a -> a -> ClosedUnitInterval
+
+instance Interpolate Double where
+  interpolate = linearInterpolate
+  interpolationFraction = linearInterpolationFraction
+
+instance Interpolate NaturalLog where
+  interpolate = logInterpolate
+  interpolationFraction = logInterpolationFraction
+
+instance Interpolate Log10 where
+  interpolate = logInterpolate
+  interpolationFraction = logInterpolationFraction
+
+instance Interpolate Log2 where
+  interpolate = logInterpolate
+  interpolationFraction = logInterpolationFraction
+
+deriving instance Interpolate FeH
+deriving instance Interpolate LogAge
+deriving instance Interpolate AbsoluteMagnitude
+
+deriving instance Interpolate NonNegative
+deriving instance Interpolate Mass
+
+deriving instance Interpolate ClosedUnitInterval
+deriving instance Interpolate Percentage
+deriving instance Interpolate HeliumFraction
+#+END_SRC
+
+#+BEGIN_SRC haskell :tangle base/test/InterpolateSpec.hs
+{-# LANGUAGE NoMonomorphismRestriction, TypeApplications #-}
+module InterpolateSpec (main, spec) where
+
+import Data.List (sort)
+
+import qualified Data.Map.Strict as M
+import qualified Data.Vector.Unboxed as V
+
+import Test.Hspec
+import Test.QuickCheck hiding (Positive(..))
+
+import Models.Input
+import Models.Sample
+
+import Interpolate
+import Types
+import Types.Internal
+
+
+main :: IO ()
+main = hspec spec
+
+
+spec :: SpecWith ()
+spec = do
+  logInterpolateSpec
+  linearInterpolateSpec
+
+  isochroneSpec
+  interpolationFractionSpec
+
+
+shouldBeCloseToD :: (Num a, Ord a, Show a) => a -> a -> a -> Expectation
+shouldBeCloseToD delta x1 x2 = abs (x2 - x1) `shouldSatisfy` (< delta)
+
+
+shouldBeCloseTo :: (Num a, Ord a, Fractional a, Show a) => a -> a -> Expectation
+shouldBeCloseTo = shouldBeCloseToD (realToFrac @Double 0.000001)
+
+
+logInterpolateSpec :: SpecWith ()
+logInterpolateSpec = parallel $ do
+  describe "log interpolation (per paper)" $ do
+    describe "hard-coded" $ do
+      it "two average stellar ages" $
+         unpack (logInterpolate (closedUnitInterval' 0.5)
+                                (toLogSpace $ nonNegative_unsafe 0.0)
+                                (toLogSpace $ nonNegative_unsafe 5.0))
+           `shouldBeCloseTo` 2.5
+
+    it "is a linear interpolation in log space" $ property $
+       \f x y ->
+         let x_unpacked = unpack x
+             y_unpacked = unpack y
+         in unpack (logInterpolate f x y)
+              `shouldBeCloseTo`
+              linearInterpolate f x_unpacked y_unpacked
+
+    it "returns x1 when f = 0.0" $ property $
+       \x y -> logInterpolate (closedUnitInterval' 0.0) x y `shouldBe` (x :: Log10)
+
+    it "returns x2 when f = 1.0" $ property $
+       \x y -> logInterpolate (closedUnitInterval' 1.0) x y `shouldBe` (y :: Log10)
+  where unpack :: Log10 -> Double
+        unpack = unNonNegative . fromLogSpace
+
+
+linearInterpolateSpec :: SpecWith ()
+linearInterpolateSpec = describe "linear interpolation" $ do
+    it "returns x1 when f = 0.0" $ property $
+       \x y -> (linearInterpolate (closedUnitInterval' 0.0) x y `shouldBe` (x :: Double))
+    it "returns x2 when f = 1.0" $ property $
+       \x y -> (linearInterpolate (closedUnitInterval' 1.0) x y `shouldBe` (y :: Double))
+    it "returns halfway between x1 and x2 when f = 0.5" $ property $
+       \x y -> (linearInterpolate (closedUnitInterval' 0.5) x y `shouldBe` (0.5 * x + 0.5 * (y :: Double)))
+
+
+{-@ assume sort :: Ord a => o:[a] -> {v:[a] | len v == len o} @-}
+
+interpolationFractionSpec :: SpecWith ()
+interpolationFractionSpec = describe "interpolation fractions" $ do
+  describe "linear" $ do
+    it "is in closed unit interval" $ property $
+       \x y z ->
+         let sorted = sort [x, y, z]
+         in let l = sorted !! 0
+                m = sorted !! 1
+                h = sorted !! 2
+                result = if l == h
+                            then closedUnitInterval_unsafe 0
+                            else closedUnitInterval' $ (m - l) / (h - l)
+            in (linearInterpolationFraction l h m) `shouldBe` result
+
+  describe "log" $ do
+    it "is linear interpolation fraction in log space" $ property $
+       \x y z ->
+         let sorted = sort [x, y, z]
+             l = sorted !! 0
+             m = sorted !! 1
+             h = sorted !! 2
+             lu = unpack l
+             mu = unpack m
+             hu = unpack h
+         in logInterpolationFraction l h m `shouldBe` linearInterpolationFraction lu hu mu
+  where unpack :: Log10 -> Double
+        unpack = unNonNegative . fromLogSpace
+
+
+isochroneSpec :: SpecWith ()
+isochroneSpec = describe "isochrone interpolation" $ do
+    it "returns the first when the scaling parameter is 0.0" $
+       (interpolateIsochrones (MkClosedUnitInterval 0.0) i1 i2)
+         `shouldBe` (let trunc = V.singleton . V.last
+                     in (Isochrone (trunc $ eeps i1)
+                                   (trunc $ mass i1)
+                                   (M.map trunc $ mags i1)))
+    it "returns the second when the scaling parameter is 1.0" $
+       (interpolateIsochrones (closedUnitInterval' 1.0) i1 i2)
+         `shouldBe` (let trunc = V.take 1
+                     in (Isochrone (trunc $ eeps i2)
+                                   (trunc $ mass i2)
+                                   (M.map trunc $ mags i2)))
+  where i1 = snd . M.findMin . snd . M.findMin . snd . M.findMin $ convertModels newDsed
+        i2 = snd . M.findMax . snd . M.findMax . snd . M.findMin $ convertModels newDsed
+        eeps (Isochrone v _ _) = v
+        mass (Isochrone _ v _) = v
+        mags (Isochrone _ _ v) = v
+#+END_SRC
+
+** Example model input and expected internal representations
+#+BEGIN_SRC haskell :tangle base/src/Models/Sample.hs
+{-# LANGUAGE OverloadedLists, OverloadedStrings #-}
+module Models.Sample where
+
+import MainSequenceModel (Age(..))
+
+import Models.Input
+
+
+dsed :: RawModel
+dsed = [ ((["U", "B", "V"], -2.5, 0.2451)
+         , [ Age 8.39794
+                 [2, 3, 4, 5]
+                 [0.278163, 0.318852, 0.335466, 0.351598]
+                 [ [11.7478, 11.3514, 11.2028, 11.0572]
+                 , [11.0484, 10.7092, 10.5813, 10.4578]
+                 , [9.8499,  9.5412,  9.4241,  9.3119]]
+           , Age 8.477121
+                 [2, 3, 4, 5]
+                 [0.212681, 0.290489, 0.320389, 0.335518]
+                 [ [12.5728, 11.6188, 11.3348, 11.2034]
+                 , [11.7446, 10.9382, 10.6947, 10.5822]
+                 , [10.4768, 9.7498,  9.5277,  9.4251]]])
+       , ((["U", "B", "V"], -2.0, 0.2453)
+         , [ Age 8.397940
+                 [2, 3, 4, 5]
+                 [0.297801, 0.335484, 0.338823, 0.355097]
+                 [ [12.1589, 11.8031, 11.7674, 11.5974]
+                 , [11.2562, 10.9432, 10.9126, 10.7646]
+                 , [9.9655,  9.6821,  9.6546,  9.5203]]
+           , Age 8.477121
+                 [2, 3, 4, 5]
+                 [0.251276, 0.317207, 0.335075, 0.337718]
+                 [ [12.6621, 11.9778, 11.8076, 11.7862]
+                 , [11.6918, 11.0959, 10.9477, 10.9296]
+                 , [10.3548, 9.8205,  9.6866,  9.6705]]])]
+
+
+newDsed :: RawModel
+newDsed = [ ((["U", "B", "V"], -1.0, 0.247800)
+            , [ Age 9.0
+                    [2, 3, 4, 5]
+                    [0.113315, 0.124680, 0.140813, 0.173692]
+                    [ [17.03370, 16.62740, 16.12280, 15.25250]
+                    , [15.03530, 14.70540, 14.29240, 13.58510]
+                    , [13.23850, 12.93440, 12.55550, 11.92120]]
+              , Age 9.096910
+                     [2, 3, 4, 5]
+                     [0.103069, 0.113581, 0.125209, 0.141832]
+                     [ [17.44610, 17.02400, 16.60920, 16.09250]
+                     , [15.36540, 15.02750, 14.69060, 14.26770]
+                     , [13.54260, 13.23130, 12.92070, 12.53310]]])
+          , ((["U", "B", "V"], -1.0, 0.330000)
+            , [ Age 9.0
+                    [5, 6, 7, 8]
+                    [0.152464, 0.191656, 0.235299, 0.256241]
+                    [ [15.419500, 14.543400, 13.869200, 13.588700]
+                    , [13.755500, 13.026700, 12.446300, 12.202200]
+                    , [12.094600, 11.447100, 10.926900, 10.706600]]
+              , Age 9.096910
+                    [5, 6, 7, 8]
+                    [0.128684, 0.153000, 0.191846, 0.232007]
+                    [ [16.111100, 15.404500, 14.537700, 13.908700]
+                    , [14.322000, 13.743300, 13.021800, 12.480500]
+                    , [12.603800, 12.083700, 11.442800, 10.957500]]])
+          , ((["U", "B", "V"], -0.5, 0.25370)
+            , [ Age 9.0
+                    [2, 3, 4, 5]
+                    [0.116263, 0.130317, 0.152523, 0.194038]
+                    [ [16.931000, 16.564000, 16.068000, 15.288200]
+                    , [15.136300, 14.815400, 14.381800, 13.705100]
+                    , [13.420600, 13.116000, 12.706400, 12.077400]]
+              , Age 9.096910
+                    [2, 3, 4, 5]
+                    [0.104591, 0.116666, 0.131087, 0.153961]
+                    [ [17.276200, 16.919900, 16.544800, 16.038100]
+                    , [15.436600, 15.126700, 14.798700, 14.355800]
+                    , [13.705400, 13.411400, 13.100200, 12.682000]]])]
+
+#+END_SRC
+
+#+BEGIN_SRC haskell :tangle base/src/Models/SampleConverted.hs
+{-# LANGUAGE OverloadedLists, OverloadedStrings #-}
+module Models.SampleConverted where
+
+import qualified Data.Vector.Unboxed as V
+
+import Models.Input
+
+import Types
+import Types.Internal
+
+packHeliumFraction :: Double -> HeliumFraction
+packHeliumFraction = MkHeliumFraction . MkPercentage . closedUnitInterval'
+
+packFeH :: Double -> FeH
+packFeH  = MkFeH . packLog
+
+packAge :: Double -> LogAge
+packAge  = MkLogAge . packLog
+
+packMasses :: V.Vector Double -> V.Vector Mass
+packMasses = V.map (MkMass . nonNegative')
+
+packMags :: V.Vector Double -> V.Vector AbsoluteMagnitude
+packMags = V.map (MkAbsoluteMagnitude . packLog)
+
+
+convertedDsed :: Model
+convertedDsed =
+  [ ( packFeH (-2.5)
+    , [( packHeliumFraction 0.2451
+       , [ (packAge 8.397940, Isochrone [2, 3, 4, 5]
+                                        (packMasses [0.278163, 0.318852, 0.335466, 0.351598])
+                                        [ ("U", packMags [11.7478, 11.3514, 11.2028, 11.0572])
+                                        , ("B", packMags [11.0484, 10.7092, 10.5813, 10.4578])
+                                        , ("V", packMags [9.8499,  9.5412,  9.4241,  9.3119])])
+         , (packAge 8.477121, Isochrone [2, 3, 4, 5]
+                                        (packMasses [0.212681, 0.290489, 0.320389, 0.335518])
+                                        [ ("U", packMags [12.5728, 11.6188, 11.3348, 11.2034])
+                                        , ("B", packMags [11.7446, 10.9382, 10.6947, 10.5822])
+                                        , ("V", packMags [10.4768, 9.7498,  9.5277,  9.4251])])])])
+  , ( packFeH (-2.0)
+    , [( packHeliumFraction 0.2453
+       , [ (packAge 8.397940, Isochrone [2, 3, 4, 5]
+                                        (packMasses [0.297801, 0.335484, 0.338823, 0.355097])
+                                        [ ("U", packMags [12.1589, 11.8031, 11.7674, 11.5974])
+                                        , ("B", packMags [11.2562, 10.9432, 10.9126, 10.7646])
+                                        , ("V", packMags [9.9655,  9.6821,  9.6546,  9.5203])])
+         , (packAge 8.477121, Isochrone [2, 3, 4, 5]
+                                        (packMasses [0.251276, 0.317207, 0.335075, 0.337718])
+                                        [ ("U", packMags [12.6621, 11.9778, 11.8076, 11.7862])
+                                        , ("B", packMags [11.6918, 11.0959, 10.9477, 10.9296])
+                                        , ("V", packMags [10.3548, 9.8205,  9.6866,  9.6705])])])])]
+
+
+convertedNewDsed :: Model
+convertedNewDsed =
+  [ ( packFeH (-1.0)
+    , [ ( packHeliumFraction 0.247800
+        , [ (packAge 9.000000, Isochrone [2, 3, 4, 5]
+                                         (packMasses [0.113315, 0.124680, 0.140813, 0.173692])
+                                         [ ("U", packMags [17.03370, 16.62740, 16.12280, 15.25250])
+                                         , ("B", packMags [15.03530, 14.70540, 14.29240, 13.58510])
+                                         , ("V", packMags [13.23850, 12.93440, 12.55550, 11.92120])])
+          , (packAge 9.096910, Isochrone [2, 3, 4, 5]
+                                         (packMasses [0.103069, 0.113581, 0.125209, 0.141832])
+                                         [ ("U", packMags [17.44610, 17.02400, 16.60920, 16.09250])
+                                         , ("B", packMags [15.36540, 15.02750, 14.69060, 14.26770])
+                                         , ("V", packMags [13.54260, 13.23130, 12.92070, 12.53310])])])
+      , ( packHeliumFraction 0.33
+        , [ (packAge 9.000000, Isochrone [5, 6, 7, 8]
+                                         (packMasses [0.152464, 0.191656, 0.235299, 0.256241])
+                                         [ ("U", packMags [15.419500, 14.543400, 13.869200, 13.588700])
+                                         , ("B", packMags [13.755500, 13.026700, 12.446300, 12.202200])
+                                         , ("V", packMags  [12.094600, 11.447100, 10.926900, 10.706600])])
+          , (packAge 9.096910, Isochrone [5, 6, 7, 8]
+                                         (packMasses [0.128684, 0.153000, 0.191846, 0.232007])
+                                         [ ("U", packMags [16.111100, 15.404500, 14.537700, 13.908700])
+                                         , ("B", packMags [14.322000, 13.743300, 13.021800, 12.480500])
+                                         , ("V", packMags [12.603800, 12.083700, 11.442800, 10.957500])])])])
+  , ( packFeH (-0.5)
+    , [ ( packHeliumFraction 0.25370
+        , [ (packAge 9.000000, Isochrone [2, 3, 4, 5]
+                                         (packMasses [0.116263, 0.130317, 0.152523, 0.194038])
+                                         [ ("U", packMags [16.931000, 16.564000, 16.068000, 15.288200])
+                                         , ("B", packMags [15.136300, 14.815400, 14.381800, 13.705100])
+                                         , ("V", packMags [13.420600, 13.116000, 12.706400, 12.077400])])
+          , (packAge 9.096910, Isochrone [2, 3, 4, 5]
+                                         (packMasses [0.104591, 0.116666, 0.131087, 0.153961])
+                                         [ ("U", packMags [17.276200, 16.919900, 16.544800, 16.038100])
+                                         , ("B", packMags [15.436600, 15.126700, 14.798700, 14.355800])
+                                         , ("V", packMags [13.705400, 13.411400, 13.100200, 12.682000])])])])]
+#+END_SRC
+
+** =makeIsochrone= tool
+#+BEGIN_SRC haskell :tangle base/makeIsochrone/Main.hs
+{-# LANGUAGE TypeApplications #-}
+module Main where
+
+import qualified Data.Map as M
+
+import Options.Applicative
+import Data.Vector (Vector)
+import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as U
+
+import Text.Printf
+
+import Models.Input
+import Types
+import Types.Internal
+
+import Interpolate
+
+clusterParser :: Parser Cluster
+clusterParser = Cluster
+                <$> option (maybeReader (Just . MkFeH . packLog . read))
+                      (long "cluster-feh"
+                       <> metavar "FEH"
+                       <> help "Specify cluster FeH")
+                <*> option (maybeReader (fmap (MkHeliumFraction . MkPercentage) . closedUnitInterval . read))
+                      (long "cluster-y"
+                       <> metavar "Y"
+                       <> help "Specify cluster Y")
+                <*> option (maybeReader (Just . MkLogAge . packLog . read))
+                      (long "cluster-age"
+                       <> metavar "AGE"
+                       <> help "Specify cluster age in log years")
+
+data MakeIsochroneOptions = MakeIsochroneOptions
+  { cluster   :: Cluster
+  , modelName :: MSModel }
+
+
+makeIsochroneOptionParser :: Parser MakeIsochroneOptions
+makeIsochroneOptionParser = MakeIsochroneOptions <$> clusterParser
+                                                 <*> option auto
+                                                            (long "model"
+                                                             <> metavar "MODEL"
+                                                             <> help "Specify model. One of: {OldDsed, NewDsed}")
+
+
+main :: IO ()
+main = do options <- execParser opts
+          models  <- convertModels <$> loadModels (modelName $ options)
+          let (Isochrone eeps masses magnitudes) = interpolateIsochrone (cluster options) models
+              filters = case M.elems magnitudes of
+                     (ms:_) -> V.fromList $ map (\i -> concatMap (\v -> printf " %0.6f" (unpackLog . unAbsoluteMagnitude $ v U.! i)) $ M.elems magnitudes) [0.. (U.length ms - 1)]
+                     _      -> mempty
+
+          mapM_ (printf "%s ") $ M.keys magnitudes
+          putStrLn ""
+          V.mapM_ (\(a, b, c) -> printf "%d %0.6f%s\n" a b c) $
+            V.zip3 (V.convert eeps)
+                   (V.map (unNonNegative . unMass) . V.convert $ masses)
+                   (filters :: Vector String)
+
+  where
+    opts = info (makeIsochroneOptionParser <**> helper)
+      ( fullDesc
+     <> progDesc "Generate an isochrone from the models based on cluster parameters")
+#+END_SRC
+
+** Benchmark
+#+BEGIN_SRC haskell :tangle base/bench/Main.hs
+import Criterion.Main
+
+import qualified Data.Map.Strict as M
+
+import Interpolate
+import Models.Input
+import Types
+import Types.Internal
+
+-- Our benchmark harness.
+main = do
+  model <- loadModels NewDsed
+  let i1 = snd . M.findMin . snd . M.findMin . snd . M.findMin . convertModels $ model
+      i2 = snd . M.findMax . snd . M.findMax . snd . M.findMin . convertModels $ model
+
+  defaultMain [
+    bench "convertModels" $ whnf convertModels model,
+    bench "interpolateIsochrones" $ whnf (interpolateIsochrones (closedUnitInterval' 0.5) i1) i2,
+    bgroup "convertModels" []]
+#+END_SRC
+
+** Artifacts
+*** Cabal config
+#+BEGIN_SRC yaml :tangle base/package.yaml
+name: BayesianStellarEvolution
+category: application
+author: Elliot Robinson
+maintainer: elliot.robinson@rgoptech.com
+copyright: '2019'
+# license:
+github: BayesianStellarEvolution/BayesianStellarEvolution
+
+default-extensions:
+  - OverloadedStrings
+  - BangPatterns
+
+ghc-options:
+  - -Wall
+  
+library:
+  source-dirs: src
+
+  exposed-modules:
+    - Models.Input
+    - Models.Sample
+    - Models.SampleConverted
+    - Interpolate
+    - Types
+    - Types.DistanceMeasures
+    - Types.Magnitude
+    - Types.Internal
+
+  dependencies:
+    - base >=4.10 && <5
+    - BayesianStellarEvolution-Models
+    - attoparsec
+    - bytestring
+    - conduit
+    - conduit-extra
+    - containers
+    - ghc-compact
+    - lzma-conduit
+    - math-functions
+    - optparse-applicative
+    - QuickCheck
+    - text
+    - vector
+    - vector-th-unbox
+
+executables:
+  makeIsochrone:
+    main: Main.hs
+    source-dirs: makeIsochrone
+
+    dependencies:
+      - base
+      - BayesianStellarEvolution
+      - containers
+      - optparse-applicative
+      - vector
+
+tests:
+  library-tests:
+    main: Spec.hs
+    source-dirs: test
+
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+
+    dependencies:
+      - base
+      - BayesianStellarEvolution
+      - attoparsec
+      - bytestring
+      - conduit
+      - containers
+      - hspec
+      - QuickCheck
+      - raw-strings-qq
+      - vector
+
+
+benchmarks:
+  library-benchmarks:
+    main: Main.hs
+    source-dirs: bench
+
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+ 
+    dependencies:
+      - base
+      - BayesianStellarEvolution
+      - containers
+      - criterion
+      - vector
+#+END_SRC
+
+*** Test spec finder
+#+BEGIN_SRC haskell :tangle base/test/Spec.hs
+<<test spec finder>>
+#+END_SRC
+
+* Photometric Model library
+#+BEGIN_SRC haskell :tangle models/test/MainSequenceModelSpec.hs
+{-# LANGUAGE QuasiQuotes, OverloadedLists #-}
+module MainSequenceModelSpec (main, spec) where
+
+import Conduit
+
+import Data.Attoparsec.ByteString (parseOnly)
+import Data.Either (isLeft, isRight)
+
+import           Data.ByteString (ByteString)
+import qualified Data.ByteString.Char8 as B
+
+import Test.Hspec
+import Text.RawString.QQ
+
+import MainSequenceModel
+
+
+main :: IO ()
+main = hspec spec
+
+spec :: SpecWith ()
+spec = parallel $ do
+  describe "MS Model file format" $ do
+    describe "taggedDouble" $ do
+      let doParse = parseOnly $ taggedDouble "tag="
+
+      it "pulls a double given a tag" $
+        doParse " tag=1.00" `shouldBe` Right 1.00
+
+      it "requires at lease one space in the source string prior to the tag" $
+        doParse "tag=1.00" `shouldSatisfy` isLeft
+
+    describe "Filters" $ do
+      let doParse = parseOnly parseFilters
+
+      it "parses a single filter" $
+        doParse " U\n" `shouldBe` (Right $ Filters ["U"])
+
+      it "parses a list of filters" $
+        doParse " U B V R I J H K\n" `shouldBe` (Right $ Filters ["U", "B", "V", "R", "I", "J", "H", "K"])
+
+
+    describe "MS Model section header" $ do
+      let doParse = parseOnly parseSectionHeader
+
+      it "parses a section header" $
+        let result = doParse " [Fe/H]=-2.500000    [alpha/Fe]=0.000000    l/Hp=1.938000    Y=0.245100\n"
+        in result `shouldBe` (Right $ SectionHeader (-2.5) 0.0 1.938 0.2451)
+
+    describe "MS Model age header" $ do
+      let doParse = parseOnly parseAgeHeader
+
+      it "parses an age header" $
+        let result = doParse " logAge=8.397940\n"
+        in result `shouldBe` (Right $ AgeHeader 8.397940)
+
+
+    describe "MS Model EEP" $ do
+      let doParse = parseOnly parseEEP "    2 0.278163 11.747800 11.048400  9.849900\n"
+
+      it "parses an EEP line" $
+        doParse `shouldBe` (Right $ EEP 2 0.278163 [11.7478, 11.0484, 9.8499])
+
+
+    describe "Comments" $ do
+      let desired = Right $ Comment "any text here"
+          doParse = parseOnly parseComment
+
+      it "captures a comment with no space after #" $
+        doParse "any text here\n" `shouldBe` desired
+      it "skips space after #" $
+        doParse "\t any text here\n" `shouldBe` desired
+
+
+    describe "Model" $ do
+      it "lexes" $
+        let result = sequence $ map (fmap snd) $ runConduitPure $ yield dsed .| lexModel .| sinkList
+            expected = [ Comment "(abbreviated) DSED models"
+                       , Filters ["U", "B"]
+                       , Filters ["V"]
+                       , SectionHeader (-2.5) 0 1.938 0.2451
+                       , AgeHeader 8.39794
+                       , Comment "EEP     Mass         U         B         V"
+                       , EEP 2 0.278163 [11.7478, 11.0484, 9.8499]
+                       , EEP 3 0.318852 [11.3514, 10.7092, 9.5412]
+                       , EEP 4 0.335466 [11.2028, 10.5813, 9.4241]
+                       , EEP 5 0.351598 [11.0572, 10.4578, 9.3119]
+                       , AgeHeader 8.477121
+                       , Comment "EEP     Mass         U         B         V"
+                       , EEP 2 0.212681 [12.5728, 11.7446, 10.4768]
+                       , EEP 3 0.290489 [11.6188, 10.9382,  9.7498]
+                       , EEP 4 0.320389 [11.3348, 10.6947,  9.5277]
+                       , EEP 5 0.335518 [11.2034, 10.5822,  9.4251]
+                       , Comment ""
+
+                       , SectionHeader (-2.0) 0.0 1.938 0.2453
+                       , AgeHeader 8.397940
+                       , Comment "EEP     Mass         U         B         V"
+                       , EEP 2 0.297801 [12.1589, 11.2562, 9.9655]
+                       , EEP 3 0.335484 [11.8031, 10.9432, 9.6821]
+                       , EEP 4 0.338823 [11.7674, 10.9126, 9.6546]
+                       , EEP 5 0.355097 [11.5974, 10.7646, 9.5203]
+                       , AgeHeader 8.477121
+                       , Comment ""
+                       , Comment "EEP     Mass         U         B         V"
+                       , EEP 2 0.251276 [12.6621, 11.6918, 10.3548]
+                       , EEP 3 0.317207 [11.9778, 11.0959,  9.8205]
+                       , EEP 4 0.335075 [11.8076, 10.9477,  9.6866]
+                       , EEP 5 0.337718 [11.7862, 10.9296,  9.6705]]
+        in (result `shouldSatisfy` isRight) >> ((\(Right r) -> r) result `shouldBe` expected)
+
+      it "parses" $
+        let result = runConduitPure $ yield dsed .| lexModel .| parseModel .| sinkList
+        in result `shouldBe` [ ((["U", "B", "V"], -2.5, 0.2451),
+                                 [ Age 8.39794
+                                       [2, 3, 4, 5]
+                                       [0.278163, 0.318852, 0.335466, 0.351598]
+                                       [ [11.7478, 11.3514, 11.2028, 11.0572]
+                                       , [11.0484, 10.7092, 10.5813, 10.4578]
+                                       , [9.8499,  9.5412,  9.4241,  9.3119]]
+                                 , Age 8.477121
+                                       [2, 3, 4, 5]
+                                       [0.212681, 0.290489, 0.320389, 0.335518]
+                                       [ [12.5728, 11.6188, 11.3348, 11.2034]
+                                       , [11.7446, 10.9382, 10.6947, 10.5822]
+                                       , [10.4768, 9.7498,  9.5277,  9.4251]] ])
+                             , ((["U", "B", "V"], -2.0, 0.2453),
+                                 [ Age 8.397940
+                                       [2, 3, 4, 5]
+                                       [0.297801, 0.335484, 0.338823, 0.355097]
+                                       [ [12.1589, 11.8031, 11.7674, 11.5974]
+                                       , [11.2562, 10.9432, 10.9126, 10.7646]
+                                       , [9.9655,  9.6821,  9.6546,  9.5203]]
+                                 , Age 8.477121
+                                       [2, 3, 4, 5]
+                                       [0.251276, 0.317207, 0.335075, 0.337718]
+                                       [ [12.6621, 11.9778, 11.8076, 11.7862]
+                                       , [11.6918, 11.0959, 10.9477, 10.9296]
+                                       , [10.3548, 9.8205,  9.6866,  9.6705]] ])]
+
+<<DSED raw>>
+#+END_SRC
+
+This quasiquote breaks HTML export, reason unknown. ( FIXME )
+
+#+HEADER: :noweb-ref DSED raw
+#+BEGIN_SRC text
+dsed :: ByteString
+dsed = B.pack $ [r|# (abbreviated) DSED models
+%f U B
+%f V
+%s [Fe/H]=-2.500000    [alpha/Fe]=0.000000    l/Hp=1.938000    Y=0.245100
+%a logAge=8.397940
+# EEP     Mass         U         B         V
+    2 0.278163 11.747800 11.048400  9.8499000
+    3 0.318852 11.351400 10.709200  9.5412000
+    4 0.335466 11.202800 10.581300  9.424100
+    5 0.351598 11.057200 10.457800  9.311900
+%a logAge=8.477121
+# EEP     Mass         U         B         V
+    2 0.212681 12.572800 11.744600 10.476800
+    3 0.290489 11.618800 10.938200  9.749800
+    4 0.320389 11.334800 10.694700  9.527700
+    5 0.335518 11.203400 10.582200  9.425100
+
+%s [Fe/H]=-2.000000    [alpha/Fe]=0.000000    l/Hp=1.938000    Y=0.245300
+%a logAge=8.397940
+# EEP     Mass         U         B         V
+    2 0.297801 12.158900 11.256200  9.965500
+    3 0.335484 11.803100 10.943200  9.682100
+    4 0.338823 11.767400 10.912600  9.654600
+    5 0.355097 11.597400 10.764600  9.520300
+%a logAge=8.477121
+
+# EEP     Mass         U         B         V
+    2 0.251276 12.662100 11.691800 10.354800
+    3 0.317207 11.977800 11.095900  9.820500
+    4 0.335075 11.807600 10.947700  9.686600
+    5 0.337718 11.786200 10.929600  9.670500
+|]
+#+END_SRC
+
+
+#+BEGIN_SRC haskell :tangle models/test/Spec.hs
+<<test spec finder>>
+#+END_SRC
+
+#+BEGIN_SRC haskell :tangle models/test/MainSequenceSpec.hs
+module MainSequenceSpec where
+
+import Conduit
+
+import Data.Attoparsec.ByteString
+import Data.ByteString (ByteString)
+import Data.Conduit.Lzma
+import Data.Conduit.Attoparsec
+import Data.Either (isRight)
+
+import Test.Hspec
+
+import MainSequenceModel
+
+loadAndLex :: String -> IO ()
+loadAndLex p =
+  runConduitRes ( sourceFile p
+               .| decompress Nothing
+               .| lexModel
+               .| parseModel
+               .| sinkNull )
+
+
+main :: IO ()
+main = hspec spec
+
+
+spec = heavyTests
+
+
+heavyTests = describe "heavy" $ do
+  describe "Loading Tests" $ do
+    describe "Old DSED" $ do
+      it "loads successfully" $
+        loadAndLex "mainSequence/dsed_old.model.xz"
+    describe "New DSED" $ do
+      it "loads successfully" $
+        loadAndLex "mainSequence/dsed_new.model.xz"
+    describe "Yale 2018" $ do
+      it "loads successfully" $
+        loadAndLex "mainSequence/yale_2018.model.xz"
+    describe "PARSEC" $ do
+      it "loads successfully" $
+        loadAndLex "mainSequence/PARSEC.model.xz"
+#+END_SRC
+
+#+BEGIN_SRC haskell :tangle models/testModelFile/Main.hs
+module Main where
+
+import Conduit
+
+import Data.Either (lefts)
+import Data.Set  (Set)
+import Data.Text (Text)
+
+import Options.Applicative
+
+import Text.Printf
+
+import Paths
+import MainSequenceModel
+
+
+loadModels :: (HasModelPath p) => p -> IO [Either (Double, Double, [(Double, Int)]) (([Text], Double, Double), Set Age)]
+loadModels model = runConduitRes $ loadModel .| sinkList
+  where loadModel = sourceFile (modelPath model "") .| lexModel .| parseModel .| mapC checkEeps
+
+newtype ModelFile = MkModelFile { unModelFile :: String }
+
+instance HasModelPath ModelFile where
+  modelPath a _ = unModelFile a
+
+main :: IO ()
+main = do options <- execParser opts
+          model <- loadModels options
+          putStr "Parsed model successfully"
+
+          let leftEeps = lefts model
+
+          if null leftEeps
+             then putStrLn ""
+             else printLeftEeps leftEeps
+  where
+    opts = info (option (maybeReader (Just . MkModelFile)) (long "modelFile" <> help "Specify model archive") <**> helper)
+      ( fullDesc
+     <> progDesc "Generate an isochrone from the models based on cluster parameters")
+    printLeftEeps eeps = do
+        putStr . unlines . ("; however, at least the following EEPS are missing:" :) $ concatMap go eeps
+        putStrLn "\nOnly the first missing EEP for each age is printed."
+      where go (feh, y, as) = let header = printf "\n  [Fe/H] = %.2f, Y = %.2f" feh y
+                                  ages   = map (uncurry (printf "    Age = %.2f, EEP = %d")) as
+                              in header : ages
+#+END_SRC
+
+#+BEGIN_SRC haskell :tangle models/src/MainSequenceModel.hs
+{-# LANGUAGE TypeApplications, OverloadedStrings #-}
+module MainSequenceModel where
+
+import Conduit
+
+import Control.Exception (Exception, throw)
+import Control.Monad (liftM2, when)
+
+import Data.Attoparsec.ByteString
+import Data.Attoparsec.ByteString.Char8 (isHorizontalSpace, isEndOfLine, double, decimal, char)
+import Data.ByteString (ByteString)
+import Data.Either (isLeft, lefts)
+import Data.Text (Text)
+import Data.Text.Encoding (decodeUtf8)
+import Data.Conduit.Attoparsec
+import Data.Ord (comparing)
+import Data.Set (Set)
+import Data.Vector.Unboxed (Vector)
+
+import qualified Data.Attoparsec.ByteString.Char8 as AP
+import qualified Data.Set as S
+import qualified Data.Vector.Unboxed as V
+
+import Text.Printf
+
+import Data.List (intersperse)
+
+
+data MSModelException = LexException         [String] Position
+                      | ParseException       PositionRange
+                      | FilterCountException PositionRange Int Int
+
+instance Exception MSModelException
+
+instance Show MSModelException where
+  showsPrec _ (LexException context (Position line col _)) =
+    showString $ printf "Failed to lex main sequence model at line %d, column %d\nContext: %s"
+                     line col $ concat $ intersperse " > " context
+  showsPrec _ (ParseException (PositionRange (Position line _ _) _)) =
+    showString $ printf "Illegal lexeme in main sequence model on line %d" line
+  showsPrec _ (FilterCountException (PositionRange (Position line _ _) _) nFilters eepFilters) =
+    showString $ printf "Incorrect number of filters on line %d. Expected %d, found %d." line nFilters eepFilters
+
+
+data MSModelFormat = Filters [Text]
+                   | SectionHeader Double Double Double Double
+                   | AgeHeader Double
+                   | EEP Int Double [Double]
+                   | Comment Text
+                   deriving (Show, Eq)
+
+
+isFilters (Filters _) = True
+isFilters _           = False
+
+isComment (Comment _) = True
+isComment _           = False
+
+
+separator = satisfy isHorizontalSpace *> skipWhile isHorizontalSpace <?> "required spacing"
+
+
+endOfLine = AP.endOfLine <?> "end of line"
+
+
+parseFilters =
+  let parser = many1 (satisfy isHorizontalSpace *> takeWhile1 (not . liftM2 (||) isHorizontalSpace isEndOfLine)) <* endOfLine
+  in Filters . map decodeUtf8 <$> parser <?> "Filters"
+
+
+parseComment =
+  let parser = skipWhile isHorizontalSpace *> takeTill isEndOfLine <* endOfLine
+  in Comment . decodeUtf8 <$> parser <?> "Comment"
+
+
+parseEmptyLine :: Parser MSModelFormat
+parseEmptyLine = pure (Comment "")
+
+
+taggedDouble t = separator *> string t *> double
+
+
+parseHeader = do
+  a <- eitherP "a" (eitherP "s" "f")
+  case a of
+    Left _ -> parseAgeHeader
+    Right (Left _) -> parseSectionHeader
+    Right (Right _) -> parseFilters
+
+parseSectionHeader =
+  let parser = SectionHeader <$> feh
+                             <*> alphaFe
+                             <*> lHp
+                             <*> y
+                             <*  endOfLine
+
+  in parser <?> "Section header"
+     where feh = taggedDouble "[Fe/H]=" <?> "[Fe/H]"
+           alphaFe = taggedDouble "[alpha/Fe]="  <?> "[alpha/Fe]"
+           lHp = taggedDouble "l/Hp=" <?> "l/Hp"
+           y = taggedDouble "Y=" <?> "Y"
+
+
+parseAgeHeader =
+  let parser = AgeHeader <$> logAge <* endOfLine
+  in parser <?> "Age header"
+     where logAge = taggedDouble "logAge=" <?> "logAge"
+
+
+parseEEP =
+  let parser = EEP <$> (skipWhile isHorizontalSpace *> decimal <?> "EEP")
+                   <*> (separator *> double <?> "Mass")
+                   <*> (many1 (separator *> double) <?> "Filters")
+                   <*  endOfLine
+  in parser <?> "EEP"
+
+
+-- | Lex a Main Sequence model
+--
+-- Strange goings-on with eitherP here are to force the parser to make choices early
+-- This is strictly necessary to get useful error messages, and has a slight performance boost (over choose) as a bonus
+lexModel ::
+  Monad m => ConduitT
+    ByteString
+    (Either ParseError (PositionRange, MSModelFormat))
+    m
+    ()
+lexModel = conduitParserEither $ do
+  c <- eitherP (char '%') (eitherP (eitherP (char '#') (char '\n')) (pure True))
+  case c of
+    Right (Right _) -> parseEEP
+    Left _ -> parseHeader
+    Right (Left (Left _)) -> parseComment
+    Right (Left (Right _)) -> parseEmptyLine
+
+
+
+data Age = Age !Double (Vector Int) (Vector Double) [Vector Double] deriving (Eq, Show)
+
+instance Ord Age where
+  compare = comparing (\(Age a _ _ _) -> a)
+
+newtype PrettyAge = PrettyAge Age
+  deriving (Eq, Ord)
+
+instance Show PrettyAge where
+  showsPrec _ (PrettyAge (Age a _ _ _)) = shows a
+
+
+checkEeps :: (([Text], Double, Double), Set Age) -> Either (Double, Double, [(Double, Int)]) (([Text], Double, Double), Set Age)
+checkEeps a@((_, feh, y), ages) =
+  let leftEeps = S.filter isLeft $ S.map eepsAreConsecutive ages
+  in if S.null leftEeps
+        then Right a
+        else Left (feh, y, lefts . S.toList $ leftEeps)
+
+
+eepsAreConsecutive (Age age eeps _ _) = go
+  where go | V.null eeps = Right (-1)
+           | otherwise   = V.foldl (\b a -> case b of (Left _)  -> b
+                                                      (Right v) -> if (v == a)
+                                                                     then Right (succ v)
+                                                                     else Left (age, v))
+                                   (Right $ V.head eeps)
+                                   eeps
+
+
+parseModel ::
+  Monad m => ConduitT
+    (Either ParseError (PositionRange, MSModelFormat))
+    (([Text], Double, Double), Set Age)
+    m
+    ()
+parseModel =
+  mapC handleError .| filterC (not . isComment . snd) .| unpack
+  where handleError (Left p@(ParseError context _ pos)) =
+          throw $ LexException context pos
+        handleError (Left DivergentParser) = error "Divergent Parser"
+        handleError (Right r) = r
+
+        unpack = do
+          filters <- concat <$> (header .| sinkList)
+
+          let nFilters = length filters
+              go = do
+                next <- await
+                case next of
+                  Nothing -> return ()
+                  Just (_, SectionHeader feh _ _ y) -> section nFilters (filters, feh, y) >> go
+                  _ -> go
+          go
+
+        header =
+          let go = do
+                next <- await
+                case next of
+                  Just (_, Filters fs) -> yield fs >> go
+                  Just l               -> leftover l
+                  Nothing              -> return ()
+          in go
+
+        section nFilters sectionHeader =
+          let go ages = do
+                next <- await
+                case next of
+                  Just (_, AgeHeader a) -> do
+                    na <- age nFilters a
+                    go $ na `S.insert` ages
+
+                  Just l@(_, SectionHeader _ _ _ _) -> doYield ages >> leftover l
+                  Just (pos, _)                     -> throw $ ParseException pos
+                  Nothing                           -> doYield ages
+          in go S.empty
+            where doYield ages = yield (sectionHeader, ages)
+
+
+        age nFilters a =
+          let go eeps masses fs = do
+                next <- await
+                case next of
+                  Just (pos, EEP eep mass filters)  -> do
+                    let eepFilters = length filters
+
+                    when (eepFilters /= nFilters) $ throw $ FilterCountException pos nFilters eepFilters
+
+                    go (eeps `V.snoc` eep) (masses `V.snoc` mass) $ zipWith V.snoc fs filters
+
+                  Just l@(_, AgeHeader _)           -> leftover l >> doReturn eeps masses fs
+                  Just l@(_, SectionHeader _ _ _ _) -> leftover l >> doReturn eeps masses fs
+                  Just (pos, _)                     -> throw $ ParseException pos
+                  Nothing                           -> doReturn eeps masses fs
+          in go V.empty V.empty $ replicate nFilters (V.empty @Double)
+            where doReturn eeps masses fs = return $ Age a eeps masses fs
+#+END_SRC
+
+#+BEGIN_SRC haskell :tangle models/src/Paths.hs
+module Paths where
+
+
+data MSModel = OldDsed | NewDsed | Yale2018 | Parsec
+             deriving (Read, Show)
+
+class HasModelPath a where
+  modelPath :: a -> FilePath -> FilePath
+
+instance HasModelPath MSModel where
+  modelPath OldDsed  base = base ++ "mainSequence/dsed_old.model.xz"
+  modelPath NewDsed  base = base ++ "mainSequence/dsed_new.model.xz"
+  modelPath Parsec   base = base ++ "mainSequence/PARSEC.model.xz"
+  modelPath Yale2018 base = base ++ "mainSequence/yale_2018.model.xz"
+#+END_SRC
+
+** Artifacts
+#+BEGIN_SRC yaml :tangle models/package.yaml
+name: BayesianStellarEvolution-Models
+category: application
+author: Elliot Robinson
+maintainer: elliot.robinson@rgoptech.com
+copyright: '2019'
+# license:
+github: BayesianStellarEvolution/BayesianStellarEvolution
+
+default-extensions:
+  - OverloadedStrings
+
+library:
+  source-dirs: src
+
+  exposed-modules:
+    - MainSequenceModel
+    - Paths
+
+  dependencies:
+    - base >=4.10 && <5
+    - attoparsec
+    - bytestring
+    - conduit
+    - conduit-extra
+    - containers
+    - lzma-conduit
+    - text
+    - vector
+
+executables:
+  testModelFile:
+    main: Main.hs
+    source-dirs: testModelFile
+
+    dependencies:
+      - base
+      - BayesianStellarEvolution-Models
+      - optparse-applicative
+      - conduit
+      - containers
+      - text
+
+tests:
+  model-tests:
+    main: Spec.hs
+    source-dirs: test
+
+    ghc-options:
+      - -rtsopts
+
+    dependencies:
+      - base
+      - BayesianStellarEvolution-Models
+      - attoparsec
+      - bytestring
+      - conduit
+      - conduit-extra
+      - hspec
+      - lzma-conduit
+      - QuickCheck
+      - raw-strings-qq
+      - vector
+#+END_SRC
+* Global Artifacts
+** Stack config
+#+BEGIN_SRC yaml :tangle stack.yaml
+resolver: lts-18.28
+
+packages:
+  - base
+  - models
+
+extra-deps:
+  - lzma-clib-5.2.2
+#+END_SRC
+
+** GitHub README
+#+BEGIN_SRC markdown :tangle README.md
+# Bayesian Analysis of Stellar Evolution
+## Prerequisites
+### Required
+#### Stack
+
+Installation instructions at [stack's README](https://docs.haskellstack.org/en/stable/README/).
+
+#### XZ Utils (aka liblzma) development files
+
+On Fedora (or other RPM-based platforms)
+
+```
+sudo yum install xz-devel
+```
+
+On Mac OS X with Homebrew:
+
+```
+brew install xz
+```
+
+On Ubuntu (or other apt-based platforms):
+
+```
+sudo apt install liblzma-dev
+```
+
+#### zlib development files
+
+On Fedora (or other RPM-based platforms)
+
+```
+sudo yum install zlib-devel
+```
+
+On Mac OS X with Homebrew:
+
+```
+brew install zlib
+```
+
+On Ubuntu (or other apt-based platforms):
+
+```
+sudo apt install zlib1g-dev
+```
+
+### Recommended
+#### Homebrew (Mac OS X only)
+
+You can install Homebrew from the command line 
+
+```
+ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" < /dev/null 2> /dev/null
+```
+
+## Building the executables
+
+Download the project, open a terminal in the base directory (the one containing `stack.yaml`), then simply run `stack build`.
+
+You can install the applications in a user-local directory with `stack install`, or run them from anywhere inside the project directory using `stack exec <executable name>`.
+
+## Executables
+
+Help is available for each executable by running it with the `--help` flag.
+
+|Name|Description|
+|-|-|
+|makeIsochrone|Given cluster parameters, generates an isochrone corresponding to those parameters|
+|testModelFile|Given a path to an uncompressed model file, attempts to parse that file|
+#+END_SRC
+* Templates
+#+HEADER: :noweb-ref test spec finder
+#+BEGIN_SRC haskell
+{-# OPTIONS_GHC -F -pgmF hspec-discover #-}
+#+END_SRC
