@@ -187,7 +187,7 @@ derivingUnbox "NonNegative"
 *** Logarithmic numbers
 Now, to the point of this exercise. First, we define some basic operations for working with any values in a logarithmic space (vs. linear). Each base (described later) will be an instance of this class.
 
- #+HEADER: :noweb-ref number class
+#+HEADER: :noweb-ref number class
 #+BEGIN_SRC haskell
 class LogSpace a where
   toLogSpace   :: NonNegative -> a -- ^ Take any non-negative number and express it as a value in log_N space
@@ -383,6 +383,7 @@ newtype Likelihood = MkLikelihood { unLikelihood :: ClosedUnitInterval }
 type EEP = Word
 type Filter = Text
 
+
 data Isochrone = Isochrone (V.Vector EEP) (V.Vector Mass) (M.Map Filter (V.Vector AbsoluteMagnitude))
           deriving (Eq, Show)
 #+END_SRC
@@ -458,7 +459,6 @@ module Types.DistanceMeasures (Parallax (..)) where
 
 import Types.Internal
 
-
 <<distance measure>>
 #+END_SRC
 
@@ -470,7 +470,7 @@ import Types.Internal
 import Data.Vector.Unboxed.Deriving
 
 
-<<apparent magnitude>>
+<<magnitude>>
 #+END_SRC
 
 #+BEGIN_SRC haskell :tangle base/src/Types.hs

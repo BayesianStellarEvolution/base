@@ -138,7 +138,6 @@ spec = parallel $ do
                                        , [11.6918, 11.0959, 10.9477, 10.9296]
                                        , [10.3548, 9.8205,  9.6866,  9.6705]] ])]
 
-
 dsed :: ByteString
 dsed = B.pack $ [r|# (abbreviated) DSED models
 %f U B
@@ -172,3 +171,4 @@ dsed = B.pack $ [r|# (abbreviated) DSED models
     4 0.335075 11.807600 10.947700  9.686600
     5 0.337718 11.786200 10.929600  9.670500
 |]
+

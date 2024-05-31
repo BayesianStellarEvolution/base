@@ -41,18 +41,6 @@ derivingUnbox "Mass"
   [| MkMass |]
 
 
-newtype Likelihood = MkLikelihood { unLikelihood :: ClosedUnitInterval }
-        deriving (Show, Eq, Ord)
-
-
-type EEP = Word
-type Filter = Text
-
-
-data Isochrone = Isochrone (V.Vector EEP) (V.Vector Mass) (M.Map Filter (V.Vector AbsoluteMagnitude))
-          deriving (Eq, Show)
-
-
 newtype LogAge = MkLogAge { unLogAge :: Log10 }
         deriving (Read, Show, Eq, Ord)
 
@@ -64,3 +52,14 @@ newtype CoolingAge = MkCoolingAge { unCoolingAge :: LogAge }
 -- TODO: This should probably move?
 data Cluster = Cluster { feh :: FeH, heliumFraction :: HeliumFraction, logAge :: LogAge }
      deriving (Read, Show)
+
+newtype Likelihood = MkLikelihood { unLikelihood :: ClosedUnitInterval }
+        deriving (Show, Eq, Ord)
+
+type EEP = Word
+type Filter = Text
+
+
+data Isochrone = Isochrone (V.Vector EEP) (V.Vector Mass) (M.Map Filter (V.Vector AbsoluteMagnitude))
+          deriving (Eq, Show)
+

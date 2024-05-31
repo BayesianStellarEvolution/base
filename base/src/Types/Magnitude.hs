@@ -13,6 +13,6 @@ derivingUnbox "AbsoluteMagnitude"
   [| unAbsoluteMagnitude |]
   [| MkAbsoluteMagnitude |]
 
-
 newtype ApparentMagnitude = MkApparentMagniutude { unApparentMagnitude :: Log10 }
         deriving (Show, Eq, Ord)
+

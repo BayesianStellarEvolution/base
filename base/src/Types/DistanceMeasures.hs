@@ -16,3 +16,4 @@ due to the absorption and the transformation is
 
 newtype Parallax = MkParallax { unParallax :: NonNegative }
         deriving (Show, Eq, Ord)
+

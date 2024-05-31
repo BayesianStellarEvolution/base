@@ -29,6 +29,7 @@ spec = do
   isochroneSpec
   interpolationFractionSpec
 
+
 shouldBeCloseToD :: (Num a, Ord a, Show a) => a -> a -> a -> Expectation
 shouldBeCloseToD delta x1 x2 = abs (x2 - x1) `shouldSatisfy` (< delta)
 

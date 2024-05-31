@@ -134,7 +134,7 @@ Fractional (e.g., a non-log value greater than 0 but less than 1) to a
 non-integer power is Complex, which results in NaN in many cases.
 
 We may want to look back at this eventually for performance purposes, but it's
-possible that the (**) is going through exp/log anyway (i.e., no benefit). One potential fix would be to double memory residency by carrying both log- and non-log-space
+possible that the (**) is going through exp/log anyway (i.e., no benefit). One potential fix would be to double memory residency by carrying both log- and non-log-space values.
 
 Note [References]
 ~~~~~~~~~~~~~~~~~
