@@ -2,6 +2,7 @@ module Types.DistanceMeasures (Parallax (..)) where
 
 import Types.Internal
 
+
 {-
 Note [Distance Moduli]
 ~~~~~~~~~~~~~~~~~~~~~~

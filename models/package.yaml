@@ -6,6 +6,10 @@ copyright: '2019'
 # license:
 github: BayesianStellarEvolution/BayesianStellarEvolution
 
+ghc-options:
+  - -Wall
+  - -O2
+
 default-extensions:
   - OverloadedStrings
 
@@ -47,6 +51,7 @@ tests:
 
     ghc-options:
       - -rtsopts
+      - '"-with-rtsopts=-H256m -s"'
 
     dependencies:
       - base

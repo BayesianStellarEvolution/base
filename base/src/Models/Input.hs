@@ -24,7 +24,6 @@ import Types
 import Types.Internal
 
 
-
 type RawModel = [(([Text], Double, Double), Set Age)]
 type Model    = M.Map FeH (M.Map HeliumFraction (M.Map LogAge Isochrone))
 
@@ -54,3 +53,4 @@ convertModels = M.fromListWith (M.union) . map go
 
 fetchCompactModel :: HasModelPath p => p -> IO (Compact Model)
 fetchCompactModel = (compact =<<) . fmap convertModels . loadModels
+

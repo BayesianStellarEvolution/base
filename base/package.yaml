@@ -12,6 +12,7 @@ default-extensions:
 
 ghc-options:
   - -Wall
+  - -O2
   
 library:
   source-dirs: src

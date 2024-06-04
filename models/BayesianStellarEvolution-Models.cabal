@@ -28,6 +28,7 @@ library
       src
   default-extensions:
       OverloadedStrings
+  ghc-options: -Wall -O2
   build-depends:
       attoparsec
     , base >=4.10 && <5
@@ -48,6 +49,7 @@ executable testModelFile
       testModelFile
   default-extensions:
       OverloadedStrings
+  ghc-options: -Wall -O2
   build-depends:
       BayesianStellarEvolution-Models
     , base
@@ -68,7 +70,7 @@ test-suite model-tests
       test
   default-extensions:
       OverloadedStrings
-  ghc-options: -rtsopts
+  ghc-options: -Wall -O2 -rtsopts "-with-rtsopts=-H256m -s"
   build-depends:
       BayesianStellarEvolution-Models
     , QuickCheck
