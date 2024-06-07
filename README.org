@@ -729,27 +729,8 @@ benchmarks:
 ** Main Sequence models
 BASE-9 specifies its own, uniform main sequence model format. Models may have any filename, but typically use the =.model= extension. We provide several popular current and historical models and support development of user models through this documentation, the =testModelFile= tool, and the =makeIsochrone= tool.
 
-#+BEGIN_SRC haskell :tangle models/test/MainSequenceModelSpec.hs
-{-# LANGUAGE QuasiQuotes, OverloadedLists #-}
-module MainSequenceModelSpec (main, spec) where
-
-import Conduit
-
-import Data.Attoparsec.ByteString (parseOnly)
-import Data.Either (isLeft, isRight)
-
-import           Data.ByteString (ByteString)
-import qualified Data.ByteString.Char8 as B
-
-import Test.Hspec
-import Text.RawString.QQ
-
-import MainSequenceModel
-
-
-main :: IO ()
-main = hspec spec
-
+#+HEADER: :noweb-ref main sequence spec
+#+BEGIN_SRC haskell
 spec :: SpecWith ()
 spec = parallel $ do
   describe "MS Model file format" $ do
@@ -912,35 +893,8 @@ dsed = B.pack $ [r|# (abbreviated) DSED models
 |]
 #+END_SRC
 
-#+BEGIN_SRC haskell :tangle models/src/MainSequenceModel.hs
-{-# LANGUAGE TypeApplications, OverloadedStrings #-}
-module MainSequenceModel where
-
-import Conduit
-
-import Control.Exception (Exception, throw)
-import Control.Monad (liftM2, when)
-
-import Data.Attoparsec.ByteString
-import Data.Attoparsec.ByteString.Char8 (isHorizontalSpace, isEndOfLine, double, decimal, char)
-import Data.ByteString (ByteString)
-import Data.Either (isLeft, lefts)
-import Data.Text (Text)
-import Data.Text.Encoding (decodeUtf8)
-import Data.Conduit.Attoparsec
-import Data.Ord (comparing)
-import Data.Set (Set)
-import Data.Vector.Unboxed (Vector)
-
-import qualified Data.Attoparsec.ByteString.Char8 as AP
-import qualified Data.Set as S
-import qualified Data.Vector.Unboxed as V
-
-import Text.Printf
-
-import Data.List (intersperse)
-
-
+#+HEADER: :noweb-ref main sequence
+#+BEGIN_SRC haskell
 data MSModelException = LexException         [String] Position
                       | ParseException       PositionRange
                       | FilterCountException PositionRange Int Int
@@ -1677,55 +1631,6 @@ isochroneSpec = describe "isochrone interpolation" $ do
         mags (Isochrone _ _ v) = v
 #+END_SRC
 
-**** Artifacts
-#+BEGIN_SRC haskell :tangle base/src/Interpolate.hs
-{-# LANGUAGE FlexibleContexts, StandaloneDeriving, GeneralizedNewtypeDeriving, NoMonomorphismRestriction #-}
-module Interpolate where
-
-import Control.Exception (Exception, throw)
-import qualified Data.Map.Strict as M
-import qualified Data.Vector.Unboxed as V
-
-import Models.Input (Model)
-import Types
-import Types.Internal
-
-
-<<interpolate>>
-#+END_SRC
-
-#+BEGIN_SRC haskell :tangle base/test/InterpolateSpec.hs
-{-# LANGUAGE NoMonomorphismRestriction, TypeApplications #-}
-module InterpolateSpec (main, spec) where
-
-import Data.List (sort)
-
-import qualified Data.Map.Strict as M
-import qualified Data.Vector.Unboxed as V
-
-import Test.Hspec
-import Test.QuickCheck hiding (Positive(..))
-
-import Models.Input
-import Models.Sample
-
-import Interpolate
-import Types
-import Types.Internal
-
-
-main :: IO ()
-main = hspec spec
-
-
-<<interpolate spec>>
-#+END_SRC
-
-*** Artifacts
-#+BEGIN_SRC haskell :tangle models/test/Spec.hs
-<<test spec finder>>
-#+END_SRC
-
 ** =testModelFile= tool
 The =testModelFile= tool facilitates user development of model files by loading (and therefore verifying the proper format of) a provided model file.
 
@@ -1885,6 +1790,115 @@ import Interpolate
 #+END_SRC
 
 ** Artifacts
+*** Main sequence
+**** Model
+#+BEGIN_SRC haskell :tangle models/src/MainSequenceModel.hs
+{-# LANGUAGE TypeApplications, OverloadedStrings #-}
+module MainSequenceModel where
+
+import Conduit
+
+import Control.Exception (Exception, throw)
+import Control.Monad (liftM2, when)
+
+import Data.Attoparsec.ByteString
+import Data.Attoparsec.ByteString.Char8 (isHorizontalSpace, isEndOfLine, double, decimal, char)
+import Data.ByteString (ByteString)
+import Data.Either (isLeft, lefts)
+import Data.Text (Text)
+import Data.Text.Encoding (decodeUtf8)
+import Data.Conduit.Attoparsec
+import Data.Ord (comparing)
+import Data.Set (Set)
+import Data.Vector.Unboxed (Vector)
+
+import qualified Data.Attoparsec.ByteString.Char8 as AP
+import qualified Data.Set as S
+import qualified Data.Vector.Unboxed as V
+
+import Text.Printf
+
+import Data.List (intersperse)
+
+
+<<main sequence>>
+#+END_SRC
+**** Interpolation
+#+BEGIN_SRC haskell :tangle base/src/Interpolate.hs
+{-# LANGUAGE FlexibleContexts, StandaloneDeriving, GeneralizedNewtypeDeriving, NoMonomorphismRestriction #-}
+module Interpolate where
+
+import Control.Exception (Exception, throw)
+import qualified Data.Map.Strict as M
+import qualified Data.Vector.Unboxed as V
+
+import Models.Input (Model)
+import Types
+import Types.Internal
+
+
+<<interpolate>>
+#+END_SRC
+
+*** Tests
+#+BEGIN_SRC haskell :tangle models/test/Spec.hs
+<<test spec finder>>
+#+END_SRC
+
+**** Main sequence
+***** Model
+#+BEGIN_SRC haskell :tangle models/test/MainSequenceModelSpec.hs
+{-# LANGUAGE QuasiQuotes, OverloadedLists #-}
+module MainSequenceModelSpec (main, spec) where
+
+import Conduit
+
+import Data.Attoparsec.ByteString (parseOnly)
+import Data.Either (isLeft, isRight)
+
+import           Data.ByteString (ByteString)
+import qualified Data.ByteString.Char8 as B
+
+import Test.Hspec
+import Text.RawString.QQ
+
+import MainSequenceModel
+
+
+main :: IO ()
+main = hspec spec
+
+<<main sequence spec>>
+#+END_SRC
+
+***** Interpolation
+#+BEGIN_SRC haskell :tangle base/test/InterpolateSpec.hs
+{-# LANGUAGE NoMonomorphismRestriction, TypeApplications #-}
+module InterpolateSpec (main, spec) where
+
+import Data.List (sort)
+
+import qualified Data.Map.Strict as M
+import qualified Data.Vector.Unboxed as V
+
+import Test.Hspec
+import Test.QuickCheck hiding (Positive(..))
+
+import Models.Input
+import Models.Sample
+
+import Interpolate
+import Types
+import Types.Internal
+
+
+main :: IO ()
+main = hspec spec
+
+
+<<interpolate spec>>
+#+END_SRC
+
 *** Cabal config
 #+BEGIN_SRC yaml :tangle models/package.yaml
 name: BayesianStellarEvolution-Models
