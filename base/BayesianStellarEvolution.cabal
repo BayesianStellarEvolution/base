@@ -1,0 +1,120 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.36.0.
+--
+-- see: https://github.com/sol/hpack
+
+name:           BayesianStellarEvolution
+version:        0.0.0
+category:       application
+homepage:       https://github.com/BayesianStellarEvolution/BayesianStellarEvolution#readme
+bug-reports:    https://github.com/BayesianStellarEvolution/BayesianStellarEvolution/issues
+author:         Elliot Robinson
+maintainer:     elliot.robinson@rgoptech.com
+copyright:      2019
+build-type:     Simple
+
+source-repository head
+  type: git
+  location: https://github.com/BayesianStellarEvolution/BayesianStellarEvolution
+
+library
+  exposed-modules:
+      Models.Input
+      Models.Sample
+      Models.SampleConverted
+      Interpolate
+      Types
+      Types.DistanceMeasures
+      Types.Magnitude
+      Types.Internal
+  other-modules:
+      Paths_BayesianStellarEvolution
+  hs-source-dirs:
+      src
+  default-extensions:
+      OverloadedStrings
+      BangPatterns
+  ghc-options: -Wall -O2
+  build-depends:
+      BayesianStellarEvolution-Models
+    , QuickCheck
+    , attoparsec
+    , base >=4.10 && <5
+    , bytestring
+    , conduit
+    , conduit-extra
+    , containers
+    , ghc-compact
+    , lzma-conduit
+    , math-functions
+    , optparse-applicative
+    , text
+    , vector
+    , vector-th-unbox
+  default-language: Haskell2010
+
+executable makeIsochrone
+  main-is: Main.hs
+  other-modules:
+      Paths_BayesianStellarEvolution
+  hs-source-dirs:
+      makeIsochrone
+  default-extensions:
+      OverloadedStrings
+      BangPatterns
+  ghc-options: -Wall -O2
+  build-depends:
+      BayesianStellarEvolution
+    , base
+    , containers
+    , optparse-applicative
+    , vector
+  default-language: Haskell2010
+
+test-suite library-tests
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      InterpolateSpec
+      Models.InputSpec
+      Types.DistanceMeasuresSpec
+      Types.MagnitudeSpec
+      Paths_BayesianStellarEvolution
+  hs-source-dirs:
+      test
+  default-extensions:
+      OverloadedStrings
+      BangPatterns
+  ghc-options: -Wall -O2 -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      BayesianStellarEvolution
+    , QuickCheck
+    , attoparsec
+    , base
+    , bytestring
+    , conduit
+    , containers
+    , hspec
+    , raw-strings-qq
+    , vector
+  default-language: Haskell2010
+
+benchmark library-benchmarks
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  other-modules:
+      Paths_BayesianStellarEvolution
+  hs-source-dirs:
+      bench
+  default-extensions:
+      OverloadedStrings
+      BangPatterns
+  ghc-options: -Wall -O2 -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      BayesianStellarEvolution
+    , base
+    , containers
+    , criterion
+    , vector
+  default-language: Haskell2010

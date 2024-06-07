@@ -16,6 +16,7 @@ import Types.Internal
 
 import Interpolate
 
+
 clusterParser :: Parser Cluster
 clusterParser = Cluster
                 <$> option (maybeReader (Just . MkFeH . packLog . read))
@@ -35,14 +36,12 @@ data MakeIsochroneOptions = MakeIsochroneOptions
   { cluster   :: Cluster
   , modelName :: MSModel }
 
-
 makeIsochroneOptionParser :: Parser MakeIsochroneOptions
 makeIsochroneOptionParser = MakeIsochroneOptions <$> clusterParser
                                                  <*> option auto
                                                             (long "model"
                                                              <> metavar "MODEL"
                                                              <> help "Specify model. One of: {OldDsed, NewDsed}")
-
 
 main :: IO ()
 main = do options <- execParser opts
@@ -63,3 +62,4 @@ main = do options <- execParser opts
     opts = info (makeIsochroneOptionParser <**> helper)
       ( fullDesc
      <> progDesc "Generate an isochrone from the models based on cluster parameters")
+

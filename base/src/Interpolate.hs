@@ -181,3 +181,4 @@ deriving instance Interpolate Mass
 deriving instance Interpolate ClosedUnitInterval
 deriving instance Interpolate Percentage
 deriving instance Interpolate HeliumFraction
+

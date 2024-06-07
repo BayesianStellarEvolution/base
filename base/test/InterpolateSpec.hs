@@ -125,3 +125,4 @@ isochroneSpec = describe "isochrone interpolation" $ do
         eeps (Isochrone v _ _) = v
         mass (Isochrone _ v _) = v
         mags (Isochrone _ _ v) = v
+

@@ -335,7 +335,7 @@ import Numeric.MathFunctions.Comparison (addUlps)
 <<number class>>
 #+END_SRC
 
-** Statistics types
+** Statistical types
 #+HEADER: :noweb-ref stats type
 #+BEGIN_SRC haskell
 newtype Likelihood = MkLikelihood { unLikelihood :: ClosedUnitInterval }
@@ -510,8 +510,6 @@ data Isochrone = Isochrone (V.Vector EEP) (V.Vector Mass) (M.Map Filter (V.Vecto
 #+END_SRC
 
 ** Load compressed Main Sequence models
-
-
 #+HEADER: :noweb-ref model loading
 #+BEGIN_SRC haskell
 type RawModel = [(([Text], Double, Double), Set Age)]
@@ -1396,20 +1394,8 @@ Users do not work directly with the models; rather, they generate an isochrone w
 
 Note: extrapolation is intentionally not supported, which does occasionally mean that models constrains the available parameter space. This will usually be visible in a trace plot as a hard boundary ( TODO add demonstrative plot ).
 
-**** Artifacts
-#+BEGIN_SRC haskell :tangle base/src/Interpolate.hs
-{-# LANGUAGE FlexibleContexts, StandaloneDeriving, GeneralizedNewtypeDeriving, NoMonomorphismRestriction #-}
-module Interpolate where
-
-import Control.Exception (Exception, throw)
-import qualified Data.Map.Strict as M
-import qualified Data.Vector.Unboxed as V
-
-import Models.Input (Model)
-import Types
-import Types.Internal
-
-
+#+HEADER: :noweb-ref interpolate
+#+BEGIN_SRC haskell
 data InterpolationException = EmptyModelException
                             | UnmatchedEEPException
      deriving (Show)
@@ -1583,30 +1569,8 @@ deriving instance Interpolate Percentage
 deriving instance Interpolate HeliumFraction
 #+END_SRC
 
-#+BEGIN_SRC haskell :tangle base/test/InterpolateSpec.hs
-{-# LANGUAGE NoMonomorphismRestriction, TypeApplications #-}
-module InterpolateSpec (main, spec) where
-
-import Data.List (sort)
-
-import qualified Data.Map.Strict as M
-import qualified Data.Vector.Unboxed as V
-
-import Test.Hspec
-import Test.QuickCheck hiding (Positive(..))
-
-import Models.Input
-import Models.Sample
-
-import Interpolate
-import Types
-import Types.Internal
-
-
-main :: IO ()
-main = hspec spec
-
-
+#+HEADER: :noweb-ref interpolate spec
+#+BEGIN_SRC haskell
 spec :: SpecWith ()
 spec = do
   logInterpolateSpec
@@ -1713,6 +1677,50 @@ isochroneSpec = describe "isochrone interpolation" $ do
         mags (Isochrone _ _ v) = v
 #+END_SRC
 
+**** Artifacts
+#+BEGIN_SRC haskell :tangle base/src/Interpolate.hs
+{-# LANGUAGE FlexibleContexts, StandaloneDeriving, GeneralizedNewtypeDeriving, NoMonomorphismRestriction #-}
+module Interpolate where
+
+import Control.Exception (Exception, throw)
+import qualified Data.Map.Strict as M
+import qualified Data.Vector.Unboxed as V
+
+import Models.Input (Model)
+import Types
+import Types.Internal
+
+
+<<interpolate>>
+#+END_SRC
+
+#+BEGIN_SRC haskell :tangle base/test/InterpolateSpec.hs
+{-# LANGUAGE NoMonomorphismRestriction, TypeApplications #-}
+module InterpolateSpec (main, spec) where
+
+import Data.List (sort)
+
+import qualified Data.Map.Strict as M
+import qualified Data.Vector.Unboxed as V
+
+import Test.Hspec
+import Test.QuickCheck hiding (Positive(..))
+
+import Models.Input
+import Models.Sample
+
+import Interpolate
+import Types
+import Types.Internal
+
+
+main :: IO ()
+main = hspec spec
+
+
+<<interpolate spec>>
+#+END_SRC
+
 *** Artifacts
 #+BEGIN_SRC haskell :tangle models/test/Spec.hs
 <<test spec finder>>
@@ -1720,6 +1728,9 @@ isochroneSpec = describe "isochrone interpolation" $ do
 
 ** =testModelFile= tool
 The =testModelFile= tool facilitates user development of model files by loading (and therefore verifying the proper format of) a provided model file.
+
+( TODO ) Write tests to verify that invalid model files cause reasonable failure here
+( TODO ) Should we also be calling ~convertModel~ for the conversion confirmation?
 
 #+HEADER: :noweb-ref testModelFile
 #+BEGIN_SRC haskell
@@ -1768,7 +1779,6 @@ printLeftEeps eeps = do
                           in header : ages
 #+END_SRC
 
-
 *** Artifacts
 #+BEGIN_SRC haskell :tangle models/testModelFile/Main.hs
 module Main where
@@ -1798,6 +1808,58 @@ EEP Mass [Filter magnitude]...
 
 Cluster parameters should be provided via the command line flags.
 
+#+HEADER: :noweb-ref makeIsochrone
+#+BEGIN_SRC haskell
+clusterParser :: Parser Cluster
+clusterParser = Cluster
+                <$> option (maybeReader (Just . MkFeH . packLog . read))
+                      (long "cluster-feh"
+                       <> metavar "FEH"
+                       <> help "Specify cluster FeH")
+                <*> option (maybeReader (fmap (MkHeliumFraction . MkPercentage) . closedUnitInterval . read))
+                      (long "cluster-y"
+                       <> metavar "Y"
+                       <> help "Specify cluster Y")
+                <*> option (maybeReader (Just . MkLogAge . packLog . read))
+                      (long "cluster-age"
+                       <> metavar "AGE"
+                       <> help "Specify cluster age in log years")
+
+data MakeIsochroneOptions = MakeIsochroneOptions
+  { cluster   :: Cluster
+  , modelName :: MSModel }
+
+makeIsochroneOptionParser :: Parser MakeIsochroneOptions
+makeIsochroneOptionParser = MakeIsochroneOptions <$> clusterParser
+                                                 <*> option auto
+                                                            (long "model"
+                                                             <> metavar "MODEL"
+                                                             <> help "Specify model. One of: {OldDsed, NewDsed}")
+#+END_SRC
+
+#+HEADER: :noweb-ref makeIsochrone
+#+BEGIN_SRC haskell
+main :: IO ()
+main = do options <- execParser opts
+          models  <- convertModels <$> loadModels (modelName $ options)
+          let (Isochrone eeps masses magnitudes) = interpolateIsochrone (cluster options) models
+              filters = case M.elems magnitudes of
+                     (ms:_) -> V.fromList $ map (\i -> concatMap (\v -> printf " %0.6f" (unpackLog . unAbsoluteMagnitude $ v U.! i)) $ M.elems magnitudes) [0.. (U.length ms - 1)]
+                     _      -> mempty
+
+          mapM_ (printf "%s ") $ M.keys magnitudes
+          putStrLn ""
+          V.mapM_ (\(a, b, c) -> printf "%d %0.6f%s\n" a b c) $
+            V.zip3 (V.convert eeps)
+                   (V.map (unNonNegative . unMass) . V.convert $ masses)
+                   (filters :: Vector String)
+
+  where
+    opts = info (makeIsochroneOptionParser <**> helper)
+      ( fullDesc
+     <> progDesc "Generate an isochrone from the models based on cluster parameters")
+#+END_SRC
+
 *** Artifacts
 #+BEGIN_SRC haskell :tangle base/makeIsochrone/Main.hs
 {-# LANGUAGE TypeApplications #-}
@@ -1818,53 +1880,8 @@ import Types.Internal
 
 import Interpolate
 
-clusterParser :: Parser Cluster
-clusterParser = Cluster
-                <$> option (maybeReader (Just . MkFeH . packLog . read))
-                      (long "cluster-feh"
-                       <> metavar "FEH"
-                       <> help "Specify cluster FeH")
-                <*> option (maybeReader (fmap (MkHeliumFraction . MkPercentage) . closedUnitInterval . read))
-                      (long "cluster-y"
-                       <> metavar "Y"
-                       <> help "Specify cluster Y")
-                <*> option (maybeReader (Just . MkLogAge . packLog . read))
-                      (long "cluster-age"
-                       <> metavar "AGE"
-                       <> help "Specify cluster age in log years")
 
-data MakeIsochroneOptions = MakeIsochroneOptions
-  { cluster   :: Cluster
-  , modelName :: MSModel }
-
-
-makeIsochroneOptionParser :: Parser MakeIsochroneOptions
-makeIsochroneOptionParser = MakeIsochroneOptions <$> clusterParser
-                                                 <*> option auto
-                                                            (long "model"
-                                                             <> metavar "MODEL"
-                                                             <> help "Specify model. One of: {OldDsed, NewDsed}")
-
-
-main :: IO ()
-main = do options <- execParser opts
-          models  <- convertModels <$> loadModels (modelName $ options)
-          let (Isochrone eeps masses magnitudes) = interpolateIsochrone (cluster options) models
-              filters = case M.elems magnitudes of
-                     (ms:_) -> V.fromList $ map (\i -> concatMap (\v -> printf " %0.6f" (unpackLog . unAbsoluteMagnitude $ v U.! i)) $ M.elems magnitudes) [0.. (U.length ms - 1)]
-                     _      -> mempty
-
-          mapM_ (printf "%s ") $ M.keys magnitudes
-          putStrLn ""
-          V.mapM_ (\(a, b, c) -> printf "%d %0.6f%s\n" a b c) $
-            V.zip3 (V.convert eeps)
-                   (V.map (unNonNegative . unMass) . V.convert $ masses)
-                   (filters :: Vector String)
-
-  where
-    opts = info (makeIsochroneOptionParser <**> helper)
-      ( fullDesc
-     <> progDesc "Generate an isochrone from the models based on cluster parameters")
+<<makeIsochrone>>
 #+END_SRC
 
 ** Artifacts
