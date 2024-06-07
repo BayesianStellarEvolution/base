@@ -39,6 +39,7 @@ dist/
 
 # Stack build artifacts
 .stack-work/
+stack.yaml.lock
 
 # Testing artifacts
 .hspec-failures
@@ -61,3 +62,7 @@ flycheck_*
 
 # Limbo default file, symlinked to one of the others
 .limbo
+
+# Fossil DVCS artifacts
+.fslckout
+.mirror_state/
